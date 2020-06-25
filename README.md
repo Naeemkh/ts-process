@@ -12,4 +12,4 @@ These codes have been developed as part of earthquake ground motion research per
 * Fabio Silva - Southern California Earthquake Center
 
 ## Software support:
-* software @ scec.org
+* software @ scec.org 
