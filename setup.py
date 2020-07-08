@@ -15,9 +15,9 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Naeemkh/ts-process",
     license="BSD 3-Clause",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=['docs*', 'tests*']),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: BSD 3-Clause License",
         "Natural Language :: English",
