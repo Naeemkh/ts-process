@@ -110,3 +110,6 @@ bin/
 # RotD50 binary
 *rotd50
 !rotd50/
+
+.DS_Store
+
