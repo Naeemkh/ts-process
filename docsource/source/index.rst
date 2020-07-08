@@ -1,15 +1,29 @@
-.. ts-process documentation master file, created by
-   sphinx-quickstart on Wed Jul  8 01:16:32 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to ts-process's documentation!
-======================================
+Welcome to ts-process!
+======================
 
 .. toctree::
+   :glob:
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Introduction
 
+   about
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+   :caption: Researchers
+
+   quickstart
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+   :caption: Developers
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+   :caption: Community
 
 
 Indices and tables
