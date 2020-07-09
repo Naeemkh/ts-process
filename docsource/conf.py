@@ -10,10 +10,16 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+import pathlib
+# import recommonmark.parser
+from recommonmark.parser import CommonMarkParser
 
+
+sys.path.insert(0, os.path.abspath('..'))
+# sys.path.append('../../ts_process')
+# from ts_process.version import VERSION
 
 # -- Project information -----------------------------------------------------
 
@@ -22,6 +28,8 @@ copyright = '2020, SCEC'
 author = 'Naeem Khoshnevis, Fabio Silva'
 
 # The full version, including alpha/beta/rc tags
+# version = VERSION
+
 release = '0.0.1'
 
 
@@ -31,7 +39,20 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.doctest",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.mathjax",
+    "nbsphinx",
+    "recommonmark",
+    'sphinx.ext.autosectionlabel',
+
 ]
+
+autosectionlabel_prefix_document = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -41,6 +62,17 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+source_parsers = {
+    '.md': 'CommonMarkParser'
+}
+
+# Enable markdown
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -48,6 +80,12 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+
+# html_theme_options = {
+#     "description": "Ground motion time series processing tools",
+#     "github_url": "https://github.com/Naeemkh/ts-process",
+# }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

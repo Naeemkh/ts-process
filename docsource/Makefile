@@ -5,8 +5,9 @@
 # from the environment for the first two.
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = source
+SOURCEDIR     = .
 BUILDDIR      = build
+
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -20,5 +21,7 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 github:
+	@rm -rf ../docs
+	@cp ../CHANGELOG.md $(SOURCEDIR)
 	@make html
 	@cp -a build/html/. ../docs

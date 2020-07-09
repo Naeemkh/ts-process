@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>About &mdash; ts-process 0.0.1 documentation</title>
+  <title>Modules &mdash; ts-process 0.0.1 documentation</title>
   
 
   
@@ -35,11 +35,11 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-    <link rel="author" title="About these documents" href="#" />
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Quickstart" href="quickstart.html" />
-    <link rel="prev" title="Welcome to ts-process!" href="index.html" /> 
+    <link rel="next" title="Contact" href="contact.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -85,16 +85,19 @@
             
             
               <p class="caption"><span class="caption-text">Introduction</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">About</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#database-py">database.py</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Community</span></p>
 <ul>
@@ -147,13 +150,13 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>About</li>
+      <li>Modules</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/about.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -190,9 +193,52 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="about">
-<h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
-<p>This is a collection of Python3-based software programs that are ground motions time series processing utilities designed to integrate 3D ground motion simulation seismograms from AWP-ODC and Hercules with Broadband Platform time series. The ts-process library also provides codes for calculating ROTD50 so that a common implementation is used to process both 3D simulation seismograms and 1D broadband platform seismograms.</p>
+<div class="section" id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
+<p>This section includes modules that are used in this project.</p>
+<span class="target" id="module-ts_process.database"></span><div class="section" id="database-py">
+<h2>database.py<a class="headerlink" href="#database-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for communicating with the database.</p>
+<dl class="py class">
+<dt id="ts_process.database.DataBase">
+<em class="property">class </em><code class="sig-prename descclassname">ts_process.database.</code><code class="sig-name descname">DataBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dbname</span></em>, <em class="sig-param"><span class="n">cache_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/database.html#DataBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.database.DataBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>database class (singleton pattern)</p>
+<dl class="py method">
+<dt id="ts_process.database.DataBase.close_db">
+<code class="sig-name descname">close_db</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/database.html#DataBase.close_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.database.DataBase.close_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Commits changes to the database, closes the database, clears the
+cache.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ts_process.database.DataBase.delete_value">
+<code class="sig-name descname">delete_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/database.html#DataBase.delete_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.database.DataBase.delete_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes the key, and its value from both in-memory and on-disk.
+If the key is not found, simply ignores it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ts_process.database.DataBase.get_value">
+<code class="sig-name descname">get_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/database.html#DataBase.get_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.database.DataBase.get_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value in the following order:</p>
+<ol class="arabic simple">
+<li><p>It will look for the value in the cache and return it, if not found</p></li>
+<li><p>will look for the value in the disk and return it, if not found</p></li>
+<li><p>will return False.</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ts_process.database.DataBase.set_value">
+<code class="sig-name descname">set_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/database.html#DataBase.set_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.database.DataBase.set_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the key and given value in the database. If the key is exist,
+it will override the value. In that case, will remove the key from the
+cache. The cache will load the new value with the get_value command.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -203,10 +249,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="contact.html" class="btn btn-neutral float-right" title="Contact" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to ts-process!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

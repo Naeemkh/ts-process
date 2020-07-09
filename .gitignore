@@ -112,4 +112,4 @@ bin/
 !rotd50/
 
 .DS_Store
-
+*.sqlite

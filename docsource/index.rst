@@ -20,10 +20,18 @@ Welcome to ts-process!
    :maxdepth: 2
    :caption: Developers
 
+   modules
+
 .. toctree::
    :glob:
    :maxdepth: 2
    :caption: Community
+   
+   contact
+   GitHub <https://github.com/Naeemkh/ts-process>
+   CHANGELOG
+
+
 
 
 Indices and tables
