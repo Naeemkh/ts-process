@@ -49,6 +49,7 @@ extensions = [
     "nbsphinx",
     "recommonmark",
     'sphinx.ext.autosectionlabel',
+    'sphinx.ext.githubpages', 
 
 ]
 
