@@ -39,7 +39,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Contact Us" href="contact.html" />
-    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
+    <link rel="prev" title="Documentation" href="documentation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,11 +91,15 @@
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#database-py">database.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-py">project.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#incident-py">incident.py</a></li>
 </ul>
 </li>
 </ul>
@@ -202,7 +206,7 @@
 <dl class="py class">
 <dt id="ts_process.database.DataBase">
 <em class="property">class </em><code class="sig-prename descclassname">ts_process.database.</code><code class="sig-name descname">DataBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dbname</span></em>, <em class="sig-param"><span class="n">cache_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/database.html#DataBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.database.DataBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>database class (singleton pattern)</p>
+<dd><p>DataBase class (singleton pattern)</p>
 <dl class="py method">
 <dt id="ts_process.database.DataBase.close_db">
 <code class="sig-name descname">close_db</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/database.html#DataBase.close_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.database.DataBase.close_db" title="Permalink to this definition">¶</a></dt>
@@ -239,6 +243,38 @@ cache. The cache will load the new value with the get_value command.</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-ts_process.project"></span><div class="section" id="project-py">
+<h2>project.py<a class="headerlink" href="#project-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for the project class.</p>
+<dl class="py class">
+<dt id="ts_process.project.Project">
+<em class="property">class </em><code class="sig-prename descclassname">ts_process.project.</code><code class="sig-name descname">Project</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.project.Project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project Class</p>
+<dl class="py method">
+<dt id="ts_process.project.Project.add_incident">
+<code class="sig-name descname">add_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_folder</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/project.html#Project.add_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.project.Project.add_incident" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new incident to the project.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ts_process.project.Project.remove_incident">
+<code class="sig-name descname">remove_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/project.html#Project.remove_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.project.Project.remove_incident" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes incident from the project.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-ts_process.incident"></span><div class="section" id="incident-py">
+<h2>incident.py<a class="headerlink" href="#incident-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for the Incident class.</p>
+<dl class="py class">
+<dt id="ts_process.incident.Incident">
+<em class="property">class </em><code class="sig-prename descclassname">ts_process.incident.</code><code class="sig-name descname">Incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ts_process/incident.html#Incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ts_process.incident.Incident" title="Permalink to this definition">¶</a></dt>
+<dd><p>Incident Class</p>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -252,7 +288,7 @@ cache. The cache will load the new value with the get_value command.</p>
         <a href="contact.html" class="btn btn-neutral float-right" title="Contact Us" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="documentation.html" class="btn btn-neutral float-left" title="Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

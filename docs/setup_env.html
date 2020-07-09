@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python Module Index &mdash; ts-process 0.0.1 documentation</title>
+  <title>Setting up Environment &mdash; ts-process 0.0.1 documentation</title>
   
 
   
@@ -38,9 +38,8 @@
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
- 
-
-
+    <link rel="next" title="Documentation" href="documentation.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,9 +89,9 @@
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setting up Environment</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -150,10 +149,14 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Python Module Index</li>
+      <li>Setting up Environment</li>
     
     
       <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/setup_env.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -165,45 +168,58 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
 
-   <h1>Python Module Index</h1>
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
 
-   <div class="modindex-jumpbox">
-   <a href="#cap-t"><strong>t</strong></a>
-   </div>
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
 
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-t"><td></td><td>
-       <strong>t</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">ts_process</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="modules.html#module-ts_process.database"><code class="xref">ts_process.database</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="modules.html#module-ts_process.incident"><code class="xref">ts_process.incident</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="modules.html#module-ts_process.project"><code class="xref">ts_process.project</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="setting-up-environment">
+<h1>Setting up Environment<a class="headerlink" href="#setting-up-environment" title="Permalink to this headline">¶</a></h1>
+<p>It is a better idea to install/use the package in a virtual environment. We recommend Python 3.7 or 3.8 versions. Here are the steps to set up a virtual environment.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 -m venv your_env_name
+<span class="gp">$</span> <span class="nb">source</span> your_env_name/bin/activate
+</pre></div>
+</div>
+<p>Type <code class="docutils literal notranslate"><span class="pre">deactivate</span></code> to close the virtual environment. Use <cite>Jupyter Notebook&lt;https://jupyter.org&gt;</cite> for long and interactive processing. Use the following command to add your virtual environment into Jupyter Notebook as a Python kernel.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python <span class="m">3</span>-m ipykernel install --user --name your_env_name --display-name <span class="s2">&quot;your_display_name&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">your_display_name</span></code> is a name that your environment will be listed with that name on Jupyter Notebook.</p>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="documentation.html" class="btn btn-neutral float-right" title="Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

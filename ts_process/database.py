@@ -8,7 +8,7 @@ from sqlitedict import SqliteDict
 from collections import OrderedDict
 
 class DataBase:
-    """ database class (singleton pattern) """
+    """ DataBase class (singleton pattern) """
 
     _instance = None
 

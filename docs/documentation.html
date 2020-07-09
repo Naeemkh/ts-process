@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python Module Index &mdash; ts-process 0.0.1 documentation</title>
+  <title>Documentation &mdash; ts-process 0.0.1 documentation</title>
   
 
   
@@ -38,9 +38,8 @@
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
- 
-
-
+    <link rel="next" title="Modules" href="modules.html" />
+    <link rel="prev" title="Setting up Environment" href="setup_env.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -95,8 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Community</span></p>
@@ -150,10 +149,14 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Python Module Index</li>
+      <li>Documentation</li>
     
     
       <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/documentation.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -165,45 +168,55 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
 
-   <h1>Python Module Index</h1>
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
 
-   <div class="modindex-jumpbox">
-   <a href="#cap-t"><strong>t</strong></a>
-   </div>
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
 
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-t"><td></td><td>
-       <strong>t</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">ts_process</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="modules.html#module-ts_process.database"><code class="xref">ts_process.database</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="modules.html#module-ts_process.incident"><code class="xref">ts_process.incident</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="modules.html#module-ts_process.project"><code class="xref">ts_process.project</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>Documenting the code is an important part of contribution. There are 3 main places that needs to be addressed during contribution.</p>
+<ul class="simple">
+<li><p>The main body of the documentation is written in reStrucuredText (rst) format. See this <a class="reference external" href="https://docutils.sourceforge.io/docs/user/rst/quickref.html#hyperlink-targets">link</a> for quick list of commands.</p></li>
+<li><p>The codes should be provided by sufficient docstrings and each module should be added to <a class="reference internal" href="modules.html"><span class="doc">Modules</span></a> file.</p></li>
+<li><p>Any modification including: add, change, fix, and remove action should be added to Changelog under <strong>Unreleased</strong> section.</p></li>
+</ul>
+<p>Please note that all files should be added to the <em>docsource</em> folder.</p>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="setup_env.html" class="btn btn-neutral float-left" title="Setting up Environment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

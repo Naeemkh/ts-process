@@ -8,6 +8,9 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - MANIFEST.in file
 - tests folder
 - test_db.py file
+- setting up environment to docsource
+- documentation to docsource
+- project.py file
 
 ### Changed
 

@@ -14,13 +14,16 @@ Welcome to ts-process!
    :caption: Researchers
 
    quickstart
+   setup_env
 
 .. toctree::
    :glob:
    :maxdepth: 2
    :caption: Developers
 
+   documentation
    modules
+
 
 .. toctree::
    :glob:
