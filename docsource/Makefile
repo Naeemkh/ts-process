@@ -21,7 +21,8 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 github:
-	@rm -rf ../docs
+	@rm -rf ../docs/*
 	@cp ../CHANGELOG.md $(SOURCEDIR)
+	@cp .nojekyll ../docs/
 	@make html
 	@cp -a build/html/. ../docs
