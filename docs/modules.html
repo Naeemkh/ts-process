@@ -92,6 +92,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="incidents.html">Incidents</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul class="current">
@@ -101,6 +102,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#project-py">project.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#incident-py">incident.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timeseries-py">timeseries.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#record-py">record.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seismicsource-py">seismicsource.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#station-py">station.py</a></li>
 </ul>
 </li>
 </ul>
@@ -253,13 +257,13 @@ cache. The cache will load the new value with the get_value command.</p>
 <dd><p>Project Class</p>
 <dl class="py method">
 <dt id="tsprocess.project.Project.add_incident">
-<code class="sig-name descname">add_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_folder</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.add_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.add_incident" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_folder</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/tsprocess/project.html#Project.add_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.add_incident" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a new incident to the project.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.project.Project.remove_incident">
-<code class="sig-name descname">remove_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.remove_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.remove_incident" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">remove_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_name</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/tsprocess/project.html#Project.remove_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.remove_incident" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes incident from the project.</p>
 </dd></dl>
 
@@ -343,6 +347,42 @@ cache. The cache will load the new value with the get_value command.</p>
 <dd><p>Returns Disp instance</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<span class="target" id="module-tsprocess.record"></span><div class="section" id="record-py">
+<h2>record.py<a class="headerlink" href="#record-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for the Record class.</p>
+<dl class="py class">
+<dt id="tsprocess.record.Record">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.record.</code><code class="sig-name descname">Record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_vec</span></em>, <em class="sig-param"><span class="n">disp_h1</span></em>, <em class="sig-param"><span class="n">disp_h2</span></em>, <em class="sig-param"><span class="n">disp_ver</span></em>, <em class="sig-param"><span class="n">vel_h1</span></em>, <em class="sig-param"><span class="n">vel_h2</span></em>, <em class="sig-param"><span class="n">vel_ver</span></em>, <em class="sig-param"><span class="n">acc_h1</span></em>, <em class="sig-param"><span class="n">acc_h2</span></em>, <em class="sig-param"><span class="n">acc_ver</span></em>, <em class="sig-param"><span class="n">station</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record" title="Permalink to this definition">¶</a></dt>
+<dd><p>Record Class</p>
+<dl class="py method">
+<dt id="tsprocess.record.Record.connect_to_database">
+<em class="property">classmethod </em><code class="sig-name descname">connect_to_database</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">database_name</span></em>, <em class="sig-param"><span class="n">cache_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record.connect_to_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record.connect_to_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>connecting to the projects databse</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-tsprocess.seismicsource"></span><div class="section" id="seismicsource-py">
+<h2>seismicsource.py<a class="headerlink" href="#seismicsource-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for the SeismicSource class.</p>
+<dl class="py class">
+<dt id="tsprocess.seismicsource.SeismicSource">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.seismicsource.</code><code class="sig-name descname">SeismicSource</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">source_directory</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/seismicsource.html#SeismicSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.seismicsource.SeismicSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>SeismicSource Class</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-tsprocess.station"></span><div class="section" id="station-py">
+<h2>station.py<a class="headerlink" href="#station-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for the Station class.</p>
+<dl class="py class">
+<dt id="tsprocess.station.Station">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.station.</code><code class="sig-name descname">Station</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">depth</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/station.html#Station"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.station.Station" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class Station</p>
 </dd></dl>
 
 </div>

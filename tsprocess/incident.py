@@ -11,6 +11,11 @@ class Incident:
     """ Incident Class """
     pr_db = None
 
+    valid_incidents = [
+        "hercules",
+        "awp",
+        "rwg"]
+
     def __init__(self,folder_path):
         """ initiating a project"""
         self.folder_path = folder_path

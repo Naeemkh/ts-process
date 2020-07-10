@@ -11,6 +11,11 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - setting up environment to docsource
 - documentation to docsource
 - project.py file
+- timeseries.py file
+- record.py file
+- seismicsource.py file
+- station.py file
+- hercules incident folder arrangment
 
 ### Changed
 - package name (ts-process -> tsprocess)

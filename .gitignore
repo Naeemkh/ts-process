@@ -113,3 +113,4 @@ bin/
 
 .DS_Store
 *.sqlite
+.vscode/*

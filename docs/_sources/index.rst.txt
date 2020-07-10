@@ -15,6 +15,7 @@ Welcome to tsprocess!
 
    quickstart
    setup_env
+   incidents
 
 .. toctree::
    :glob:

@@ -90,6 +90,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../setup_env.html">Setting up Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../incidents.html">Incidents</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -171,7 +172,9 @@
 <span class="sd">The core module for the project class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
+
 
 
 <div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">:</span>
@@ -184,13 +187,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_connect_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="n">db</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_db&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="n">DataBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_db&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
         
-<div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Adds a new incident to the project. &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a new incident to the project. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;add_incident is called.&#39;</span><span class="p">)</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Project.remove_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.remove_incident">[docs]</a>    <span class="k">def</span> <span class="nf">remove_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">):</span>
+<div class="viewcode-block" id="Project.remove_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.remove_incident">[docs]</a>    <span class="k">def</span> <span class="nf">remove_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Removes incident from the project. &quot;&quot;&quot;</span>
         <span class="k">pass</span></div></div>
 
