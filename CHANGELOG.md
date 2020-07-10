@@ -13,6 +13,8 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - project.py file
 - timeseries.py file
 - record.py file
+- seismicsource.py file
+- station.py file
 
 ### Changed
 - package name (ts-process -> tsprocess)

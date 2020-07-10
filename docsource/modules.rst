@@ -14,3 +14,12 @@ This section includes modules that are used in this project.
 
 .. automodule:: tsprocess.timeseries
     :members: 
+
+.. automodule:: tsprocess.record
+    :members: 
+
+.. automodule:: tsprocess.seismicsource
+    :members: 
+
+.. automodule:: tsprocess.station
+    :members: 
