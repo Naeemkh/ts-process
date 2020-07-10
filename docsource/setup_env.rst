@@ -11,6 +11,22 @@ Type ``deactivate`` to close the virtual environment. Use `Jupyter Notebook<http
 
 .. code-block:: console
 
-    $ python 3-m ipykernel install --user --name your_env_name --display-name "your_display_name"
+    $ python3 -m ipykernel install --user --name your_env_name --display-name "your_display_name"
 
 ``your_display_name`` is a name that your environment will be listed with that name on Jupyter Notebook.  
+
+
+Installation
+------------ 
+
+In order to install the package, please download the package from `Github repository <https://github.com/Naeemkh/tsprocess>`_. The package name is ``tsprocess``. Install the package according to the following commands:
+
+.. code-block:: console
+
+    $ pip install -r tsprocess/requirements.txt
+    $ pip install -e tsprocess
+    $ python
+    >>> from tsprocess import project as pr
+    >>> project_1 = pr.Project('project1')
+
+
