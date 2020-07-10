@@ -4,7 +4,7 @@ incident.py
 The core module for the Incident class.
 """
 
-import database as db
+from .database import DataBase as db
 
 
 class Incident:
