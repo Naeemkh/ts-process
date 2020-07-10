@@ -1,6 +1,6 @@
 import unittest
 
-from ts_process import database as db
+from tsprocess import database as db
 
 class TestDataBase(unittest.TestCase):
     def setUp(self):
