@@ -3,11 +3,11 @@ Modules
 This section includes modules that are used in this project. 
 
 
-.. automodule:: ts_process.database
+.. automodule:: tsprocess.database
     :members: 
 
-.. automodule:: ts_process.project
+.. automodule:: tsprocess.project
     :members: 
 
-.. automodule:: ts_process.incident
+.. automodule:: tsprocess.incident
     :members: 

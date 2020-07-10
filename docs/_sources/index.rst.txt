@@ -1,4 +1,4 @@
-Welcome to ts-process!
+Welcome to tsprocess!
 ======================
 
 .. toctree::
@@ -31,7 +31,7 @@ Welcome to ts-process!
    :caption: Community
    
    contact
-   GitHub <https://github.com/Naeemkh/ts-process>
+   GitHub <https://github.com/Naeemkh/tsprocess>
    CHANGELOG
 
 

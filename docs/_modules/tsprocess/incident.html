@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ts_process.project &mdash; ts-process 0.0.1 documentation</title>
+  <title>tsprocess.incident &mdash; tsprocess 0.0.1 documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> ts-process
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> tsprocess
           
 
           
@@ -99,7 +99,7 @@
 <p class="caption"><span class="caption-text">Community</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact Us</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/Naeemkh/ts-process">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Naeemkh/tsprocess">GitHub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../CHANGELOG.html">Changelog</a></li>
 </ul>
 
@@ -116,7 +116,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">ts-process</a>
+          <a href="../../index.html">tsprocess</a>
         
       </nav>
 
@@ -149,7 +149,7 @@
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
-      <li>ts_process.project</li>
+      <li>tsprocess.incident</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -164,37 +164,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for ts_process.project</h1><div class="highlight"><pre>
+  <h1>Source code for tsprocess.incident</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">project.py</span>
+<span class="sd">incident.py</span>
 <span class="sd">====================================</span>
-<span class="sd">The core module for the project class.</span>
+<span class="sd">The core module for the Incident class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">database</span> <span class="k">as</span> <span class="nn">db</span>
+<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
 
 
-<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../modules.html#ts_process.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Project Class &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="Incident"><a class="viewcode-back" href="../../modules.html#tsprocess.incident.Incident">[docs]</a><span class="k">class</span> <span class="nc">Incident</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Incident Class &quot;&quot;&quot;</span>
+    <span class="n">pr_db</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">folder_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; initiating a project&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_connect_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">DataBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_db&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">folder_path</span> <span class="o">=</span> <span class="n">folder_path</span></div>
         
-<div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#ts_process.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Adds a new incident to the project. &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="Project.remove_incident"><a class="viewcode-back" href="../../modules.html#ts_process.project.Project.remove_incident">[docs]</a>    <span class="k">def</span> <span class="nf">remove_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Removes incident from the project. &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div></div>
-
-    
 </pre></div>
 
            </div>
