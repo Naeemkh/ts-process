@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tsprocess.timeseries &mdash; tsprocess 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> tsprocess
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Researchers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup_env.html">Setting up Environment</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../documentation.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Community</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Naeemkh/tsprocess">GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CHANGELOG.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsprocess</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>tsprocess.timeseries</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tsprocess.timeseries</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">timeseries.py</span>
+<span class="sd">====================================</span>
+<span class="sd">The core module for the TimeSeries class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+
+<div class="viewcode-block" id="TimeSeries"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries">[docs]</a><span class="k">class</span> <span class="nc">TimeSeries</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; TimeSeries Abstract Class &quot;&quot;&quot;</span>
+    <span class="n">processing_labels</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">label_types</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;lowpass_filter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;highpass_filter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;rotate&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;scale&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;shift&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;taper&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cut&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;zero_pad&#39;</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fft_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_f</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vt</span> <span class="o">=</span> <span class="kc">None</span>
+        
+
+    <span class="k">def</span> <span class="nf">add_note</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_add_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span> <span class="o">=</span> <span class="n">init_point</span></div>
+
+
+<div class="viewcode-block" id="Disp"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp">[docs]</a><span class="k">class</span> <span class="nc">Disp</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Disp Class &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Disp.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+<div class="viewcode-block" id="Vel"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel">[docs]</a><span class="k">class</span> <span class="nc">Vel</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Vel Class &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Vel.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns ACC instance &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Vel.compute_integral"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel.compute_integral">[docs]</a>    <span class="k">def</span> <span class="nf">compute_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns Disp instance &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Acc"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc">[docs]</a><span class="k">class</span> <span class="nc">Acc</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Acc Class &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response_spectra</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">init_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_response_spectra</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Acc.compute_integral"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc.compute_integral">[docs]</a>    <span class="k">def</span> <span class="nf">compute_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="k">def</span> <span class="nf">_compute_response_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Computes response spectra &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Raw"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Raw">[docs]</a><span class="k">class</span> <span class="nc">Raw</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Raw Class &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">,</span> <span class="n">poles</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_value</span> <span class="o">=</span> <span class="n">raw_value</span>
+
+<div class="viewcode-block" id="Raw.to_velocity"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Raw.to_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">to_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Unitless"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Unitless">[docs]</a><span class="k">class</span> <span class="nc">Unitless</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Unitless Class &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, SCEC
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

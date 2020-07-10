@@ -4,7 +4,7 @@ project.py
 The core module for the project class.
 """
 
-from .database import DataBase as db
+from .database import DataBase
 
 
 class Project:
@@ -17,7 +17,7 @@ class Project:
         self._connect_to_database()
 
     def _connect_to_database(self):
-        self.pr_db = db(self.name+"_db", cache_size=2000)
+        self.pr_db = DataBase(self.name+"_db", cache_size=2000)
         
     def add_incident(self, incident_folder):
         """ Adds a new incident to the project. """

@@ -11,7 +11,7 @@ Type ``deactivate`` to close the virtual environment. Use `Jupyter Notebook<http
 
 .. code-block:: console
 
-    $ python 3-m ipykernel install --user --name your_env_name --display-name "your_display_name"
+    $ python3 -m ipykernel install --user --name your_env_name --display-name "your_display_name"
 
 ``your_display_name`` is a name that your environment will be listed with that name on Jupyter Notebook.  
 

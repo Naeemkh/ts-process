@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#database-py">database.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#project-py">project.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#incident-py">incident.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timeseries-py">timeseries.py</a></li>
 </ul>
 </li>
 </ul>
@@ -272,6 +273,76 @@ cache. The cache will load the new value with the get_value command.</p>
 <dt id="tsprocess.incident.Incident">
 <em class="property">class </em><code class="sig-prename descclassname">tsprocess.incident.</code><code class="sig-name descname">Incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/incident.html#Incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.incident.Incident" title="Permalink to this definition">¶</a></dt>
 <dd><p>Incident Class</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-tsprocess.timeseries"></span><div class="section" id="timeseries-py">
+<h2>timeseries.py<a class="headerlink" href="#timeseries-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for the TimeSeries class.</p>
+<dl class="py class">
+<dt id="tsprocess.timeseries.Acc">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Acc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Acc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Acc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acc Class</p>
+<dl class="py method">
+<dt id="tsprocess.timeseries.Acc.compute_integral">
+<code class="sig-name descname">compute_integral</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Acc.compute_integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Acc.compute_integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Vel instance</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tsprocess.timeseries.Disp">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Disp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Disp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Disp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disp Class</p>
+<dl class="py method">
+<dt id="tsprocess.timeseries.Disp.compute_diff">
+<code class="sig-name descname">compute_diff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Disp.compute_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Disp.compute_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Vel instance</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tsprocess.timeseries.Raw">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em>, <em class="sig-param"><span class="n">poles</span></em>, <em class="sig-param"><span class="n">zeros</span></em>, <em class="sig-param"><span class="n">constant</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw Class</p>
+<dl class="py method">
+<dt id="tsprocess.timeseries.Raw.to_velocity">
+<code class="sig-name descname">to_velocity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Raw.to_velocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Raw.to_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Vel instance</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tsprocess.timeseries.TimeSeries">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">TimeSeries</code><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>TimeSeries Abstract Class</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="tsprocess.timeseries.Unitless">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Unitless</code><a class="reference internal" href="_modules/tsprocess/timeseries.html#Unitless"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Unitless" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unitless Class</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="tsprocess.timeseries.Vel">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Vel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Vel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Vel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vel Class</p>
+<dl class="py method">
+<dt id="tsprocess.timeseries.Vel.compute_diff">
+<code class="sig-name descname">compute_diff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Vel.compute_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Vel.compute_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns ACC instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.timeseries.Vel.compute_integral">
+<code class="sig-name descname">compute_integral</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Vel.compute_integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Vel.compute_integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Disp instance</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
