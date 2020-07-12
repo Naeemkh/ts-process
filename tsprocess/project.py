@@ -27,6 +27,7 @@ class Project:
 
     # database
     def _connect_to_database(self):
+        """ Creates and connects to a database."""
         self.pr_db = DataBase(self.name+"_db", cache_size=2000)
         Record.pr_db = self.pr_db
 
@@ -36,9 +37,7 @@ class Project:
 
     # Incidents
     def add_incident(self, incident_folder):
-        """
-        Adds a new incident to the project. 
-        """
+        """ Adds a new incident to the project."""
         if not self.pr_db.connected:
             print("database is not connected")
             return
@@ -86,6 +85,7 @@ class Project:
 
     @staticmethod
     def _read_incident_description(incident_folder):
+        """ Extract incident descriptions """
         incident_description = {}
         incident_description["incident_folder"] = incident_folder
         with open(os.path.join(incident_folder,'description.txt'),'r') as fp:
@@ -154,6 +154,7 @@ class Project:
     
     # source
     def add_source_hypocenter(self,lat, lon, depth):
+        """ Adds earthquake hypocenter to the project. """
         self.metadata["project_source_hypocenter"] = (lat, lon, depth)
         Station.pr_source_loc = (lat, lon, depth)
 
@@ -182,32 +183,34 @@ class Project:
         return True
 
     def valid_processing_labels(self):
+        """ Returns a list of valid processing labels """
         for i,item in enumerate(TimeSeries.label_types):
             print(f"{i}: {item}")
 
     # station filtering
     def add_station_filter(self, station_filter_name, station_filter_type, hyper_parameters):
+        """ Adds a new filter for selecting stations """
         Station.add_station_filter(station_filter_name, station_filter_type, hyper_parameters)
     
-
     def valid_station_filter_type(self):
+        """ Returns a list of valid filters for selecting stations. """
         for i,item in enumerate(Station.station_filter_types):
             print(f"{i}: {item}")
 
     # Analysis interface
-    def plot_velocity_records(self, list_inc,list_process,list_filters):
-        """ Plots 3 velocity timeseries one page per station."""
+    # def plot_velocity_records(self, list_inc,list_process,list_filters):
+    #     """ Plots 3 velocity timeseries one page per station."""
         
-        if not self._is_incident_valid(list_inc):
-            return
+    #     if not self._is_incident_valid(list_inc):
+    #         return
 
-        if not self._is_processing_label_valid(list_process):
-            return
+    #     if not self._is_processing_label_valid(list_process):
+    #         return
 
-        records = self._extract_records(list_inc, list_process, list_filters)
+    #     records = self._extract_records(list_inc, list_process, list_filters)
         
-        for item in records:
-            print(item[0]) 
+    #     for item in records:
+    #         print(item[0]) 
 
     def which_records(self, list_inc,list_process,list_filters):
         """Represent all records that will pass a given filters"""

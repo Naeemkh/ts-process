@@ -63,7 +63,7 @@ class Incident:
             return
 
     def _extract_station_name_location(self):
-        """ """
+        """ Extracts stations' name and location from the incident folder. """
 
         if self.metadata["incident_type"] == "hercules":
             n_st = int(self.metadata["number_output_stations"])
@@ -106,7 +106,7 @@ class Incident:
             return
     
     def _extract_seismic_source_data(self):
-        """ """
+        """ extract seismic source details. """
         self.metadata["incident_source_hypocenter"] = tuple([float(i.strip()) for i in self.metadata["source_hypocenter"].split(",")])
         source_relative_path = self.metadata["source_directory"]
         source_folder = os.path.join(self.metadata["incident_folder"],source_relative_path)

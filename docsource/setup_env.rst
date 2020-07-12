@@ -21,13 +21,13 @@ Type 'y'(yes) for questions.
 
     $ conda activate your_venv
 
-- Step 3: Navigate to the downloaded ``reprocess`` folder and install the package requirements.
+- Step 3: Navigate to the downloaded ``tsprocess`` folder and install the package requirements.
 
 .. code-block:: console
 
     $ pip3 install -r requirements.txt
 
-- Step 4: Navigate one folder up an install the package.
+- Step 4: Navigate one folder up and install the package.
 
 .. code-block:: console
 
@@ -59,7 +59,7 @@ In your working directory (any arbitrary directory that you work on your data), 
 
     $ jupyter notebook
 
-At the top right corner, there is `New` key. Choose your recently created kernel (in this example: your_venv). Choosing a kernel will open a new tab that you can work on. 
+At the top right corner, there is `New` key. Choose your recently created kernel (in this example: your_venv_name). Choosing a kernel will open a new tab that you can work on. 
 
 
 

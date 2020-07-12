@@ -211,7 +211,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">azimuth</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">back_azimuth</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_source_dependent_params</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="p">[]</span>     
+        <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Record at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">}</span><span class="s2"> km distance from source.&quot;</span>     
 
 <div class="viewcode-block" id="Record.connect_to_database"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record.connect_to_database">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">connect_to_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">database_name</span><span class="p">,</span> <span class="n">cache_size</span><span class="p">):</span>
@@ -223,7 +226,6 @@
         <span class="c1"># extract source hyper parameters and record to source distance. </span>
         <span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span> <span class="n">source_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;epicentral distance added.&quot;</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">_compute_time_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># all records should have the most common length and dt</span>
