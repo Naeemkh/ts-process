@@ -9,10 +9,23 @@ from math import radians, cos, sin, asin, sqrt
 # this should follow object pool design pattern 
 # we need to take a look at stations, if we find it, we should return it. 
 
+
 class Station:
     """ Class Station """
     list_of_stations = []
     vicinity_estimations = 10 
+    station_filter_types = [
+        "epi_dist_lt",
+        "epi_dist_gt",
+        "epi_dist_lte",
+        "epi_dist_gte",
+        "azimuth_lt",
+        "azimuth_gt",
+        "include_stlist_by_incident",
+        "exclude_stlist_by_incident"
+    ]
+
+    station_filters = {}
 
     def __init__(self, lat, lon, depth):
         #TODO add setter and getter to double check the lat and lon. 
@@ -34,7 +47,82 @@ class Station:
     def _add_location(self):
         pass
 
+    @classmethod
+    def add_station_filter(cls, filter_name, filter_type, argument_dict):
+        if filter_name in cls.station_filters:
+            #TODO probably customize exception should be a better option
+            #  to handle this.
+            print("Filter name is already used. Has not been added.")
+            return
+
+        if filter_type not in cls.station_filter_types:
+            #TODO probably customize exception should be a better option
+            #  to handle this.
+            print("Filter type is not supported. Has not been added.")
+            return
+        
+        cls.station_filters[filter_name] = [filter_type, argument_dict]
     
+    def _epi_dist_lt(self, distance):
+        # we already have the record distance from the source. 
+        # However, I think it is better if filter the source before
+        # messing up with records. 
+        # I keep both sides, to see which method works better.
+        source_lat, source_lon, source_depth = self.pr_source_loc
+        tmp_dist = self._haversine(source_lat,source_lon,self.lat, self.lon)/1000
+        if tmp_dist < distance:
+            return True
+        else:
+            return False
+
+    def _epi_dist_gt(self, distance):
+        # we already have the record distance from the source. 
+        # However, I think it is better if filter the source before
+        # messing up with records. 
+        # I keep both sides, to see which method works better.
+        source_lat, source_lon, source_depth = self.pr_source_loc
+        tmp_dist = (self._haversine(source_lat,source_lon,self.lat, self.lon))/1000
+        print(tmp_dist)
+        if tmp_dist > distance:
+            return True
+        else:
+            return False
+  
+    def _include_stlist_by_incident(self, incident_name, stations):
+
+        if self.inc_st_name[incident_name] in stations:
+            return True
+        else:
+            return False
+
+    def _check_station_filter(self,station_filter_name):
+
+        if station_filter_name not in self.station_filters.keys():
+            # this should never be invoked. I have checked the labels before. 
+            print("Filter is not supported, ignored.")
+            return
+        
+        filter_type = self.station_filters[station_filter_name][0]
+        filter_kwargs = self.station_filters[station_filter_name][1]
+
+        if filter_type == 'epi_dist_lt':
+            return self._epi_dist_lt(**filter_kwargs)
+
+        if filter_type == 'epi_dist_gte':
+            return not self._epi_dist_lt(**filter_kwargs)
+
+        if filter_type == 'epi_dist_gt':
+            return self._epi_dist_gt(**filter_kwargs)
+
+        if filter_type == 'epi_dist_lte':
+            return not self._epi_dist_gt(**filter_kwargs)
+
+        if filter_type == 'include_stlist_by_incident':
+            return self._include_stlist_by_incident(**filter_kwargs)
+
+        if filter_type == 'exclude_stlist_by_incident':
+            return not self._include_stlist_by_incident(**filter_kwargs)
+
     @staticmethod
     def _haversine(lat1, lon1, lat2, lon2):
         # convert decimal degrees to radians 

@@ -94,6 +94,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html">Concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../documentation.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
 </ul>
@@ -172,9 +173,15 @@
 <span class="sd">The core module for the project class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 
+<span class="kn">from</span> <span class="nn">.record</span> <span class="kn">import</span> <span class="n">Record</span>
+<span class="kn">from</span> <span class="nn">.station</span> <span class="kn">import</span> <span class="n">Station</span>
+<span class="kn">from</span> <span class="nn">.incident</span> <span class="kn">import</span> <span class="n">Incident</span>
+<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
+<span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
 
 
 <div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">:</span>
@@ -185,18 +192,167 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span> <span class="nf">_connect_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="n">DataBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_db&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+        <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span>
         
-<div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a new incident to the project. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;add_incident is called.&#39;</span><span class="p">)</span>
-        <span class="k">pass</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">connected</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;database is not connected&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># read the description file of incident</span>
+        <span class="n">inc_des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_incident_description</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Project.remove_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.remove_incident">[docs]</a>    <span class="k">def</span> <span class="nf">remove_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1">#TODO these checks do not follow EAFP</span>
+        <span class="k">if</span> <span class="s2">&quot;incident_name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;incident name is not provided in the description.txt file.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="s2">&quot;incident_type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;incident type is not provided in the description.txt file.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incident type is not supported (valid incidents:</span><span class="se">\</span>
+<span class="s2">             </span><span class="si">{</span><span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;incident name should be a unique name. Current incidents:</span><span class="se">\</span>
+<span class="s2">             </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">])</span>
+            <span class="k">return</span>
+
+        <span class="c1"># load incident</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_incident</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">,</span><span class="n">inc_des</span><span class="p">)</span></div>
+      
+<div class="viewcode-block" id="Project._load_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._load_incident">[docs]</a>    <span class="k">def</span> <span class="nf">_load_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">,</span> <span class="n">incident_description</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; load incidents into the project&#39;s incidents dictionary &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="p">[</span><span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]]</span> <span class="o">=</span> \
+            <span class="n">Incident</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">,</span> <span class="n">incident_description</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Incident details has not been added. Ignoring the command.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> 
+
+        <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;rwg&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Incident details has not been added. Ignoring the command.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> </div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_read_incident_description</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">):</span>
+        <span class="n">incident_description</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">incident_folder</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">,</span><span class="s1">&#39;description.txt&#39;</span><span class="p">),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">))</span>
+                <span class="n">incident_description</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">incident_description</span>
+
+<div class="viewcode-block" id="Project.plot_velocity_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_velocity_records">[docs]</a>    <span class="k">def</span> <span class="nf">plot_velocity_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Plots 3 velocity timeseries one page per station.&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Project._extract_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._extract_records">[docs]</a>    <span class="k">def</span> <span class="nf">_extract_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Extracts the requested records. Loop through all available</span>
+<span class="sd">         stations and choose them based on list_filters. For list of</span>
+<span class="sd">         incidents with N incidents, each station will return a list of </span>
+<span class="sd">         N records, corresponding the list of incidents. If for some </span>
+<span class="sd">         station there is no record for that incident, it should return </span>
+<span class="sd">         None. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">Station</span><span class="o">.</span><span class="n">list_of_stations</span><span class="p">:</span>
+            <span class="c1"># if station passes the list_filters</span>
+            <span class="c1"># go forward.</span>
+            <span class="c1"># else continue.</span>
+
+           
+            <span class="n">ignore_this_station</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">st_f</span> <span class="ow">in</span> <span class="n">list_filters</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">station</span><span class="o">.</span><span class="n">_check_station_filter</span><span class="p">(</span><span class="n">st_f</span><span class="p">):</span>
+                    <span class="c1"># station could not pass at list one of filters.</span>
+                    <span class="n">ignore_this_station</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            
+            <span class="k">if</span> <span class="n">ignore_this_station</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+
+            <span class="n">st_records</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">incident_item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+                <span class="c1"># choose the equivalent station for that incident.</span>
+
+                <span class="n">incident_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="p">[</span><span class="n">incident_item</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span>
+
+                <span class="n">st_name_inc</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_item</span><span class="p">]</span>
+                <span class="n">tmp_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">get_record</span><span class="p">(</span><span class="n">station</span><span class="p">,</span> <span class="n">incident_metadata</span><span class="p">,</span> <span class="n">list_process</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">st_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_record</span><span class="p">)</span>
+
+            <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st_records</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">records</span></div>
+    
+    <span class="k">def</span> <span class="nf">add_source_hypocenter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;project_source_hypocenter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+        <span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_station_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station_filter_name</span><span class="p">,</span> <span class="n">station_filter_type</span><span class="p">,</span> <span class="n">hyper_parameters</span><span class="p">):</span>
+        <span class="n">Station</span><span class="o">.</span><span class="n">_add_station_filter</span><span class="p">(</span><span class="n">station_filter_name</span><span class="p">,</span> <span class="n">station_filter_type</span><span class="p">,</span> <span class="n">hyper_parameters</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="Project.add_processing_label"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_processing_label">[docs]</a>    <span class="k">def</span> <span class="nf">add_processing_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">hyper_parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a processing label &quot;&quot;&quot;</span>
+        <span class="n">TimeSeries</span><span class="o">.</span><span class="n">_add_processing_label</span><span class="p">(</span><span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">hyper_parameters</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Project.list_of_processing_labels"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_processing_labels">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_processing_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a list of available processing labels&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">item</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Project._is_processing_label_valid"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._is_processing_label_valid">[docs]</a>    <span class="k">def</span> <span class="nf">_is_processing_label_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">list_process</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if the requested processing label is a valid lable &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">list_process</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pr_l</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pr_l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>\
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pr_l</span><span class="si">}</span><span class="s2"> is not a valid processing label. Command ignored.&quot;</span>\
+                        <span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Project._is_incident_valid"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._is_incident_valid">[docs]</a>    <span class="k">def</span> <span class="nf">_is_incident_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">list_incidents</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if the requested processing label is a valid lable &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">inc</span> <span class="ow">in</span> <span class="n">list_incidents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">inc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>\
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inc</span><span class="si">}</span><span class="s2"> is not a valid incident name. Command ignored.&quot;</span>\
+                    <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Project.remove_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.remove_incident">[docs]</a>    <span class="k">def</span> <span class="nf">remove_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Removes incident from the project. &quot;&quot;&quot;</span>
         <span class="k">pass</span></div></div>
 

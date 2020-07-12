@@ -94,6 +94,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html">Concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../documentation.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
 </ul>
@@ -172,16 +173,120 @@
 <span class="sd">The core module for the Incident class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.station</span> <span class="kn">import</span> <span class="n">Station</span>
+<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
+<span class="kn">from</span> <span class="nn">.seismicsource</span> <span class="kn">import</span> <span class="n">SeismicSource</span>
 
 
 <div class="viewcode-block" id="Incident"><a class="viewcode-back" href="../../modules.html#tsprocess.incident.Incident">[docs]</a><span class="k">class</span> <span class="nc">Incident</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Incident Class &quot;&quot;&quot;</span>
     <span class="n">pr_db</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">folder_path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; initiating a project&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">folder_path</span> <span class="o">=</span> <span class="n">folder_path</span></div>
+    <span class="n">valid_incidents</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;hercules&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;awp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rwg&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">folder_path</span><span class="p">,</span> <span class="n">incident_description</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initiating an incident&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">folder_path</span> <span class="o">=</span> <span class="n">folder_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">incident_description</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stations_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extract_input_parameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extract_station_name_location</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extract_seismic_source_data</span><span class="p">()</span>
+        <span class="c1"># self.source</span>
+        <span class="c1"># self.notes</span>
+
+<div class="viewcode-block" id="Incident._extract_input_parameters"><a class="viewcode-back" href="../../modules.html#tsprocess.incident.Incident._extract_input_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">_extract_input_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Extracts input parameters from the incident folder. Stores the</span>
+<span class="sd">        results in the metadata attribute. &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
+            <span class="c1"># TODO move each part of reading files into a function.</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder_path</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;inputfiles_parameters&#39;</span><span class="p">]),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span> 
+                        <span class="n">tmp_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_line</span><span class="p">)</span><span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tmp_line</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">return</span>
+       
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Methods for AWP is not implemented.&quot;</span><span class="p">)</span>                 
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;rwg&quot;</span><span class="p">:</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Methods for RWG is not implemented.&quot;</span><span class="p">)</span>                 
+            <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Incident._extract_station_name_location"><a class="viewcode-back" href="../../modules.html#tsprocess.incident.Incident._extract_station_name_location">[docs]</a>    <span class="k">def</span> <span class="nf">_extract_station_name_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
+            <span class="n">n_st</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;number_output_stations&quot;</span><span class="p">])</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;inputfiles_parameters&#39;</span><span class="p">]),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                
+                <span class="n">start_reading_stations</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;output_stations&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+                        <span class="n">start_reading_stations</span> <span class="o">=</span> <span class="kc">True</span>
+                    
+                    <span class="k">if</span> <span class="n">start_reading_stations</span><span class="p">:</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_st</span><span class="p">):</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                            <span class="n">tmp_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">stations_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="p">[</span><span class="s1">&#39;station.&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>\
+                                        <span class="n">Station</span><span class="o">.</span><span class="n">add_station</span><span class="p">(</span>\
+                                            <span class="nb">float</span><span class="p">(</span><span class="n">tmp_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span>\
+                                            <span class="nb">float</span><span class="p">(</span><span class="n">tmp_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span>\
+                                            <span class="nb">float</span><span class="p">(</span><span class="n">tmp_line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span>\
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">],</span><span class="s1">&#39;station.&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))]</span> 
+                                    <span class="p">)</span>
+                                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="k">break</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Methods for AWP is not implemented.&quot;</span><span class="p">)</span>                 
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;rwg&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Methods for rwg is not implemented.&quot;</span><span class="p">)</span>                 
+            <span class="k">return</span></div>
+    
+<div class="viewcode-block" id="Incident._extract_seismic_source_data"><a class="viewcode-back" href="../../modules.html#tsprocess.incident.Incident._extract_seismic_source_data">[docs]</a>    <span class="k">def</span> <span class="nf">_extract_seismic_source_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_source_hypocenter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;source_hypocenter&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)])</span>
+        <span class="n">source_relative_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;source_directory&quot;</span><span class="p">]</span>
+        <span class="n">source_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">],</span><span class="n">source_relative_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">SeismicSource</span><span class="p">(</span><span class="n">source_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">])</span></div></div>
+
+
+
+        
+        
+
+
         
 </pre></div>
 

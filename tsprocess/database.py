@@ -67,7 +67,7 @@ class DataBase:
                 self.cache[key] = tmp
                 return tmp
             except Exception:
-                return False
+                return None
         else:
             return value
         

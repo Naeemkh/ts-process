@@ -18,8 +18,9 @@ The only extra file is **description.txt** that has two mandatory keys and value
 .. code-block:: console
      
     # description.txt
-    incident_name  =  hercules_1
-    incident_type  =  hercules
+    incident_name         =  hercules_1
+    incident_type         =  hercules
+    inputfiles_parameters =  inputfiles/parameters.in
 
 
 RWG

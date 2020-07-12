@@ -3,11 +3,16 @@ record.py
 ====================================
 The core module for the Record class.
 """
-
-from .database import DataBase
+import os
 import hashlib
+from math import radians, cos, sin, asin, sqrt
+
+import numpy as np
+
+from .station import Station
+from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
-import numpy as np 
+
 
 class Record:
     """ Record Class """
@@ -17,7 +22,7 @@ class Record:
     def __init__(self, time_vec, disp_h1, disp_h2, disp_ver,
                 vel_h1, vel_h2, vel_ver,
                 acc_h1, acc_h2, acc_ver,
-                station):
+                station, source_params):
         self.station = station
         self.time_vec = time_vec
         self.disp_h1 = disp_h1
@@ -29,22 +34,29 @@ class Record:
         self.acc_h1 = acc_h1
         self.acc_h2 = acc_h2
         self.acc_ver = acc_ver
+        self.source_params = source_params
         self.notes = []
+        self.this_record_hash = None
         self.epicentral_distance = None
         self.jb_distance = None
         self.azimuth = None
         self.back_azimuth = None
-        self._compute_source_params()
-        self.processed = []     
+        self._compute_source_dependent_params()
+        self.processed = []
+
+    def __str__(self):
+        return f"Record at {self.station.lat, self.station.lon} with {self.epicentral_distance} km distance from source."     
 
     @classmethod
     def connect_to_database(cls, database_name, cache_size):
         """ connecting to the projects databse """
         cls.mydb = DataBase(database_name,cache_size)
 
-    def _compute_source_params(self):
+    def _compute_source_dependent_params(self):
         # compute distance and azimuth
-        pass
+        # extract source hyper parameters and record to source distance. 
+        source_lat, source_lon, source_depth = self.source_params
+        self.epicentral_distance = self._haversine(source_lat, source_lon, self.station.lat, self.station.lon)
     
     def _compute_time_vec(self):
         # all records should have the most common length and dt
@@ -69,41 +81,141 @@ class Record:
         pass
 
     @staticmethod
-    def get_record(filename, processing_label):
-        
-        # from the description.txt we know the type of record (hercules, AWP, and so on)
-        # assume it is hercules
+    def get_record(station_obj, incident_metadata, list_process):
 
-        record_type = "hercules"
+        incident_name = incident_metadata["incident_name"]
+        incident_type = incident_metadata["incident_type"]
+       
+        # extract station name:
+        try:
+            st_name = station_obj.inc_st_name[incident_name]
+        except KeyError as e:
+            print(e)
+            return
 
+        # generate original record hash value.
+        hash_val = hashlib.sha256((incident_name+st_name).encode('utf-8')).hexdigest()
 
-        if record_type == "hercules":
-            # create_hash_value: file_name+file_content:
-                
-            with open(filename, 'r') as file:
-                file_content = file.read()
+        # retrieve the record from database.
+        record_org = Record.pr_db.get_value(hash_val)
 
-            if not file_content:
-                # think about handling this
-                return None
+        if not record_org:
+            # we need to load the data 
+            if incident_type == "hercules":
+                station_folder = incident_metadata["output_stations_directory"]
+                station_file = os.path.join(incident_metadata["incident_folder"],station_folder,st_name)
+                record_org = Record._from_hercules(station_file,station_obj,Station.pr_source_loc)
+                record_org.this_record_hash = hash_val
+                # put the record in the database.
+                Record.pr_db.set_value(hash_val,record_org)
 
-            file_content_and_name = file_content+filename
+            if incident_type == "awp":
+                print("method is not implemented.")
 
-            hash_val = hashlib.sha256((file_content_and_name).encode('utf-8')).hexdigest()
-            print(hash_val)
+            if incident_type == "rwg":
+                print("method is not implemented.")
+
+        if not record_org:
+            # this should never happen. 
+            # if by this point record is still is None, something is
+            # wrong with the record. 
+            # TODO handle corrupt record.
+            print('something is wrong with the record.')
+            return
             
+        if not list_process:
+            # no need for processed data. Return original record.
+            return record_org
 
-            # look for hash value 
-            if Record.mydb.get_value(hash_val):
-                return Record.mydb.get_value(hash_val)
+        
+        processed_record = Record._get_processed_record(record_org, list_process)
 
-            # if it is not in the database, we need to read the file. 
-            value = Record._from_hercules(filename)
-            Record.mydb.set_value(hash_val,value)
-            return value
+        return processed_record
 
     @staticmethod
-    def _from_hercules(filename,station_obj):
+    def _get_processed_record(record, list_process):
+        """ Returns the processed records based on hash value of the 
+        record and the processing label. Developers should call this
+        function only by original record."""
+
+        # by this point the list of process has been controled for valid items. 
+        
+        try:
+            pl = list_process.pop(0)
+        except IndexError:
+            return record
+
+        hash_content = str(record.disp_h1) + str(record.vel_h2) + str(record.acc_ver) + pl
+        proc_hash_val = hashlib.sha256((hash_content).encode('utf-8')).hexdigest()
+
+        if proc_hash_val in record.processed:
+            # this process has been done before, get it from database.
+            tmp_rec = Record.pr_db.get_value(proc_hash_val)
+            if not tmp_rec:
+                return _get_processed_record(tmp_rec,list_process)
+
+        
+        # if the code flow gets here, it means the requested label is not
+        # computed. As a result, we need to apply that label to the record, 
+        # add the hash value to the processed attribute, and put the hash and
+        # value into the database.
+        proc_record = Record._apply(record, pl)
+        proc_record.this_record_hash = proc_hash_val
+        
+        # put data in the database
+        Record.pr_db.set_value(proc_hash_val,proc_record)
+
+        # add hash value into processed values
+        # and update it on the data base.
+        Record._add_proc_key(record, proc_hash_val)
+        
+        return Record._get_processed_record(proc_record, list_process)
+ 
+    @staticmethod
+    def _add_proc_key(record, hash_val):
+        record.processed.append(hash_val)
+        this_record_hash = record.this_record_hash
+        Record.pr_db.set_value(this_record_hash,record)
+
+    @staticmethod    
+    def _apply(record, processing_label):
+
+        # you are repeating yourself. Refactor it at the earliest
+        # convenient.
+        tmp_disp_h1 = record.disp_h1._apply(processing_label)
+        tmp_disp_h2 = record.disp_h2._apply(processing_label)
+        tmp_disp_ver = record.disp_ver._apply(processing_label)
+        tmp_vel_h1 = record.vel_h1._apply(processing_label)
+        tmp_vel_h2 = record.vel_h2._apply(processing_label)
+        tmp_vel_ver = record.vel_ver._apply(processing_label)
+        tmp_acc_h1 = record.acc_h1._apply(processing_label)
+        tmp_acc_h2 = record.acc_h2._apply(processing_label)
+        tmp_acc_ver = record.acc_ver._apply(processing_label)
+
+        return Record(record.time_vec, tmp_disp_h1, tmp_disp_h2, tmp_disp_ver,
+                                       tmp_vel_h1, tmp_vel_h2, tmp_vel_ver,
+                                       tmp_acc_h1, tmp_acc_h2, tmp_acc_ver,
+                                       record.station, record.source_params)
+
+    @staticmethod
+    def _haversine(lat1, lon1, lat2, lon2):
+        # convert decimal degrees to radians 
+        # this method is also defined in station module.
+        # TODO: move them to a util module. 
+        try:
+            lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+        except Exception:
+            return None
+        # haversine formula 
+        dlon = lon2 - lon1 
+        dlat = lat2 - lat1 
+        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+        c = 2 * asin(sqrt(a)) 
+        r = 6371 # in kilometers
+        return c * r
+
+    @staticmethod
+    def _from_hercules(filename,station_obj,source_hypocenter):
         times = []
         acc_h1 = []
         vel_h1 = []
@@ -172,7 +284,6 @@ class Record:
 
         dt = times[1] - times[0]
 
-
         disp_h1 = Disp(dis_h1, dt, times[0])
         disp_h2 = Disp(dis_h2, dt, times[0])
         disp_ver = Disp(dis_ver, dt, times[0])
@@ -192,5 +303,5 @@ class Record:
         return Record(times, disp_h1, disp_h2, disp_ver,
                     vel_h1, vel_h2, vel_ver,
                     acc_h1, acc_h2, acc_ver,
-                    station_obj)
+                    station_obj, source_hypocenter)
 

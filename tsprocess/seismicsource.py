@@ -6,10 +6,11 @@ The core module for the SeismicSource class.
 
 import os
 
+
 class SeismicSource:
     """ SeismicSource Class """
 
-    def __init__(self,source_directory):
+    def __init__(self,source_directory, incident_type):
         self.source_directory = source_directory
         self.coords = []
         self.seismic_moment = []
@@ -20,15 +21,13 @@ class SeismicSource:
         self.slip_function = []
         self.metadata = {}
         self.domain_surface_corners = []
-        self._load_source_from_disk(None)
+        self._load_source_from_disk(incident_type)
         self._load_domain_surface_corners()
         self._load_source_params_hercules()
 
-    def _load_source_from_disk(self, source_type):
+    def _load_source_from_disk(self, incident_type):
 
-        source_type = "hercules"
-
-        if source_type == "hercules":
+        if incident_type == "hercules":
 
             with open((os.path.join(self.source_directory,'source.in')), 'r') as fp:
                 while True:
@@ -43,6 +42,14 @@ class SeismicSource:
                             key, value = tuple(tmp_line)
                             if key and value:
                                 self.metadata[key.strip()] = value.strip()
+        
+        if incident_type == "awp":
+            print("Methods for AWP is not implemented.")                 
+            return
+
+        if incident_type == "rwg":
+            print("Methods for rwg is not implemented.")                 
+            return
 
 
     def _load_domain_surface_corners(self):

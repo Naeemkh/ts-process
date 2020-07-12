@@ -31,6 +31,7 @@ pyrsistent==0.16.0
 pytz==2020.1
 recommonmark==0.6.0
 requests==2.24.0
+scipy==1.5.1
 setuptools==49.1.0
 six==1.15.0
 snowballstemmer==2.0.0
@@ -46,7 +47,6 @@ sphinxcontrib-serializinghtml==1.1.4
 sqlitedict==1.6.0
 testpath==0.4.4
 traitlets==4.3.3
--e git+git@github.com:Naeemkh/tsprocess.git@67a4a7dbea2827a8608d12bd0db99997afbd145e#egg=tsprocess
 urllib3==1.25.9
 webencodings==0.5.1
 wheel==0.34.2

@@ -94,6 +94,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html">Concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../documentation.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
 </ul>
@@ -173,7 +174,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
-<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">sosfiltfilt</span><span class="p">,</span> <span class="n">filtfilt</span><span class="p">,</span> <span class="n">ellip</span><span class="p">,</span> <span class="n">butter</span><span class="p">,</span> <span class="n">zpk2sos</span><span class="p">,</span> <span class="n">decimate</span>
+
 
 <div class="viewcode-block" id="TimeSeries"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries">[docs]</a><span class="k">class</span> <span class="nc">TimeSeries</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; TimeSeries Abstract Class &quot;&quot;&quot;</span>
@@ -206,26 +208,93 @@
     <span class="k">def</span> <span class="nf">add_note</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">_add_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_add_processing_label</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">label_name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+            <span class="c1">#TODO probably customize exception should be a better option</span>
+            <span class="c1">#  to handle this.</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Label name is already used. Is not added.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">label_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">:</span>
+            <span class="c1">#TODO probably customize exception should be a better option</span>
+            <span class="c1">#  to handle this.</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Label type is not supported. Is not added.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="bp">cls</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_lowpass_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;zpk&#39;</span><span class="p">):</span>
+        <span class="n">Fs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
+        <span class="n">Wn</span> <span class="o">=</span> <span class="n">Wn</span><span class="o">/</span><span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">,</span> <span class="n">analog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;zpk&#39;</span><span class="p">)</span>
+        <span class="n">butter_sos</span> <span class="o">=</span> <span class="n">zpk2sos</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sosfiltfilt</span><span class="p">(</span><span class="n">butter_sos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+<div class="viewcode-block" id="TimeSeries._apply"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._apply">[docs]</a>    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Applies the requested label_name on the timeseries &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">label_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processing_labels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># this should never be invoked. I have checked the labels before. </span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Label is not supported, ignored.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1">#timeseries type</span>
+        <span class="n">ts_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+
+        <span class="n">label_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">label_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;lowpass_filter&#39;</span><span class="p">:</span>
+            <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lowpass_filter</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
+ 
+
+            
+            
+        <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Disp&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Vel&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Vel</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Acc&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Acc</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Raw&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> </div>
+
+    
+    <span class="k">def</span> <span class="nf">_add_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">init_point</span><span class="p">):</span>
+        <span class="c1"># double check to see if it is a numbpy array.</span>
+        <span class="c1"># if not convert it into numpy array.</span>
+        <span class="c1"># ########## &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="n">dt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span> <span class="o">=</span> <span class="n">init_point</span></div>
+
+
+
 
 
 <div class="viewcode-block" id="Disp"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp">[docs]</a><span class="k">class</span> <span class="nc">Disp</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Disp Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Disp&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
-
+        
 <div class="viewcode-block" id="Disp.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
         <span class="k">pass</span></div></div>
+
 
 <div class="viewcode-block" id="Vel"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel">[docs]</a><span class="k">class</span> <span class="nc">Vel</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Vel Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Vel&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Vel.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -241,23 +310,26 @@
     <span class="sd">&quot;&quot;&quot; Acc Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Acc&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response_spectra</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">init_point</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_response_spectra</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Acc.compute_integral"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc.compute_integral">[docs]</a>    <span class="k">def</span> <span class="nf">compute_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-    <span class="k">def</span> <span class="nf">_compute_response_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Acc._compute_response_spectra"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc._compute_response_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">_compute_response_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Computes response spectra &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">pass</span></div></div>
+
 
 <div class="viewcode-block" id="Raw"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Raw">[docs]</a><span class="k">class</span> <span class="nc">Raw</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Raw Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">,</span> <span class="n">poles</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raw_value</span> <span class="o">=</span> <span class="n">raw_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Raw&quot;</span>
 
 <div class="viewcode-block" id="Raw.to_velocity"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Raw.to_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">to_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>

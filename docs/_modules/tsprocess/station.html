@@ -94,6 +94,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html">Concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../documentation.html">Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
 </ul>
@@ -177,10 +178,22 @@
 <span class="c1"># this should follow object pool design pattern </span>
 <span class="c1"># we need to take a look at stations, if we find it, we should return it. </span>
 
+
 <div class="viewcode-block" id="Station"><a class="viewcode-back" href="../../modules.html#tsprocess.station.Station">[docs]</a><span class="k">class</span> <span class="nc">Station</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Class Station &quot;&quot;&quot;</span>
     <span class="n">list_of_stations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">vicinity_estimations</span> <span class="o">=</span> <span class="mi">10</span> 
+    <span class="n">station_filter_types</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;epi_dist_lt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;epi_dist_gt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;epi_dist_lte&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;epi_dist_gte&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;azimuth_lt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;azimuth_gt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;include_stlist_by_incident&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;exclude_stlist_by_incident&quot;</span>
+    <span class="p">]</span>
+    <span class="n">station_filters</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
         <span class="c1">#TODO add setter and getter to double check the lat and lon. </span>
@@ -202,7 +215,82 @@
     <span class="k">def</span> <span class="nf">_add_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_add_station_filter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filter_name</span><span class="p">,</span> <span class="n">filter_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filter_name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">station_filters</span><span class="p">:</span>
+            <span class="c1">#TODO probably customize exception should be a better option</span>
+            <span class="c1">#  to handle this.</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter name is already used. Has not been added.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">:</span>
+            <span class="c1">#TODO probably customize exception should be a better option</span>
+            <span class="c1">#  to handle this.</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter type is not supported. Has not been added.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="bp">cls</span><span class="o">.</span><span class="n">station_filters</span><span class="p">[</span><span class="n">filter_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">filter_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">]</span>
     
+    <span class="k">def</span> <span class="nf">_epi_dist_lt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+        <span class="c1"># we already have the record distance from the source. </span>
+        <span class="c1"># However, I think it is better if filter the source before</span>
+        <span class="c1"># messing up with records. </span>
+        <span class="c1"># I keep both sides, to see which method works better.</span>
+        <span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span> <span class="n">source_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_source_loc</span>
+        <span class="n">tmp_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">source_lat</span><span class="p">,</span><span class="n">source_lon</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tmp_dist</span> <span class="o">&lt;</span> <span class="n">distance</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_epi_dist_gt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+        <span class="c1"># we already have the record distance from the source. </span>
+        <span class="c1"># However, I think it is better if filter the source before</span>
+        <span class="c1"># messing up with records. </span>
+        <span class="c1"># I keep both sides, to see which method works better.</span>
+        <span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span> <span class="n">source_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_source_loc</span>
+        <span class="n">tmp_dist</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">source_lat</span><span class="p">,</span><span class="n">source_lon</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">))</span><span class="o">/</span><span class="mi">1000</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tmp_dist</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tmp_dist</span> <span class="o">&gt;</span> <span class="n">distance</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+  
+    <span class="k">def</span> <span class="nf">_include_stlist_by_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">,</span> <span class="n">stations</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_name</span><span class="p">]</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_check_station_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">station_filter_name</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">station_filter_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_filters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># this should never be invoked. I have checked the labels before. </span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter is not supported, ignored.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">filter_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_filters</span><span class="p">[</span><span class="n">station_filter_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">filter_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_filters</span><span class="p">[</span><span class="n">station_filter_name</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;epi_dist_lt&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epi_dist_lt</span><span class="p">(</span><span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;epi_dist_gte&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epi_dist_lt</span><span class="p">(</span><span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;epi_dist_gt&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epi_dist_gt</span><span class="p">(</span><span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;epi_dist_lte&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epi_dist_gt</span><span class="p">(</span><span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;include_stlist_by_incident&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_include_stlist_by_incident</span><span class="p">(</span><span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;exclude_stlist_by_incident&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_include_stlist_by_incident</span><span class="p">(</span><span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_haversine</span><span class="p">(</span><span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">):</span>
         <span class="c1"># convert decimal degrees to radians </span>

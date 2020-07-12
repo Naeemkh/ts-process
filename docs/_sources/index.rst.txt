@@ -22,6 +22,7 @@ Welcome to tsprocess!
    :maxdepth: 2
    :caption: Developers
 
+   concepts
    documentation
    modules
 
