@@ -6,8 +6,9 @@ The core module for the project class.
 
 import os
 import hashlib
-from typing import Any, List, Set, Dict, Tuple, Optional
+import pandas as pd
 import matplotlib.pyplot as plt
+from typing import Any, List, Set, Dict, Tuple, Optional
 
 from .record import Record
 from .station import Station
@@ -18,6 +19,10 @@ from .timeseries import TimeSeries
 
 class Project:
     """ Project Class """
+
+    color_code  = ['k', 'r', 'b', 'm', 'g', 'c', 'y', 'brown',
+                   'gold', 'blueviolet', 'grey', 'pink']
+
     def __init__(self,name):
         """ initiating a project"""
         self.name = name
@@ -77,11 +82,11 @@ class Project:
             return
 
         if incident_description["incident_type"] == "awp":
-            print("Incident details has not been added. Ignoring the command.")
+            print("AWP incident loading methods have not been added. Ignoring the command.")
             return 
 
         if incident_description["incident_type"] == "rwg":
-            print("Incident details has not been added. Ignoring the command.")
+            print("RWG incident loading methods have not been added. Ignoring the command.")
             return 
 
     @staticmethod
@@ -187,7 +192,10 @@ class Project:
     def valid_processing_labels(self):
         """ Returns a list of valid processing labels """
         for i,item in enumerate(TimeSeries.label_types):
-            print(f"{i}: {item}")
+            print(f"{i}: {item} - args: {TimeSeries.label_types[item]}")
+
+
+
 
     # station filtering
     def add_station_filter(self, station_filter_name, station_filter_type, hyper_parameters):
@@ -198,6 +206,13 @@ class Project:
         """ Returns a list of valid filters for selecting stations. """
         for i,item in enumerate(Station.station_filter_types):
             print(f"{i}: {item}")
+
+    def list_of_station_filters(self):
+        """ Returns a list of available processing labels"""
+        if not Station.station_filters:
+            return
+        for item in Station.station_filters:
+            print(item, '-->', Station.station_filters[item])
 
     # Analysis interface
     def plot_velocity_records(self, list_inc,list_process,list_filters):
@@ -211,13 +226,32 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
-        for station_record in records:
-            for item in station_record:
-                plt.figure()
-                plt.plot(item.time_vec,item.vel_h1.value)
-                
+         # Check number of input timeseries
+        if len(records[0]) > len(self.color_code):
+            print("[ERROR]: Too many timeseries to plot!")
+            # sys.exit(-1)
+            return
 
+        plt.figure()
+        
+        for record in records:
+            
+            fig, axs = plt.subplots(nrows=3, ncols=1, figsize=(12, 8))       
+             
+            for i,item in enumerate(record):
+                axs[0].plot(item.time_vec,item.vel_h1.value,self.color_code[i], label=list_inc[i]) 
+                axs[1].plot(item.time_vec,item.vel_h2.value,self.color_code[i]) 
+                axs[2].plot(item.time_vec,item.vel_ver.value,self.color_code[i]) 
 
+            ylabels = ['vel h1', 'vel h2', 'vel ver']
+            for ii in range(3):
+                axs[ii].set_ylabel(ylabels[ii])
+                axs[ii].grid(True)
+            
+            axs[0].legend()
+            axs[0].set_title(
+                f'Station at incident {list_inc[0]}: {record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist: {record[0].epicentral_distance: 0.2f} km')
+            fig.tight_layout()
 
 
     def which_records(self, list_inc,list_process,list_filters):
@@ -232,6 +266,43 @@ class Project:
         
         for item in records:
             print(item[0]) 
+
+    
+    def list_of_incidents(self):
+        """Returns list of incidents."""
+        return list(self.incidents.keys())
+
+
+    def compare_incidents(self,ls_inc, only_differences=False):
+        """ compares the incidents' meta data
+        Inputs:
+            ls_inc: list of incident names
+            only_differerences: True or False
+        """
+
+        uni_keys = []
+
+        column_names = ["parameters"]
+        for inc in ls_inc:
+            column_names.append(inc)
+            uni_keys.extend(self.incidents[inc].metadata.keys())
+
+        uni_keys = list(set(uni_keys))
+        table = []
+        for param in uni_keys:
+            tmp = [param]
+            for inc in ls_inc:
+                tmp.append(self.incidents[inc].metadata.get(param, " "))
+            
+            if not (only_differences and len(set(tmp[1:])) == 1):
+                table.append(tmp)
+
+        table_df = pd.DataFrame(table, columns=column_names)
+        return table_df
+
+
+
+        
 
 
         

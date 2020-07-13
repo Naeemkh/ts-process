@@ -161,6 +161,7 @@ class Record:
         # value into the database.
         proc_record = Record._apply(record, pl)
         proc_record.this_record_hash = proc_hash_val
+        print(proc_hash_val)
         
         # put data in the database
         Record.pr_db.set_value(proc_hash_val,proc_record)

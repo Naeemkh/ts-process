@@ -82,7 +82,6 @@ class Station:
         # I keep both sides, to see which method works better.
         source_lat, source_lon, source_depth = self.pr_source_loc
         tmp_dist = (self._haversine(source_lat,source_lon,self.lat, self.lon))/1000
-        print(tmp_dist)
         if tmp_dist > distance:
             return True
         else:
