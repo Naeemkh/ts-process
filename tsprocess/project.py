@@ -82,11 +82,11 @@ class Project:
             return
 
         if incident_description["incident_type"] == "awp":
-            print("AWP incident loading methods have not been added. Ignoring the command.")
+            print("AWP incident loading methods have not been added yet.")
             return 
 
         if incident_description["incident_type"] == "rwg":
-            print("RWG incident loading methods have not been added. Ignoring the command.")
+            print("RWG incident loading methods have not been added yet.")
             return 
 
     @staticmethod

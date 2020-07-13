@@ -44,13 +44,13 @@ class TimeSeries:
         if label_name in cls.processing_labels:
             #TODO probably customize exception should be a better option
             #  to handle this.
-            print("Label name is already used. Is not added.")
+            print("Label name has been used. Command is ignored.")
             return
 
         if label_type not in cls.label_types:
             #TODO probably customize exception should be a better option
             #  to handle this.
-            print("Label type is not supported. Is not added.")
+            print("Label type is not supported. Command is ignored.")
             return
         
         cls.processing_labels[label_name] = [label_type, argument_dict]
