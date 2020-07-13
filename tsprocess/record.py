@@ -4,6 +4,8 @@ record.py
 The core module for the Record class.
 """
 import os
+import random
+import string
 import hashlib
 from math import radians, cos, sin, asin, sqrt
 
@@ -35,6 +37,8 @@ class Record:
         self.acc_h2 = acc_h2
         self.acc_ver = acc_ver
         self.source_params = source_params
+        self.unique_id_1 = None 
+        self.unique_id_2 = None
         self.notes = []
         self.this_record_hash = None
         self.epicentral_distance = None
@@ -42,6 +46,7 @@ class Record:
         self.azimuth = None
         self.back_azimuth = None
         self._compute_source_dependent_params()
+        self._compute_record_unique_ids()
         self.processed = []
 
     def __str__(self):
@@ -58,6 +63,17 @@ class Record:
         source_lat, source_lon, source_depth = self.source_params
         self.epicentral_distance = self._haversine(source_lat, source_lon, self.station.lat, self.station.lon)
     
+    @staticmethod
+    def generate_uid():
+        """ generates 16 chars random combo from string and numbers"""
+        char_list = string.ascii_uppercase + string.digits
+        return ''.join(random.choice(char_list) for _ in range(16))
+
+    def _compute_record_unique_ids(self):
+        self.unique_id_1 = self.generate_uid()
+        self.unique_id_2 = self.generate_uid()
+        return
+
     def _compute_time_vec(self):
         # all records should have the most common length and dt
         pass
@@ -110,10 +126,10 @@ class Record:
                 Record.pr_db.set_value(hash_val,record_org)
 
             if incident_type == "awp":
-                print("method is not implemented.")
+                print("AWP method is not implemented.")
 
             if incident_type == "rwg":
-                print("method is not implemented.")
+                print("RWG method is not implemented.")
 
         if not record_org:
             # this should never happen. 
@@ -145,23 +161,23 @@ class Record:
         except IndexError:
             return record
 
-        hash_content = str(record.disp_h1) + str(record.vel_h2) + str(record.acc_ver) + pl
+        hash_content = record.unique_id_1 + record.unique_id_1 + pl
         proc_hash_val = hashlib.sha256((hash_content).encode('utf-8')).hexdigest()
 
         if proc_hash_val in record.processed:
             # this process has been done before, get it from database.
             tmp_rec = Record.pr_db.get_value(proc_hash_val)
-            if not tmp_rec:
-                return _get_processed_record(tmp_rec,list_process)
-
-        
+            if tmp_rec:
+                return Record._get_processed_record(tmp_rec,list_process)
+            
+               
         # if the code flow gets here, it means the requested label is not
-        # computed. As a result, we need to apply that label to the record, 
+        # computed, or it is computed, however, some how could not retireve
+        # from db. As a result, we need to apply that label to the record, 
         # add the hash value to the processed attribute, and put the hash and
         # value into the database.
         proc_record = Record._apply(record, pl)
         proc_record.this_record_hash = proc_hash_val
-        print(proc_hash_val)
         
         # put data in the database
         Record.pr_db.set_value(proc_hash_val,proc_record)
