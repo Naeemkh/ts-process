@@ -7,6 +7,7 @@ The core module for the project class.
 import os
 import hashlib
 from typing import Any, List, Set, Dict, Tuple, Optional
+import matplotlib.pyplot as plt
 
 from .record import Record
 from .station import Station
@@ -130,7 +131,8 @@ class Project:
                 incident_metadata = self.incidents[incident_item].metadata
 
                 st_name_inc = station.inc_st_name[incident_item]
-                tmp_record = Record.get_record(station, incident_metadata, list_process[i])
+                list_process_cp = list_process[i].copy()
+                tmp_record = Record.get_record(station, incident_metadata, list_process_cp)
                 st_records.append(tmp_record)
 
             records.append(st_records)
@@ -198,19 +200,25 @@ class Project:
             print(f"{i}: {item}")
 
     # Analysis interface
-    # def plot_velocity_records(self, list_inc,list_process,list_filters):
-    #     """ Plots 3 velocity timeseries one page per station."""
+    def plot_velocity_records(self, list_inc,list_process,list_filters):
+        """ Plots 3 velocity timeseries one page per station."""
         
-    #     if not self._is_incident_valid(list_inc):
-    #         return
+        if not self._is_incident_valid(list_inc):
+            return
 
-    #     if not self._is_processing_label_valid(list_process):
-    #         return
+        if not self._is_processing_label_valid(list_process):
+            return
 
-    #     records = self._extract_records(list_inc, list_process, list_filters)
+        records = self._extract_records(list_inc, list_process, list_filters)
         
-    #     for item in records:
-    #         print(item[0]) 
+        for station_record in records:
+            for item in station_record:
+                plt.figure()
+                plt.plot(item.time_vec,item.vel_h1.value)
+                
+
+
+
 
     def which_records(self, list_inc,list_process,list_filters):
         """Represent all records that will pass a given filters"""

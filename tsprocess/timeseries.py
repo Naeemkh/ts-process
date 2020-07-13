@@ -55,9 +55,17 @@ class TimeSeries:
         
         cls.processing_labels[label_name] = [label_type, argument_dict]
 
-    def _lowpass_filter(self, N=4, Wn, btype, output = 'zpk'):
+    def _lowpass_filter(self, Wn, btype,N = 4, output = 'zpk'):
         """ Returns a lowpass filtered (the Butterworth filter) signal value."""
+        Fs = 1/self.delta_t
+        Wn = Wn/(Fs/2)
+        z, p, k = butter(N=N, Wn=Wn, btype='lowpass', analog=False, output='zpk')
+        butter_sos = zpk2sos(z, p, k)
+        data = sosfiltfilt(butter_sos, self.value)
+        return data
 
+    def _highpass_filter(self, Wn, btype='highpass', N = 4, output = 'zpk'):
+        """ Returns a lowpass filtered (the Butterworth filter) signal value."""
         Fs = 1/self.delta_t
         Wn = Wn/(Fs/2)
         z, p, k = butter(N=N, Wn=Wn, btype=btype, analog=False, output='zpk')
@@ -65,9 +73,6 @@ class TimeSeries:
         data = sosfiltfilt(butter_sos, self.value)
         return data
 
-    def _highpass_filter(self, N=4, Wn, btype, output = 'zpk'):
-        """ Returns a lowpass filtered (the Butterworth filter) signal value."""
-        pass
     
 
     def _apply(self, label_name):
@@ -88,7 +93,7 @@ class TimeSeries:
             proc_data = self._lowpass_filter(**label_kwargs)
  
         if label_type == 'highpass_filter':
-            print(f"{label_type} is not implemented.")
+            proc_data = self._highpass_filter(**label_kwargs)
  
         if label_type == 'bandpass_filter':
             print(f"{label_type} is not implemented.")
@@ -111,10 +116,7 @@ class TimeSeries:
         if label_type == 'zero_pad':
             print(f"{label_type} is not implemented.")
         
-
- 
-            
-            
+          
         if ts_type == "Disp":
             return Disp(proc_data, self.delta_t, self.init_point)
 

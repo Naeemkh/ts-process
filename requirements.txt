@@ -1,37 +1,61 @@
 alabaster==0.7.12
+appnope==0.1.0
 attrs==19.3.0
 Babel==2.8.0
+backcall==0.2.0
 bleach==3.1.5
 certifi==2020.6.20
 chardet==3.0.4
 commonmark==0.9.1
+cycler==0.10.0
 decorator==4.4.2
 defusedxml==0.6.0
 docutils==0.16
 entrypoints==0.3
 idna==2.10
 imagesize==1.2.0
-importlib-metadata==1.7.0
+importlib-metadata @ file:///opt/concourse/worker/volumes/live/84197498-cbc0-4436-7ce0-03c4490b7a28/volume/importlib-metadata_1593446431408/work
+ipykernel==5.3.0
+ipython @ file:///opt/concourse/worker/volumes/live/7ea70a71-5624-4799-50b3-3b90e07922f3/volume/ipython_1593447385860/work
 ipython-genutils==0.2.0
+jedi @ file:///opt/concourse/worker/volumes/live/114a62c0-dd60-4a40-6382-85abb31b5f6e/volume/jedi_1592841953086/work
 Jinja2==2.11.2
 jsonschema==3.2.0
+jupyter-client @ file:///tmp/build/80754af9/jupyter_client_1594163838128/work
 jupyter-core==4.6.3
+kiwisolver==1.2.0
 MarkupSafe==1.1.1
+matplotlib==3.2.2
 mistune==0.8.4
+mkl-fft==1.1.0
+mkl-random==1.1.1
+mkl-service==2.3.0
 nbconvert==5.6.1
 nbformat==5.0.7
 nbsphinx==0.7.1
+notebook==6.0.3
 numpy==1.19.0
 packaging==20.4
 pandocfilters==1.4.2
+parso==0.7.0
+pexpect==4.8.0
+pickleshare==0.7.5
 pip==20.1.1
+prometheus-client==0.8.0
+prompt-toolkit==3.0.5
+ptyprocess==0.6.0
 Pygments==2.6.1
 pyparsing==2.4.7
 pyrsistent==0.16.0
+python-dateutil==2.8.1
 pytz==2020.1
+pyzmq==19.0.1
+readme-renderer==26.0
 recommonmark==0.6.0
 requests==2.24.0
+requests-toolbelt==0.9.1
 scipy==1.5.1
+Send2Trash==1.5.0
 setuptools==49.1.0
 six==1.15.0
 snowballstemmer==2.0.0
@@ -45,9 +69,13 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 sqlitedict==1.6.0
+terminado==0.8.3
 testpath==0.4.4
+tornado==6.0.4
 traitlets==4.3.3
+twine==3.1.1
 urllib3==1.25.9
+wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work
 webencodings==0.5.1
 wheel==0.34.2
 zipp==3.1.0
