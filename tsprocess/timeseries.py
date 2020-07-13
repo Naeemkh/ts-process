@@ -71,9 +71,49 @@ class TimeSeries:
         z, p, k = butter(N=N, Wn=Wn, btype=btype, analog=False, output='zpk')
         butter_sos = zpk2sos(z, p, k)
         data = sosfiltfilt(butter_sos, self.value)
-        return data
+        return data    
 
-    
+    def _taper(flag, m, samples):
+    """
+    Returns a Kaiser window created by a Besel function
+
+    Inputs:
+        flag - set to 'front', 'end', or 'all' to taper at the beginning,
+               at the end, or at both ends of the timeseries
+        m - number of samples for tapering
+        samples - total number of samples in the timeseries
+    Outputs:
+        window - Taper window
+    """
+    window = kaiser(2*m+1, beta=14)
+
+    if flag == 'front':
+        # cut and replace the second half of window with 1s
+        ones = np.ones(samples-m-1)
+        window = window[0:(m+1)]
+        window = np.concatenate([window, ones])
+
+    elif flag == 'end':
+        # cut and replace the first half of window with 1s
+        ones = np.ones(samples-m-1)
+        window = window[(m+1):]
+        window = np.concatenate([ones, window])
+
+    elif flag == 'all':
+        ones = np.ones(samples-2*m-1)
+        window = np.concatenate([window[0:(m+1)], ones, window[(m+1):]])
+
+    # avoid concatenate error
+    if window.size < samples:
+        window = np.append(window, 1)
+
+    if window.size != samples:
+        print(window.size)
+        print(samples)
+        print("[ERROR]: taper and data do not have the same number of samples.")
+        window = np.ones(samples)
+
+    return window
 
     def _apply(self, label_name):
         """ Applies the requested label_name on the timeseries """
