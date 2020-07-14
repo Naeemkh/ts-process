@@ -101,7 +101,6 @@
 <p class="caption"><span class="caption-text">Community</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact Us</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/Naeemkh/tsprocess">GitHub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../CHANGELOG.html">Changelog</a></li>
 </ul>
 
@@ -250,8 +249,8 @@
         <span class="c1"># messing up with records. </span>
         <span class="c1"># I keep both sides, to see which method works better.</span>
         <span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span> <span class="n">source_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_source_loc</span>
-        <span class="n">tmp_dist</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">source_lat</span><span class="p">,</span><span class="n">source_lon</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">))</span><span class="o">/</span><span class="mi">1000</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">tmp_dist</span><span class="p">)</span>
+        <span class="n">tmp_dist</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">source_lat</span><span class="p">,</span><span class="n">source_lon</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">))</span><span class="o">/</span><span class="mi">1000</span>
         <span class="k">if</span> <span class="n">tmp_dist</span> <span class="o">&gt;</span> <span class="n">distance</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -311,7 +310,8 @@
     <span class="k">def</span> <span class="nf">add_station</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span><span class="n">incident_name</span><span class="p">,</span><span class="n">station_name</span><span class="p">):</span>
    
         <span class="k">for</span> <span class="n">st_item</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">list_of_stations</span><span class="p">:</span>           
-            <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">,</span><span class="n">st_item</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span><span class="n">st_item</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">cls</span><span class="o">.</span><span class="n">vicinity_estimations</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">depth</span> <span class="o">-</span> <span class="n">st_item</span><span class="o">.</span><span class="n">depth</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">,</span><span class="n">st_item</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span><span class="n">st_item</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span> <span class="o">&lt;</span> 
+            <span class="bp">cls</span><span class="o">.</span><span class="n">vicinity_estimations</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">depth</span> <span class="o">-</span> <span class="n">st_item</span><span class="o">.</span><span class="n">depth</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
                <span class="c1"># this station is available</span>
                <span class="n">st_item</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_name</span>
                <span class="k">return</span> <span class="n">st_item</span>

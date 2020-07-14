@@ -4,7 +4,8 @@ timeseries.py
 The core module for the TimeSeries class.
 """
 import numpy as np
-from scipy.signal import sosfiltfilt, filtfilt, ellip, butter, zpk2sos, decimate, kaiser
+from scipy.signal import (sosfiltfilt, filtfilt, ellip, butter, zpk2sos,
+                          decimate, kaiser)
 
 from .database import DataBase as db
 
@@ -59,7 +60,8 @@ class TimeSeries:
         """ Returns a lowpass filtered (the Butterworth filter) signal value."""
         Fs = 1/self.delta_t
         Wn = fc/(Fs/2)
-        z, p, k = butter(N=N, Wn=Wn, btype='lowpass', analog=False, output='zpk')
+        z, p, k = butter(N=N, Wn=Wn, btype='lowpass', analog=False,
+         output='zpk')
         butter_sos = zpk2sos(z, p, k)
         data = sosfiltfilt(butter_sos, self.value)
         return data
@@ -68,7 +70,8 @@ class TimeSeries:
         """ Returns a lowpass filtered (the Butterworth filter) signal value."""
         Fs = 1/self.delta_t
         Wn = fc/(Fs/2)
-        z, p, k = butter(N=N, Wn=Wn, btype='highpath', analog=False, output='zpk')
+        z, p, k = butter(N=N, Wn=Wn, btype='highpath', analog=False,
+         output='zpk')
         butter_sos = zpk2sos(z, p, k)
         data = sosfiltfilt(butter_sos, self.value)
         return data    
@@ -80,10 +83,14 @@ class TimeSeries:
         Returns a Kaiser window created by a Besel function
     
         Inputs:
+
             flag - set to 'front', 'end', or 'all' to taper at the beginning,
                    at the end, or at both ends of the timeseries
+
             m - number of samples for tapering
+
             window - Taper window
+
         """
         samples = len(self.value)
     
@@ -112,7 +119,8 @@ class TimeSeries:
         if window.size != samples:
             print(window.size)
             print(samples)
-            print("[ERROR]: taper and data do not have the same number of samples.")
+            print("[ERROR]: taper and data do not have the same number of\
+                 samples.")
             window = np.ones(samples)
     
         return window

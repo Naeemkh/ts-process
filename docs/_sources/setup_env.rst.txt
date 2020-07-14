@@ -13,7 +13,7 @@ Here are the steps for running the code with anaconda virtual environment. Pleas
 
     $ conda create --name your_venv python=3.7
 
-Type 'y'(yes) for questions.
+Type 'y' (yes) for popup questions.
 
 - Step 2: Activate the virtual environment
 
@@ -43,7 +43,7 @@ Make sure that you have activated the virtual environment (Please see Step 2). N
 
     $ conda install -c anaconda ipykernel
 
-Type 'y'(yes) for questions.
+Type 'y' (yes) for popup questions.
 The last step is adding the kernel into Jupyter Notebook. 
 
 
@@ -59,7 +59,7 @@ In your working directory (any arbitrary directory that you work on your data), 
 
     $ jupyter notebook
 
-At the top right corner, there is `New` key. Choose your recently created kernel (in this example: your_venv_name). Choosing a kernel will open a new tab that you can work on. 
+At the top right corner, there is a button labeled `New` key. Choose your recently created kernel (in this example: your_venv_name). Choosing a kernel will open a new tab that you can work on. 
 
 
 

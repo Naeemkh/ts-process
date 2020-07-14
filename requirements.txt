@@ -14,14 +14,14 @@ docutils==0.16
 entrypoints==0.3
 idna==2.10
 imagesize==1.2.0
-importlib-metadata @ file:///opt/concourse/worker/volumes/live/84197498-cbc0-4436-7ce0-03c4490b7a28/volume/importlib-metadata_1593446431408/work
+importlib-metadata==1.7.0
 ipykernel==5.3.0
-ipython @ file:///opt/concourse/worker/volumes/live/7ea70a71-5624-4799-50b3-3b90e07922f3/volume/ipython_1593447385860/work
+ipython==7.16.1
 ipython-genutils==0.2.0
-jedi @ file:///opt/concourse/worker/volumes/live/114a62c0-dd60-4a40-6382-85abb31b5f6e/volume/jedi_1592841953086/work
+jedi==0.17.1
 Jinja2==2.11.2
 jsonschema==3.2.0
-jupyter-client @ file:///tmp/build/80754af9/jupyter_client_1594163838128/work
+jupyter-client==6.1.5
 jupyter-core==4.6.3
 kiwisolver==1.2.0
 MarkupSafe==1.1.1
@@ -36,6 +36,7 @@ nbsphinx==0.7.1
 notebook==6.0.3
 numpy==1.19.0
 packaging==20.4
+pandas==1.0.5
 pandocfilters==1.4.2
 parso==0.7.0
 pexpect==4.8.0
@@ -73,9 +74,10 @@ terminado==0.8.3
 testpath==0.4.4
 tornado==6.0.4
 traitlets==4.3.3
+tsprocess==0.0.1
 twine==3.1.1
 urllib3==1.25.9
-wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work
+wcwidth==0.2.5
 webencodings==0.5.1
 wheel==0.34.2
 zipp==3.1.0

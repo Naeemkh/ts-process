@@ -101,7 +101,6 @@
 <p class="caption"><span class="caption-text">Community</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact Us</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/Naeemkh/tsprocess">GitHub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../CHANGELOG.html">Changelog</a></li>
 </ul>
 
@@ -173,6 +172,8 @@
 <span class="sd">The core module for the Record class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">asin</span><span class="p">,</span> <span class="n">sqrt</span>
 
@@ -204,6 +205,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">acc_h2</span> <span class="o">=</span> <span class="n">acc_h2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">acc_ver</span> <span class="o">=</span> <span class="n">acc_ver</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source_params</span> <span class="o">=</span> <span class="n">source_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_1</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_2</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">this_record_hash</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span> <span class="o">=</span> <span class="kc">None</span>
@@ -211,10 +214,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">azimuth</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">back_azimuth</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_source_dependent_params</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_record_unique_ids</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Record at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">}</span><span class="s2"> km distance from source.&quot;</span>     
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Record at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2"> with&quot;</span>\
+               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">}</span><span class="s2"> km distance from source.&quot;</span>     
 
 <div class="viewcode-block" id="Record.connect_to_database"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record.connect_to_database">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">connect_to_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">database_name</span><span class="p">,</span> <span class="n">cache_size</span><span class="p">):</span>
@@ -225,8 +230,20 @@
         <span class="c1"># compute distance and azimuth</span>
         <span class="c1"># extract source hyper parameters and record to source distance. </span>
         <span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span> <span class="n">source_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_haversine</span><span class="p">(</span><span class="n">source_lat</span><span class="p">,</span> <span class="n">source_lon</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
     
+<div class="viewcode-block" id="Record.generate_uid"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record.generate_uid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">generate_uid</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot; generates 16 chars random combo from string and numbers&quot;&quot;&quot;</span>
+        <span class="n">char_list</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">char_list</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_compute_record_unique_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_uid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_uid</span><span class="p">()</span>
+        <span class="k">return</span>
+
     <span class="k">def</span> <span class="nf">_compute_time_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># all records should have the most common length and dt</span>
         <span class="k">pass</span>
@@ -263,7 +280,8 @@
             <span class="k">return</span>
 
         <span class="c1"># generate original record hash value.</span>
-        <span class="n">hash_val</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">((</span><span class="n">incident_name</span><span class="o">+</span><span class="n">st_name</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">hash_val</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">((</span><span class="n">incident_name</span><span class="o">+</span><span class="n">st_name</span><span class="p">)</span><span class="o">.</span>\
+            <span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 
         <span class="c1"># retrieve the record from database.</span>
         <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">hash_val</span><span class="p">)</span>
@@ -272,17 +290,19 @@
             <span class="c1"># we need to load the data </span>
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
                 <span class="n">station_folder</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;output_stations_directory&quot;</span><span class="p">]</span>
-                <span class="n">station_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">],</span><span class="n">station_folder</span><span class="p">,</span><span class="n">st_name</span><span class="p">)</span>
-                <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_from_hercules</span><span class="p">(</span><span class="n">station_file</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span><span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">)</span>
+                <span class="n">station_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">]</span>\
+                    <span class="p">,</span><span class="n">station_folder</span><span class="p">,</span><span class="n">st_name</span><span class="p">)</span>
+                <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_from_hercules</span><span class="p">(</span><span class="n">station_file</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span>\
+                    <span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">)</span>
                 <span class="n">record_org</span><span class="o">.</span><span class="n">this_record_hash</span> <span class="o">=</span> <span class="n">hash_val</span>
                 <span class="c1"># put the record in the database.</span>
                 <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">hash_val</span><span class="p">,</span><span class="n">record_org</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;method is not implemented.&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AWP method is not implemented.&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;rwg&quot;</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;method is not implemented.&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RWG method is not implemented.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">record_org</span><span class="p">:</span>
             <span class="c1"># this should never happen. </span>
@@ -297,7 +317,8 @@
             <span class="k">return</span> <span class="n">record_org</span>
 
         
-        <span class="n">processed_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_get_processed_record</span><span class="p">(</span><span class="n">record_org</span><span class="p">,</span> <span class="n">list_process</span><span class="p">)</span>
+        <span class="n">processed_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_get_processed_record</span><span class="p">(</span><span class="n">record_org</span><span class="p">,</span>\
+             <span class="n">list_process</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">processed_record</span>
 
@@ -314,18 +335,20 @@
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">record</span>
 
-        <span class="n">hash_content</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span>
-        <span class="n">proc_hash_val</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">((</span><span class="n">hash_content</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">hash_content</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">unique_id_1</span> <span class="o">+</span> <span class="n">record</span><span class="o">.</span><span class="n">unique_id_1</span> <span class="o">+</span> <span class="n">pl</span>
+        <span class="n">proc_hash_val</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">((</span><span class="n">hash_content</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span>\
+            <span class="n">hexdigest</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">proc_hash_val</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">processed</span><span class="p">:</span>
             <span class="c1"># this process has been done before, get it from database.</span>
             <span class="n">tmp_rec</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">proc_hash_val</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">tmp_rec</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_get_processed_record</span><span class="p">(</span><span class="n">tmp_rec</span><span class="p">,</span><span class="n">list_process</span><span class="p">)</span>
-
-        
+            <span class="k">if</span> <span class="n">tmp_rec</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">_get_processed_record</span><span class="p">(</span><span class="n">tmp_rec</span><span class="p">,</span><span class="n">list_process</span><span class="p">)</span>
+            
+               
         <span class="c1"># if the code flow gets here, it means the requested label is not</span>
-        <span class="c1"># computed. As a result, we need to apply that label to the record, </span>
+        <span class="c1"># computed, or it is computed, however, some how could not retireve</span>
+        <span class="c1"># from db. As a result, we need to apply that label to the record, </span>
         <span class="c1"># add the hash value to the processed attribute, and put the hash and</span>
         <span class="c1"># value into the database.</span>
         <span class="n">proc_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">pl</span><span class="p">)</span>
@@ -410,19 +433,24 @@
                     <span class="c1"># Write header</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pieces</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
                         <span class="n">dis_header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;# her header: # </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span>
-                                         <span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                                         <span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                          <span class="n">pieces</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
                         <span class="n">vel_header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;# her header: # </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span>
-                                         <span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+                                         <span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                                          <span class="n">pieces</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
                         <span class="n">acc_header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;# her header: # </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span>
-                                         <span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">9</span><span class="p">]))</span>
+                                         <span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+                                          <span class="n">pieces</span><span class="p">[</span><span class="mi">9</span><span class="p">]))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">dis_header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;# her header: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">line</span><span class="p">))</span>
                     <span class="k">continue</span>
                 <span class="n">pieces</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                 <span class="n">pieces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">piece</span><span class="p">)</span> <span class="k">for</span> <span class="n">piece</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">]</span>
-                <span class="c1"># Write timeseries to files. Please not that Hercules files have</span>
-                <span class="c1"># the vertical component positive pointing down so we have to flip it</span>
-                <span class="c1"># here to match the BBP format in which vertical component points up</span>
+                <span class="c1"># Write timeseries to files. Please not that Hercules files </span>
+                <span class="c1"># have the vertical component positive pointing down so we have</span>
+                <span class="c1"># to flip it here to match the BBP format in which vertical</span>
+                <span class="c1"># component points up</span>
+
                 <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">dis_h1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">dis_h2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
@@ -433,12 +461,13 @@
                 <span class="n">acc_h1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
                 <span class="n">acc_h2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
                 <span class="n">acc_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+
         <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="c1"># All done</span>
             <span class="n">input_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            
         <span class="c1"># Convert to NumPy Arrays</span>
         <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
         <span class="n">vel_h1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vel_h1</span><span class="p">)</span>

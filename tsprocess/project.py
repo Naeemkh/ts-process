@@ -105,10 +105,10 @@ class Project:
 
     def _extract_records(self, list_inc, list_process, list_filters):
         """ Extracts the requested records. Loop through all available
-         stations and choose them based on list_filters. For list of
+         stations and choose them based on list_filters. For a list of
          incidents with N incidents, each station will return a list of 
-         N records, corresponding the list of incidents. If for some 
-         station there is no record for that incident, it should return 
+         N records, corresponding to the list of incidents. If for some 
+         stations there is no record for that incident, it should return 
          None. 
         """
         records = []
@@ -137,7 +137,8 @@ class Project:
 
                 st_name_inc = station.inc_st_name[incident_item]
                 list_process_cp = list_process[i].copy()
-                tmp_record = Record.get_record(station, incident_metadata, list_process_cp)
+                tmp_record = Record.get_record(station, incident_metadata,
+                 list_process_cp)
                 st_records.append(tmp_record)
 
             records.append(st_records)
@@ -168,7 +169,8 @@ class Project:
     # processing labels
     def add_processing_label(self, label_name, label_type, hyper_parameters):
         """ Creates a processing label """
-        TimeSeries._add_processing_label(label_name, label_type, hyper_parameters)
+        TimeSeries._add_processing_label(label_name, label_type,
+         hyper_parameters)
         
     def list_of_processing_labels(self):
         """ Returns a list of available processing labels"""
@@ -182,8 +184,9 @@ class Project:
         for group in list_process:
             for pr_l in group:
                 if pr_l not in TimeSeries.processing_labels:
-                    print(\
-                        f"{pr_l} is not a valid processing label. Command ignored."\
+                    print(
+                        f"{pr_l} is not a valid processing label. Command\
+                            ignored."
                         )
                     return False
         
@@ -239,7 +242,8 @@ class Project:
             fig, axs = plt.subplots(nrows=3, ncols=1, figsize=(12, 8))       
              
             for i,item in enumerate(record):
-                axs[0].plot(item.time_vec,item.vel_h1.value,self.color_code[i], label=list_inc[i]) 
+                axs[0].plot(item.time_vec,item.vel_h1.value,self.color_code[i],
+                 label=list_inc[i]) 
                 axs[1].plot(item.time_vec,item.vel_h2.value,self.color_code[i]) 
                 axs[2].plot(item.time_vec,item.vel_ver.value,self.color_code[i]) 
 
@@ -250,7 +254,10 @@ class Project:
             
             axs[0].legend()
             axs[0].set_title(
-                f'Station at incident {list_inc[0]}: {record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist: {record[0].epicentral_distance: 0.2f} km')
+                f'Station at incident {list_inc[0]}:'\
+                f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'\
+                f'{record[0].epicentral_distance: 0.2f} km'\
+                )
             fig.tight_layout()
 
 
@@ -274,10 +281,15 @@ class Project:
 
 
     def compare_incidents(self,ls_inc, only_differences=False):
-        """ compares the incidents' meta data
+        """ 
+        compares the incidents' meta data
+
         Inputs:
+
             ls_inc: list of incident names
+
             only_differerences: True or False
+
         """
 
         uni_keys = []

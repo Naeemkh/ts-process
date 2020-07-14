@@ -201,7 +201,7 @@
 </style>
 <div class="section" id="incidents">
 <h1>Incidents<a class="headerlink" href="#incidents" title="Permalink to this headline">¶</a></h1>
-<p>An earthquake incident (or incident for short) is a folder that includes observed or simulated earthquakes with their source and stations details. <em>tsporcess</em> parses all files inside the incident folder and extract the required data. In the following, we explain the incident folders’ details for major ground motion simulation platforms. Please let <a class="reference internal" href="contact.html"><span class="doc">us</span></a> know if you need to add your research group format into <em>tsporcess</em>.</p>
+<p>An earthquake incident (or incident for short) is a folder that includes observed or simulated earthquakes with their source and stations details. <strong>tsporcess</strong> parses all files inside the incident folder and extract the required data. In the following, we explain the incident folders’ details for major ground motion simulation platforms. Please let <a class="reference internal" href="contact.html"><span class="doc">us</span></a> know if you need to add your research group incident format into <strong>tsporcess</strong>.</p>
 <div class="section" id="hercules">
 <h2>Hercules<a class="headerlink" href="#hercules" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/CMU-Quake/hercules/wiki/Hercules">Hercules</a> is a simulation software for anelastic wave propagation in highly heterogeneous media due to kinematic faulting. The following figure shows the required files and folders and their arrangements.</p>
@@ -211,6 +211,7 @@
 <span class="go">incident_name         =  hercules_1</span>
 <span class="go">incident_type         =  hercules</span>
 <span class="go">inputfiles_parameters =  inputfiles/parameters.in</span>
+<span class="go">source_hypocenter     =  lat, lon, depth(km)</span>
 </pre></div>
 </div>
 </div>

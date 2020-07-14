@@ -29,7 +29,8 @@ class SeismicSource:
 
         if incident_type == "hercules":
 
-            with open((os.path.join(self.source_directory,'source.in')), 'r') as fp:
+            with open((os.path.join(self.source_directory,'source.in')),
+             'r') as fp:
                 while True:
                     line = fp.readline()
                     if not line:
@@ -64,7 +65,8 @@ class SeismicSource:
                     break
                 if line.startswith("#"):
                     continue
-                if ("domain_surface_corners" in line) and ("=" in line) and (len(line.split())==2):
+                if (("domain_surface_corners" in line) and ("=" in line) and
+                 (len(line.split())==2)):
                     start_reading_corners = True
                 
                 if start_reading_corners:
@@ -74,7 +76,8 @@ class SeismicSource:
                         tmp_line = line.split()
                         if len(tmp_line) == 2:
                             self.domain_surface_corners.append(
-                                [float(tmp_line[0].strip()),float(tmp_line[1].strip())]
+                                [float(tmp_line[0].strip()),
+                                float(tmp_line[1].strip())]
                                 )
                             i = i + 1
                     break
@@ -89,7 +92,8 @@ class SeismicSource:
                 line = fp.readline()
                 tmp_line = line.split()
                 if len(tmp_line) == 3:
-                    self.coords.append([float(tmp_line[0].strip()), float(tmp_line[1].strip()), float(tmp_line[2].strip())])
+                    self.coords.append([float(tmp_line[0].strip()),
+                     float(tmp_line[1].strip()), float(tmp_line[2].strip())])
                     i = i + 1
 
         with open(os.path.join(self.source_directory,'dip.in'), 'r') as fp:

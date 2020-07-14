@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#access-to-data">Access to Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stations">Stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-stations">Selecting Stations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
@@ -213,20 +214,20 @@
 <li><p>Each record will be load or processed if it is required.</p></li>
 <li><p>Each record will be load or processed, once.</p></li>
 <li><p>The user does not need to store any inter-processing results.</p></li>
-<li><p>All results should be reproducible</p></li>
+<li><p>All results should be reproducible.</p></li>
 </ul>
 </div>
 <div class="section" id="access-to-data">
 <h2>Access to Data<a class="headerlink" href="#access-to-data" title="Permalink to this headline">¶</a></h2>
 <p>A record of a ground motion simulation can go through different processing paths (e.g., filtering, rotation, zero-padding, …). In a specific study, we may never use some of those records. As a result, we want to make sure that, we only load those data that we need and if we process them once we do not want to repeat that processing again.</p>
-<p>Adding an instance to the project does not load any data, it registers the incident folder location, incident type, and their stations location. The smallest unit of data that is saved into database is a Record instance (through a pickle object). Each record has a time vector, 9 seismic vectors, which they are also different classes, and a station object.</p>
-<p>Original records are reside inside incident folders. We use <strong>(incident_name + station_name)</strong> hash value to put and retrieve that record from the database. We use a NoSQL key-value database. Keys are hash values that are generated at different steps. Since incident name is unique, and station name inside one incident is also unique, the resultant hash value will be a unique value. If we cannot find that hash value inside the database, we load it from the incident folder, and store it in the database with the same hash value. Through these steps, if we need that record for the second time, we will retrieve it from the database rather than loading from the incident folder.</p>
+<p>Adding an instance to the project does not load any data, it registers the incident folder location, incident type, and their stations location. The smallest unit of data that is stored into the database is a Record instance (through a <a class="reference external" href="https://docs.python.org/3.7/library/pickle.html">pickle object</a>). Each record has a time vector, 9 seismic vectors, which they are also different classes, and a station object.</p>
+<p>Original records are reside inside incident folders. We use <strong>incident_name + station_name</strong> hash value to put and retrieve that record from the database. We use a NoSQL key-value database. Keys are hash values that are generated at different steps. Since incident name is unique, and station name inside one incident is also unique, the resultant hash value will be a unique value. If we cannot find that hash value inside the database, we load it from the incident folder, and store it in the database with the same hash value. Through these steps, if we need that record for the second time, we will retrieve it from the database rather than loading from the incident folder.</p>
 <p>The processed records are dependent to the original records. We use processing label idea to track the processed records. Through this implementation, the users are not allowed to directly process any time series, however, they can define processing labels. Processing label name is unique, therefore, a combination of the processing label and the record itself will generate a unique hash value. The processed record will be stored in the database with the generated hash value as a key. The hash value, will be stored in the <em>processed</em> attribute of the record. Before, any processing, we generate the hash value, if that value is in the <em>processed</em> attribute, we retrieve that record from the database. Following these steps, we never repeat the same processing again, also we never store one processed record in different folders. Users can define as much as processing labels they want. Here is an example:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nv">pr</span> <span class="o">=</span> Project<span class="o">(</span><span class="s1">&#39;example_project&#39;</span><span class="o">)</span>
 <span class="gp">$</span> pr.add_processing_label<span class="o">(</span><span class="s1">&#39;lpf2&#39;</span>,<span class="s1">&#39;lowpass_filter&#39;</span>, <span class="o">{</span><span class="s2">&quot;N&quot;</span> : <span class="m">4</span>, <span class="s2">&quot;Wn&quot;</span> : <span class="m">2</span>.0<span class="o">})</span>
 </pre></div>
 </div>
-<p><em>lpf2</em> is a unique name and <em>lowpass_filter</em> is the process label type, then we provide a dictionary of hyper-parameters. Once a label is defined, it is not immutable. However, the user always can define another label if needed.</p>
+<p><em>lpf2</em> is a unique name and <em>lowpass_filter</em> is the process label type, then we provide a dictionary of hyper-parameters. Once a label is defined, it is immutable. However, the user always can define another label if needed.</p>
 </div>
 <div class="section" id="stations">
 <h2>Stations<a class="headerlink" href="#stations" title="Permalink to this headline">¶</a></h2>
@@ -235,7 +236,11 @@
 <span class="gp">&gt;</span> <span class="o">{</span><span class="s1">&#39;hercules_1&#39;</span>:<span class="s1">&#39;station.10&#39;</span>, <span class="s1">&#39;observation_1&#39;</span>:<span class="s1">&#39;CE16850&#39;</span><span class="o">}</span>
 </pre></div>
 </div>
-<p>All processing are based on a loop on stations. Therefore, if I need to extract data for the mentioned location, for <cite>hercules_1</cite> incident, I need to load <cite>station.10</cite> data from the incident folder.</p>
+<p>All processing are based on a loop on stations. Therefore, if we need to extract data for the mentioned location, for <cite>hercules_1</cite> incident, for instance, we need to load <cite>station.10</cite> data from the incident folder.</p>
+</div>
+<div class="section" id="selecting-stations">
+<h2>Selecting Stations<a class="headerlink" href="#selecting-stations" title="Permalink to this headline">¶</a></h2>
+<p>We define filters for selecting stations. These filters are based on different criteria (e.g., epicentral distance, azimuth, station names, …) and are defined by the users. All stations will be considered if no filter applied.</p>
 </div>
 </div>
 

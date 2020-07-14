@@ -106,8 +106,9 @@ class Incident:
             return
     
     def _extract_seismic_source_data(self):
-        """ extract seismic source details. """
-        self.metadata["incident_source_hypocenter"] = tuple([float(i.strip()) for i in self.metadata["source_hypocenter"].split(",")])
+        """ extracts seismic source details. """
+        self.metadata["incident_source_hypocenter"] = \
+        tuple([float(i.strip()) for i in self.metadata["source_hypocenter"].split(",")])
         source_relative_path = self.metadata["source_directory"]
         source_folder = os.path.join(self.metadata["incident_folder"],source_relative_path)
         self.source = SeismicSource(source_folder, self.metadata["incident_type"])

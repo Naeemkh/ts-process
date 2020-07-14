@@ -33,7 +33,6 @@ Welcome to tsprocess!
    :caption: Community
    
    contact
-   GitHub <https://github.com/Naeemkh/tsprocess>
    CHANGELOG
 
 

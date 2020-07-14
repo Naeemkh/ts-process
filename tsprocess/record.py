@@ -50,7 +50,8 @@ class Record:
         self.processed = []
 
     def __str__(self):
-        return f"Record at {self.station.lat, self.station.lon} with {self.epicentral_distance} km distance from source."     
+        return f"Record at {self.station.lat, self.station.lon} with"\
+               f"{self.epicentral_distance} km distance from source."     
 
     @classmethod
     def connect_to_database(cls, database_name, cache_size):
@@ -61,7 +62,8 @@ class Record:
         # compute distance and azimuth
         # extract source hyper parameters and record to source distance. 
         source_lat, source_lon, source_depth = self.source_params
-        self.epicentral_distance = self._haversine(source_lat, source_lon, self.station.lat, self.station.lon)
+        self.epicentral_distance = self._haversine(source_lat, source_lon,
+         self.station.lat, self.station.lon)
     
     @staticmethod
     def generate_uid():
@@ -110,7 +112,8 @@ class Record:
             return
 
         # generate original record hash value.
-        hash_val = hashlib.sha256((incident_name+st_name).encode('utf-8')).hexdigest()
+        hash_val = hashlib.sha256((incident_name+st_name).\
+            encode('utf-8')).hexdigest()
 
         # retrieve the record from database.
         record_org = Record.pr_db.get_value(hash_val)
@@ -119,8 +122,10 @@ class Record:
             # we need to load the data 
             if incident_type == "hercules":
                 station_folder = incident_metadata["output_stations_directory"]
-                station_file = os.path.join(incident_metadata["incident_folder"],station_folder,st_name)
-                record_org = Record._from_hercules(station_file,station_obj,Station.pr_source_loc)
+                station_file = os.path.join(incident_metadata["incident_folder"]\
+                    ,station_folder,st_name)
+                record_org = Record._from_hercules(station_file,station_obj,\
+                    Station.pr_source_loc)
                 record_org.this_record_hash = hash_val
                 # put the record in the database.
                 Record.pr_db.set_value(hash_val,record_org)
@@ -144,7 +149,8 @@ class Record:
             return record_org
 
         
-        processed_record = Record._get_processed_record(record_org, list_process)
+        processed_record = Record._get_processed_record(record_org,\
+             list_process)
 
         return processed_record
 
@@ -162,7 +168,8 @@ class Record:
             return record
 
         hash_content = record.unique_id_1 + record.unique_id_1 + pl
-        proc_hash_val = hashlib.sha256((hash_content).encode('utf-8')).hexdigest()
+        proc_hash_val = hashlib.sha256((hash_content).encode('utf-8')).\
+            hexdigest()
 
         if proc_hash_val in record.processed:
             # this process has been done before, get it from database.
@@ -258,19 +265,24 @@ class Record:
                     # Write header
                     if len(pieces) >= 10:
                         dis_header.append("# her header: # %s %s %s %s\n" %
-                                         (pieces[0], pieces[1], pieces[2], pieces[3]))
+                                         (pieces[0], pieces[1], pieces[2],
+                                          pieces[3]))
                         vel_header.append("# her header: # %s %s %s %s\n" %
-                                         (pieces[0], pieces[4], pieces[5], pieces[6]))
+                                         (pieces[0], pieces[4], pieces[5],
+                                          pieces[6]))
                         acc_header.append("# her header: # %s %s %s %s\n" %
-                                         (pieces[0], pieces[7], pieces[8], pieces[9]))
+                                         (pieces[0], pieces[7], pieces[8],
+                                          pieces[9]))
                     else:
                         dis_header.append("# her header: %s\n" % (line))
                     continue
                 pieces = line.split()
                 pieces = [float(piece) for piece in pieces]
-                # Write timeseries to files. Please not that Hercules files have
-                # the vertical component positive pointing down so we have to flip it
-                # here to match the BBP format in which vertical component points up
+                # Write timeseries to files. Please not that Hercules files 
+                # have the vertical component positive pointing down so we have
+                # to flip it here to match the BBP format in which vertical
+                # component points up
+
                 times.append(pieces[0])
                 dis_h1.append(pieces[1])
                 dis_h2.append(pieces[2])
@@ -281,12 +293,13 @@ class Record:
                 acc_h1.append(pieces[7])
                 acc_h2.append(pieces[8])
                 acc_ver.append(-1 * pieces[9])
+
         except IOError as e:
             print(e)
             sys.exit(-1)
         finally:
-            # All done
             input_fp.close()
+            
         # Convert to NumPy Arrays
         times = np.array(times)
         vel_h1 = np.array(vel_h1)

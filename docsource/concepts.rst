@@ -14,16 +14,16 @@ In **tsprocess** package, we target the following goals:
 - Each record will be load or processed if it is required.
 - Each record will be load or processed, once.
 - The user does not need to store any inter-processing results. 
-- All results should be reproducible
+- All results should be reproducible.
  
 
 Access to Data
 --------------
 A record of a ground motion simulation can go through different processing paths (e.g., filtering, rotation, zero-padding, ...). In a specific study, we may never use some of those records. As a result, we want to make sure that, we only load those data that we need and if we process them once we do not want to repeat that processing again.
 
-Adding an instance to the project does not load any data, it registers the incident folder location, incident type, and their stations location. The smallest unit of data that is saved into database is a Record instance (through a pickle object). Each record has a time vector, 9 seismic vectors, which they are also different classes, and a station object. 
+Adding an instance to the project does not load any data, it registers the incident folder location, incident type, and their stations location. The smallest unit of data that is stored into the database is a Record instance (through a `pickle object <https://docs.python.org/3.7/library/pickle.html>`_). Each record has a time vector, 9 seismic vectors, which they are also different classes, and a station object. 
 
-Original records are reside inside incident folders. We use **(incident_name + station_name)** hash value to put and retrieve that record from the database. We use a NoSQL key-value database. Keys are hash values that are generated at different steps. Since incident name is unique, and station name inside one incident is also unique, the resultant hash value will be a unique value. If we cannot find that hash value inside the database, we load it from the incident folder, and store it in the database with the same hash value. Through these steps, if we need that record for the second time, we will retrieve it from the database rather than loading from the incident folder. 
+Original records are reside inside incident folders. We use **incident_name + station_name** hash value to put and retrieve that record from the database. We use a NoSQL key-value database. Keys are hash values that are generated at different steps. Since incident name is unique, and station name inside one incident is also unique, the resultant hash value will be a unique value. If we cannot find that hash value inside the database, we load it from the incident folder, and store it in the database with the same hash value. Through these steps, if we need that record for the second time, we will retrieve it from the database rather than loading from the incident folder. 
 
 The processed records are dependent to the original records. We use processing label idea to track the processed records. Through this implementation, the users are not allowed to directly process any time series, however, they can define processing labels. Processing label name is unique, therefore, a combination of the processing label and the record itself will generate a unique hash value. The processed record will be stored in the database with the generated hash value as a key. The hash value, will be stored in the *processed* attribute of the record. Before, any processing, we generate the hash value, if that value is in the *processed* attribute, we retrieve that record from the database. Following these steps, we never repeat the same processing again, also we never store one processed record in different folders. Users can define as much as processing labels they want. Here is an example:
 
@@ -32,7 +32,7 @@ The processed records are dependent to the original records. We use processing l
      $ pr = Project('example_project')
      $ pr.add_processing_label('lpf2','lowpass_filter', {"N" : 4, "Wn" : 2.0})
 
-*lpf2* is a unique name and *lowpass_filter* is the process label type, then we provide a dictionary of hyper-parameters. Once a label is defined, it is not immutable. However, the user always can define another label if needed. 
+*lpf2* is a unique name and *lowpass_filter* is the process label type, then we provide a dictionary of hyper-parameters. Once a label is defined, it is immutable. However, the user always can define another label if needed. 
 
 
 Stations
@@ -44,7 +44,12 @@ Each station is defined through a geographical point *(latitude, longitude, dept
     $station.inc_st_name
     > {'hercules_1':'station.10', 'observation_1':'CE16850'}
 
-All processing are based on a loop on stations. Therefore, if I need to extract data for the mentioned location, for `hercules_1` incident, I need to load `station.10` data from the incident folder. 
+All processing are based on a loop on stations. Therefore, if we need to extract data for the mentioned location, for `hercules_1` incident, for instance, we need to load `station.10` data from the incident folder. 
 
+
+Selecting Stations
+------------------
+
+We define filters for selecting stations. These filters are based on different criteria (e.g., epicentral distance, azimuth, station names, ...) and are defined by the users. All stations will be considered if no filter applied. 
 
  

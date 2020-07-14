@@ -81,7 +81,8 @@ class Station:
         # messing up with records. 
         # I keep both sides, to see which method works better.
         source_lat, source_lon, source_depth = self.pr_source_loc
-        tmp_dist = (self._haversine(source_lat,source_lon,self.lat, self.lon))/1000
+        tmp_dist = (self._haversine(source_lat,source_lon,self.lat,
+         self.lon))/1000
         if tmp_dist > distance:
             return True
         else:
@@ -141,7 +142,8 @@ class Station:
     def add_station(cls, lat, lon, depth,incident_name,station_name):
    
         for st_item in cls.list_of_stations:           
-            if cls._haversine(lat,lon,st_item.lat,st_item.lon) < cls.vicinity_estimations and abs(depth - st_item.depth) < 1:
+            if (cls._haversine(lat,lon,st_item.lat,st_item.lon) < 
+            cls.vicinity_estimations and abs(depth - st_item.depth) < 1):
                # this station is available
                st_item.inc_st_name[incident_name] = station_name
                return st_item
