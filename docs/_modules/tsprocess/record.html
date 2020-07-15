@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../setup_env.html">Setting up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../incidents.html">Incidents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../comm_quick_ref.html">Commands Quick Reference</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -179,6 +180,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.station</span> <span class="kn">import</span> <span class="n">Station</span>
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
 <span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span>  <span class="n">Disp</span><span class="p">,</span> <span class="n">Vel</span><span class="p">,</span> <span class="n">Acc</span><span class="p">,</span> <span class="n">Raw</span><span class="p">,</span> <span class="n">Unitless</span>
@@ -195,6 +197,7 @@
                 <span class="n">station</span><span class="p">,</span> <span class="n">source_params</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">station</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_vec</span> <span class="o">=</span> <span class="n">time_vec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq_vec</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disp_h1</span> <span class="o">=</span> <span class="n">disp_h1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disp_h2</span> <span class="o">=</span> <span class="n">disp_h2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disp_ver</span> <span class="o">=</span> <span class="n">disp_ver</span>
@@ -215,6 +218,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">back_azimuth</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_source_dependent_params</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_record_unique_ids</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_freq_vector</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -247,6 +251,14 @@
     <span class="k">def</span> <span class="nf">_compute_time_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># all records should have the most common length and dt</span>
         <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_compute_freq_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># all records should have same length, and df</span>
+        <span class="c1"># choosing value from one of signals</span>
+        <span class="c1"># however, make sure that all are the same. </span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">delta_f</span>
+        <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">fft_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">s_size</span><span class="p">))</span><span class="o">*</span><span class="n">df</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">f_init_point</span>
 
     <span class="k">def</span> <span class="nf">export_to_hercules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -292,12 +304,18 @@
                 <span class="n">station_folder</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;output_stations_directory&quot;</span><span class="p">]</span>
                 <span class="n">station_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">]</span>\
                     <span class="p">,</span><span class="n">station_folder</span><span class="p">,</span><span class="n">st_name</span><span class="p">)</span>
-                <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_from_hercules</span><span class="p">(</span><span class="n">station_file</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span>\
-                    <span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">)</span>
-                <span class="n">record_org</span><span class="o">.</span><span class="n">this_record_hash</span> <span class="o">=</span> <span class="n">hash_val</span>
-                <span class="c1"># put the record in the database.</span>
-                <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">hash_val</span><span class="p">,</span><span class="n">record_org</span><span class="p">)</span>
-
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_from_hercules</span><span class="p">(</span><span class="n">station_file</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span>\
+                        <span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">)</span>
+                    <span class="n">record_org</span><span class="o">.</span><span class="n">this_record_hash</span> <span class="o">=</span> <span class="n">hash_val</span>
+    
+                    <span class="c1"># put the record in the database.</span>
+                    <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">hash_val</span><span class="p">,</span><span class="n">record_org</span><span class="p">)</span>
+                
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">record_org</span> <span class="o">=</span> <span class="kc">None</span>
+               
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AWP method is not implemented.&quot;</span><span class="p">)</span>
 
@@ -310,6 +328,7 @@
             <span class="c1"># wrong with the record. </span>
             <span class="c1"># TODO handle corrupt record.</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;something is wrong with the record.&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2"> could not load&quot;</span><span class="p">)</span>
             <span class="k">return</span>
             
         <span class="k">if</span> <span class="ow">not</span> <span class="n">list_process</span><span class="p">:</span>
@@ -464,7 +483,7 @@
 
         <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># sys.exit(-1)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">input_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             

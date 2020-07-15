@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../setup_env.html">Setting up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../incidents.html">Incidents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../comm_quick_ref.html">Commands Quick Reference</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -176,6 +177,7 @@
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
@@ -199,8 +201,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;project </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is created.&quot;</span><span class="p">)</span>
-
+        
     <span class="c1"># database</span>
 <div class="viewcode-block" id="Project._connect_to_database"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._connect_to_database">[docs]</a>    <span class="k">def</span> <span class="nf">_connect_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Creates and connects to a database.&quot;&quot;&quot;</span>
@@ -410,8 +411,11 @@
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
             
             <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>       
-             
+            
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+
+                    <span class="k">continue</span>
                 <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                  <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
                 <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
@@ -429,6 +433,84 @@
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">:</span><span class="s1"> 0.2f</span><span class="si">}</span><span class="s1"> km&#39;</span>\
                 <span class="p">)</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
+            
+
+<div class="viewcode-block" id="Project.plot_velocity_records_with_fft"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_velocity_records_with_fft">[docs]</a>    <span class="k">def</span> <span class="nf">plot_velocity_records_with_fft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Plots 3 velocity timeseries one page per station and their fft values&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+         <span class="c1"># Check number of input timeseries</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ERROR]: Too many timeseries to plot!&quot;</span><span class="p">)</span>
+            <span class="c1"># sys.exit(-1)</span>
+            <span class="k">return</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            
+            <span class="c1"># fig, axs = plt.subplots(nrows=3, ncols=3, figsize=(12, 8))       </span>
+            
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># f_ax1.set_title(&#39;gs[0, :]&#39;)</span>
+            <span class="n">ax3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax4</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span>  <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># f_ax2.set_title(&#39;gs[1, :-1]&#39;)</span>
+            <span class="n">ax5</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ax6</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span>  <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># f_ax3.set_title(&#39;gs[1:, -1]&#39;)</span>
+            <span class="c1"># f_ax4 = fig.add_subplot(gs[-1, 0])</span>
+            <span class="c1"># # f_ax4.set_title(&#39;gs[-1, 0]&#39;)</span>
+            <span class="c1"># f_ax5 = fig3.add_subplot(gs[-1, -2])</span>
+            <span class="c1"># f_ax5.set_title(&#39;gs[-1, -2]&#39;)</span>
+
+
+
+
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+
+                    <span class="k">continue</span>
+                <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                 <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
+                <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">freq_vec</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">fft_value</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                 <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
+                <span class="n">ax4</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">freq_vec</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">fft_value</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                 <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">ax5</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
+                <span class="n">ax6</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">freq_vec</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">fft_value</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                 <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="n">ylabels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;vel h1&#39;</span><span class="p">,</span> <span class="s1">&#39;vel h2&#39;</span><span class="p">,</span> <span class="s1">&#39;vel ver&#39;</span><span class="p">]</span>
+            <span class="c1"># for ii in range(3):</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;vel h1&#39;</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;vel h2&#39;</span><span class="p">)</span>
+            <span class="n">ax5</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;vel ver&#39;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ax5</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Station at incident </span><span class="si">{</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">:&#39;</span>\
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="si">}</span><span class="s1"> - epicenteral dist:&#39;</span>\
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">:</span><span class="s1"> 0.2f</span><span class="si">}</span><span class="s1"> km&#39;</span>\
+                <span class="p">)</span></div>
+            <span class="c1"># fig.tight_layout()</span>
+            
+            
 
 
 <div class="viewcode-block" id="Project.which_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.which_records">[docs]</a>    <span class="k">def</span> <span class="nf">which_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">):</span>

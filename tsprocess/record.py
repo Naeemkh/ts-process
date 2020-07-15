@@ -28,6 +28,7 @@ class Record:
                 station, source_params):
         self.station = station
         self.time_vec = time_vec
+        self.freq_vec = None
         self.disp_h1 = disp_h1
         self.disp_h2 = disp_h2
         self.disp_ver = disp_ver
@@ -48,6 +49,7 @@ class Record:
         self.back_azimuth = None
         self._compute_source_dependent_params()
         self._compute_record_unique_ids()
+        self._compute_freq_vector()
         self.processed = []
 
     def __str__(self):
@@ -80,6 +82,14 @@ class Record:
     def _compute_time_vec(self):
         # all records should have the most common length and dt
         pass
+
+    def _compute_freq_vector(self):
+        # all records should have same length, and df
+        # choosing value from one of signals
+        # however, make sure that all are the same. 
+        df = self.acc_h1.delta_f
+        s_size = len(self.acc_h1.fft_value)
+        self.freq_vec = np.array(range(s_size))*df + self.acc_h1.f_init_point
 
     def export_to_hercules(self, filename):
         pass

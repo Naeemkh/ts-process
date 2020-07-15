@@ -8,6 +8,7 @@ from scipy.signal import (sosfiltfilt, filtfilt, ellip, butter, zpk2sos,
                           decimate, kaiser)
 
 from .database import DataBase as db
+from .ts_library  import FAS
 
 class TimeSeries:
     """ TimeSeries Abstract Class """
@@ -21,20 +22,23 @@ class TimeSeries:
         'shift':'',
         'taper':'flag: front, end, all; m: number of samples for tapering',
         'cut':'',
+        'zoom_in_freq':'f_min, f_max',
         'zero_pad':''
     }
 
     def __init__(self):
         self.value = None
         self.delta_t = None
-        self.init_point = None
+        self.t_init_point = None
         self.type = None
         self.unit = None
         self.fft_value = None
         self.delta_f = None
+        self.f_init_point = 0
         self.notes = None
         self.peak_vv = None
         self.peak_vt = None
+        
         
 
     def add_note(self):
@@ -125,6 +129,21 @@ class TimeSeries:
     
         return window
 
+    def _zoom_in_freq(self, f_min, f_max):
+        """
+        Picks the part of fft that is between f_min and f_max; and updates the 
+        initial point.
+        """
+        new_init_point = f_min
+        
+        index_1 = int(np.floor((f_min - self.f_init_point)/self.delta_f))
+        index_2 = int(np.floor((f_max - self.f_init_point)/self.delta_f))
+
+        new_f_value = self.fft_value[index_1:index_2]
+        
+        return new_init_point, new_f_value
+
+
 
     def _apply(self, label_name):
         """ Applies the requested label_name on the timeseries """
@@ -162,34 +181,51 @@ class TimeSeries:
             taper_window = self._taper(**label_kwargs)
             proc_data = self.value * taper_window            
 
-        if label_type == 'cut':
+        if label_type == 'cut_in_time':
             print(f"{label_type} is not implemented.")
+        
+        if label_type == 'zoom_in_freq':
+            new_init_point, new_f_value = self._zoom_in_freq(**label_kwargs)
+            tmp_record = self
+            tmp_record.f_init_point = new_init_point
+            tmp_record.fft_value = new_f_value
+            return tmp_record
 
         if label_type == 'zero_pad':
             print(f"{label_type} is not implemented.")
         
           
         if ts_type == "Disp":
-            return Disp(proc_data, self.delta_t, self.init_point)
+            return Disp(proc_data, self.delta_t, self.t_init_point)
 
         if ts_type == "Vel":
-            return Vel(proc_data, self.delta_t, self.init_point)
+            return Vel(proc_data, self.delta_t, self.t_init_point)
 
         if ts_type == "Acc":
-            return Acc(proc_data, self.delta_t, self.init_point)
+            return Acc(proc_data, self.delta_t, self.t_init_point)
 
         if ts_type == "Raw":
             print("Not implemented.")
             return 
 
     
-    def _add_values(self,value,dt,init_point):
+    def _add_values(self,value,dt,t_init_point):
         # double check to see if it is a numbpy array.
         # if not convert it into numpy array.
         # ########## <<<<<<<<<<<<<<<<<<<
         self.value = value
         self.delta_t = dt
-        self.init_point = init_point
+        self.t_init_point = t_init_point
+
+    def _compute_fft_value(self):
+
+        fmin = 0.1
+        fmax = 1/self.delta_t
+        s_factor = 3
+        freq, afs = FAS(self.value, self.delta_t, len(self.value), fmin, fmax, s_factor)
+        self.delta_f = freq[1] - freq[0]
+        self.fft_value = afs
+        
 
 
 
@@ -197,10 +233,11 @@ class TimeSeries:
 
 class Disp(TimeSeries):
     """ Disp Class """
-    def __init__(self, value, dt, init_point):
+    def __init__(self, value, dt, t_init_point):
         super().__init__()
         self.type = "Disp"
-        self._add_values(value, dt, init_point)
+        self._add_values(value, dt, t_init_point)
+        self._compute_fft_value()
         
     def compute_diff(self):
         """ Returns Vel instance """
@@ -209,10 +246,11 @@ class Disp(TimeSeries):
 
 class Vel(TimeSeries):
     """ Vel Class """
-    def __init__(self, value, dt, init_point):
+    def __init__(self, value, dt, t_init_point):
         super().__init__()
         self.type = "Vel"
-        self._add_values(value, dt, init_point)
+        self._add_values(value, dt, t_init_point)
+        self._compute_fft_value()
 
     def compute_diff(self):
         """ Returns ACC instance """
@@ -225,12 +263,13 @@ class Vel(TimeSeries):
 
 class Acc(TimeSeries):
     """ Acc Class """
-    def __init__(self, value, dt, init_point):
+    def __init__(self, value, dt, t_init_point):
         super().__init__()
         self.type = "Acc"
-        self._add_values(value, dt, init_point)
+        self._add_values(value, dt, t_init_point)
         self.response_spectra = None
         self._compute_response_spectra()
+        self._compute_fft_value()
 
     def compute_integral(self):
         """ Returns Vel instance """
@@ -243,7 +282,7 @@ class Acc(TimeSeries):
 
 class Raw(TimeSeries):
     """ Raw Class """
-    def __init__(self, raw_value, dt, init_point, poles, zeros, constant):
+    def __init__(self, raw_value, dt, t_init_point, poles, zeros, constant):
         super().__init__()
         self.raw_value = raw_value
         self.type = "Raw"

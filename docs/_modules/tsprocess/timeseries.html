@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../setup_env.html">Setting up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../incidents.html">Incidents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../comm_quick_ref.html">Commands Quick Reference</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -176,6 +177,7 @@
                           <span class="n">decimate</span><span class="p">,</span> <span class="n">kaiser</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">.ts_library</span>  <span class="kn">import</span> <span class="n">FAS</span>
 
 <div class="viewcode-block" id="TimeSeries"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries">[docs]</a><span class="k">class</span> <span class="nc">TimeSeries</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; TimeSeries Abstract Class &quot;&quot;&quot;</span>
@@ -189,20 +191,23 @@
         <span class="s1">&#39;shift&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="s1">&#39;taper&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end, all; m: number of samples for tapering&#39;</span><span class="p">,</span>
         <span class="s1">&#39;cut&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;zoom_in_freq&#39;</span><span class="p">:</span><span class="s1">&#39;f_min, f_max&#39;</span><span class="p">,</span>
         <span class="s1">&#39;zero_pad&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fft_value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delta_f</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_init_point</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_vv</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_vt</span> <span class="o">=</span> <span class="kc">None</span>
+        
         
 
     <span class="k">def</span> <span class="nf">add_note</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -293,6 +298,21 @@
     
         <span class="k">return</span> <span class="n">window</span></div>
 
+<div class="viewcode-block" id="TimeSeries._zoom_in_freq"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._zoom_in_freq">[docs]</a>    <span class="k">def</span> <span class="nf">_zoom_in_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_min</span><span class="p">,</span> <span class="n">f_max</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Picks the part of fft that is between f_min and f_max; and updates the </span>
+<span class="sd">        initial point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_init_point</span> <span class="o">=</span> <span class="n">f_min</span>
+        
+        <span class="n">index_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">f_min</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_init_point</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_f</span><span class="p">))</span>
+        <span class="n">index_2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">f_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_init_point</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_f</span><span class="p">))</span>
+
+        <span class="n">new_f_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fft_value</span><span class="p">[</span><span class="n">index_1</span><span class="p">:</span><span class="n">index_2</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">new_init_point</span><span class="p">,</span> <span class="n">new_f_value</span></div>
+
+
 
 <div class="viewcode-block" id="TimeSeries._apply"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._apply">[docs]</a>    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Applies the requested label_name on the timeseries &quot;&quot;&quot;</span>
@@ -330,34 +350,51 @@
             <span class="n">taper_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taper</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
             <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">taper_window</span>            
 
-        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;cut&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;cut_in_time&#39;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;zoom_in_freq&#39;</span><span class="p">:</span>
+            <span class="n">new_init_point</span><span class="p">,</span> <span class="n">new_f_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zoom_in_freq</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
+            <span class="n">tmp_record</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="n">tmp_record</span><span class="o">.</span><span class="n">f_init_point</span> <span class="o">=</span> <span class="n">new_init_point</span>
+            <span class="n">tmp_record</span><span class="o">.</span><span class="n">fft_value</span> <span class="o">=</span> <span class="n">new_f_value</span>
+            <span class="k">return</span> <span class="n">tmp_record</span>
 
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;zero_pad&#39;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
         
           
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Disp&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Vel&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Vel</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Vel</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Acc&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Acc</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Acc</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Raw&quot;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span>
             <span class="k">return</span> </div>
 
     
-    <span class="k">def</span> <span class="nf">_add_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">init_point</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_add_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">t_init_point</span><span class="p">):</span>
         <span class="c1"># double check to see if it is a numbpy array.</span>
         <span class="c1"># if not convert it into numpy array.</span>
         <span class="c1"># ########## &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="n">dt</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">init_point</span> <span class="o">=</span> <span class="n">init_point</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span> <span class="o">=</span> <span class="n">t_init_point</span>
+
+    <span class="k">def</span> <span class="nf">_compute_fft_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">fmin</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">fmax</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
+        <span class="n">s_factor</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">freq</span><span class="p">,</span> <span class="n">afs</span> <span class="o">=</span> <span class="n">FAS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">,</span> <span class="n">s_factor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_f</span> <span class="o">=</span> <span class="n">freq</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">freq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fft_value</span> <span class="o">=</span> <span class="n">afs</span></div>
+        
 
 
 
@@ -365,10 +402,11 @@
 
 <div class="viewcode-block" id="Disp"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp">[docs]</a><span class="k">class</span> <span class="nc">Disp</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Disp Class &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Disp&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_fft_value</span><span class="p">()</span>
         
 <div class="viewcode-block" id="Disp.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
@@ -377,10 +415,11 @@
 
 <div class="viewcode-block" id="Vel"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel">[docs]</a><span class="k">class</span> <span class="nc">Vel</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Vel Class &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Vel&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_fft_value</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Vel.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns ACC instance &quot;&quot;&quot;</span>
@@ -393,12 +432,13 @@
 
 <div class="viewcode-block" id="Acc"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc">[docs]</a><span class="k">class</span> <span class="nc">Acc</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Acc Class &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Acc&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response_spectra</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_response_spectra</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_fft_value</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Acc.compute_integral"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc.compute_integral">[docs]</a>    <span class="k">def</span> <span class="nf">compute_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
@@ -411,7 +451,7 @@
 
 <div class="viewcode-block" id="Raw"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Raw">[docs]</a><span class="k">class</span> <span class="nc">Raw</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Raw Class &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">init_point</span><span class="p">,</span> <span class="n">poles</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">,</span> <span class="n">poles</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raw_value</span> <span class="o">=</span> <span class="n">raw_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Raw&quot;</span>

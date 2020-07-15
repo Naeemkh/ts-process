@@ -93,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidents.html">Incidents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comm_quick_ref.html">Commands Quick Reference</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul class="current">
@@ -368,6 +369,12 @@ None.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.project.Project.plot_velocity_records_with_fft">
+<code class="sig-name descname">plot_velocity_records_with_fft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_velocity_records_with_fft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_velocity_records_with_fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots 3 velocity timeseries one page per station and their fft values</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.project.Project.remove_incident">
 <code class="sig-name descname">remove_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.remove_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.remove_incident" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes incident from the project.</p>
@@ -428,7 +435,7 @@ results in the metadata attribute.</p>
 <p>The core module for the TimeSeries class.</p>
 <dl class="py class">
 <dt id="tsprocess.timeseries.Acc">
-<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Acc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Acc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Acc" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Acc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">t_init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Acc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Acc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acc Class</p>
 <dl class="py method">
 <dt id="tsprocess.timeseries.Acc._compute_response_spectra">
@@ -446,7 +453,7 @@ results in the metadata attribute.</p>
 
 <dl class="py class">
 <dt id="tsprocess.timeseries.Disp">
-<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Disp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Disp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Disp" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Disp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">t_init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Disp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Disp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disp Class</p>
 <dl class="py method">
 <dt id="tsprocess.timeseries.Disp.compute_diff">
@@ -458,7 +465,7 @@ results in the metadata attribute.</p>
 
 <dl class="py class">
 <dt id="tsprocess.timeseries.Raw">
-<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em>, <em class="sig-param"><span class="n">poles</span></em>, <em class="sig-param"><span class="n">zeros</span></em>, <em class="sig-param"><span class="n">constant</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Raw" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">t_init_point</span></em>, <em class="sig-param"><span class="n">poles</span></em>, <em class="sig-param"><span class="n">zeros</span></em>, <em class="sig-param"><span class="n">constant</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw Class</p>
 <dl class="py method">
 <dt id="tsprocess.timeseries.Raw.to_velocity">
@@ -505,6 +512,13 @@ results in the metadata attribute.</p>
 </div></blockquote>
 </dd></dl>
 
+<dl class="py method">
+<dt id="tsprocess.timeseries.TimeSeries._zoom_in_freq">
+<code class="sig-name descname">_zoom_in_freq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f_min</span></em>, <em class="sig-param"><span class="n">f_max</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._zoom_in_freq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._zoom_in_freq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Picks the part of fft that is between f_min and f_max; and updates the
+initial point.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -515,7 +529,7 @@ results in the metadata attribute.</p>
 
 <dl class="py class">
 <dt id="tsprocess.timeseries.Vel">
-<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Vel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Vel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Vel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">Vel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">t_init_point</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#Vel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.Vel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vel Class</p>
 <dl class="py method">
 <dt id="tsprocess.timeseries.Vel.compute_diff">
