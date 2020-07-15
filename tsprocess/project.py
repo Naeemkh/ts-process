@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Any, List, Set, Dict, Tuple, Optional
 
+from .log import LOGGER
 from .record import Record
 from .station import Station
 from .incident import Incident
@@ -30,6 +31,7 @@ class Project:
         self.incidents = {}
         self._connect_to_database()
         self.metadata = {}
+        
 
     # database
     def _connect_to_database(self):
@@ -240,8 +242,11 @@ class Project:
         for record in records:
             
             fig, axs = plt.subplots(nrows=3, ncols=1, figsize=(12, 8))       
-             
+            
             for i,item in enumerate(record):
+                if not item:
+
+                    continue
                 axs[0].plot(item.time_vec,item.vel_h1.value,self.color_code[i],
                  label=list_inc[i]) 
                 axs[1].plot(item.time_vec,item.vel_h2.value,self.color_code[i]) 

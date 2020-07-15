@@ -16,6 +16,7 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - seismicsource.py file
 - station.py file
 - hercules incident folder arrangment
+- logging
 
 ### Changed
 - package name (ts-process -> tsprocess)

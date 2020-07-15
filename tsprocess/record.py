@@ -11,6 +11,7 @@ from math import radians, cos, sin, asin, sqrt
 
 import numpy as np
 
+from .log import LOGGER
 from .station import Station
 from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
@@ -124,12 +125,18 @@ class Record:
                 station_folder = incident_metadata["output_stations_directory"]
                 station_file = os.path.join(incident_metadata["incident_folder"]\
                     ,station_folder,st_name)
-                record_org = Record._from_hercules(station_file,station_obj,\
-                    Station.pr_source_loc)
-                record_org.this_record_hash = hash_val
-                # put the record in the database.
-                Record.pr_db.set_value(hash_val,record_org)
-
+                try:
+                    record_org = Record._from_hercules(station_file,station_obj,\
+                        Station.pr_source_loc)
+                    record_org.this_record_hash = hash_val
+    
+                    # put the record in the database.
+                    Record.pr_db.set_value(hash_val,record_org)
+                
+                except Exception as e:
+                    LOGGER.debug(e)
+                    record_org = None
+               
             if incident_type == "awp":
                 print("AWP method is not implemented.")
 
@@ -142,6 +149,7 @@ class Record:
             # wrong with the record. 
             # TODO handle corrupt record.
             print('something is wrong with the record.')
+            LOGGER.debug(f"{st_name} from {incident_name} could not load")
             return
             
         if not list_process:
@@ -296,7 +304,7 @@ class Record:
 
         except IOError as e:
             print(e)
-            sys.exit(-1)
+            # sys.exit(-1)
         finally:
             input_fp.close()
             
