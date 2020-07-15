@@ -221,7 +221,8 @@ class Project:
 
     # Analysis interface
     def plot_velocity_records(self, list_inc,list_process,list_filters):
-        """ Plots 3 velocity timeseries one page per station."""
+        """ Plots 3 velocity timeseries one page per station and their
+         fft values"""
         
         if not self._is_incident_valid(list_inc):
             return
@@ -241,107 +242,43 @@ class Project:
         
         for record in records:
             
-            fig, axs = plt.subplots(nrows=3, ncols=1, figsize=(12, 8))       
+                 
+            fig, axarr = plt.subplots(nrows=3, ncols=3, figsize=(14, 9))
             
+            # h1, h2, UD
+            for i in range(3):
+                axarr[i][0] = plt.subplot2grid((3,3),(i,0),rowspan=1, colspan=2)
+                axarr[i][1] = plt.subplot2grid((3,3),(i,2),rowspan=1, colspan=1)
+                axarr[i][0].grid(True)
+                
+
             for i,item in enumerate(record):
                 if not item:
-
                     continue
-                axs[0].plot(item.time_vec,item.vel_h1.value,self.color_code[i],
-                 label=list_inc[i]) 
-                axs[1].plot(item.time_vec,item.vel_h2.value,self.color_code[i]) 
-                axs[2].plot(item.time_vec,item.vel_ver.value,self.color_code[i]) 
-
-            ylabels = ['vel h1', 'vel h2', 'vel ver']
-            for ii in range(3):
-                axs[ii].set_ylabel(ylabels[ii])
-                axs[ii].grid(True)
+                axarr[0][0].plot(item.time_vec,item.vel_h1.value,
+                 self.color_code[i], label=list_inc[i])
+                axarr[0][1].plot(item.freq_vec,abs(item.vel_h1.fft_value),
+                 self.color_code[i], label=list_inc[i])   
+                axarr[1][0].plot(item.time_vec,item.vel_h2.value,
+                 self.color_code[i], label=list_inc[i])
+                axarr[1][1].plot(item.freq_vec,abs(item.vel_h2.fft_value),
+                 self.color_code[i], label=list_inc[i])   
+                axarr[2][0].plot(item.time_vec,item.vel_ver.value,
+                 self.color_code[i], label=list_inc[i])
+                axarr[2][1].plot(item.freq_vec,abs(item.vel_ver.fft_value),
+                 self.color_code[i], label=list_inc[i])   
             
-            axs[0].legend()
-            axs[0].set_title(
+            axarr[0][0].legend()
+            axarr[0][0].set_title(
                 f'Station at incident {list_inc[0]}:'\
                 f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'\
                 f'{record[0].epicentral_distance: 0.2f} km'\
-                )
-            fig.tight_layout()
-            
-
-    # def plot_velocity_records_with_fft(self, list_inc,list_process,list_filters):
-    #     """ Plots 3 velocity timeseries one page per station and their fft values"""
-        
-    #     if not self._is_incident_valid(list_inc):
-    #         return
-
-    #     if not self._is_processing_label_valid(list_process):
-    #         return
-
-    #     records = self._extract_records(list_inc, list_process, list_filters)
-        
-    #      # Check number of input timeseries
-    #     if len(records[0]) > len(self.color_code):
-    #         print("[ERROR]: Too many timeseries to plot!")
-    #         # sys.exit(-1)
-    #         return
-
-    #     plt.figure()
-        
-    #     for record in records:
-            
-    #         # fig, axs = plt.subplots(nrows=3, ncols=3, figsize=(12, 8))       
-            
-    #         fig = plt.figure(constrained_layout=True, figsize=(12,8))
-    #         gs = fig.add_gridspec(3, 3)
-    #         ax1 = fig.add_subplot(gs[0, :-1])
-    #         ax2 = fig.add_subplot(gs[0,  -1])
-    #         # f_ax1.set_title('gs[0, :]')
-    #         ax3 = fig.add_subplot(gs[1, :-1])
-    #         ax4 = fig.add_subplot(gs[1,  -1])
-    #         # f_ax2.set_title('gs[1, :-1]')
-    #         ax5 = fig.add_subplot(gs[2, :-1])
-    #         ax6 = fig.add_subplot(gs[2,  -1])
-    #         # f_ax3.set_title('gs[1:, -1]')
-    #         # f_ax4 = fig.add_subplot(gs[-1, 0])
-    #         # # f_ax4.set_title('gs[-1, 0]')
-    #         # f_ax5 = fig3.add_subplot(gs[-1, -2])
-    #         # f_ax5.set_title('gs[-1, -2]')
-
-
-
-
-
-    #         for i,item in enumerate(record):
-    #             if not item:
-
-    #                 continue
-    #             ax1.plot(item.time_vec,item.vel_h1.value,self.color_code[i],
-    #              label=list_inc[i]) 
-    #             ax2.plot(item.freq_vec,abs(item.vel_h1.fft_value),self.color_code[i],
-    #              label=list_inc[i])
-    #             ax3.plot(item.time_vec,item.vel_h2.value,self.color_code[i]) 
-    #             ax4.plot(item.freq_vec,abs(item.vel_h2.fft_value),self.color_code[i],
-    #              label=list_inc[i])
-    #             ax5.plot(item.time_vec,item.vel_ver.value,self.color_code[i]) 
-    #             ax6.plot(item.freq_vec,abs(item.vel_ver.fft_value),self.color_code[i],
-    #              label=list_inc[i])
-
-    #         ylabels = ['vel h1', 'vel h2', 'vel ver']
-    #         # for ii in range(3):
-    #         ax1.set_ylabel('vel h1')
-    #         ax3.set_ylabel('vel h2')
-    #         ax5.set_ylabel('vel ver')
-    #         ax1.grid(True)
-    #         ax3.grid(True)
-    #         ax5.grid(True)
-            
-    #         ax1.legend()
-    #         ax1.set_title(
-    #             f'Station at incident {list_inc[0]}:'\
-    #             f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'\
-    #             f'{record[0].epicentral_distance: 0.2f} km'\
-    #             )
-    #         # fig.tight_layout()
-            
-            
+                )    
+            fig.tight_layout()     
+           
+            # plt.savefig("output_plot.pdf", format='pdf',
+            # transparent=False, dpi=300)  
+            # TODO: add another dictionary as metadata to the timeseries, a
 
 
     def which_records(self, list_inc,list_process,list_filters):
