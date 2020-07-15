@@ -9,6 +9,7 @@ from scipy.signal import (sosfiltfilt, filtfilt, ellip, butter, zpk2sos,
 
 from .database import DataBase as db
 from .ts_library  import FAS
+from .ts_utils import cal_acc_response, get_period, get_points
 
 class TimeSeries:
     """ TimeSeries Abstract Class """
@@ -268,8 +269,9 @@ class Acc(TimeSeries):
         self.type = "Acc"
         self._add_values(value, dt, t_init_point)
         self.response_spectra = None
-        self._compute_response_spectra()
         self._compute_fft_value()
+        self._compute_response_spectra()
+        
 
     def compute_integral(self):
         """ Returns Vel instance """
@@ -277,7 +279,17 @@ class Acc(TimeSeries):
 
     def _compute_response_spectra(self):
         """ Computes response spectra """
-        pass
+        tmin = 0.1
+        tmax = 10
+        
+        period = get_period(tmin, tmax)
+        rsp = cal_acc_response(period, self.value, self.delta_t)
+        self.response_spectra = [period, rsp]
+
+
+
+
+        
 
 
 class Raw(TimeSeries):
