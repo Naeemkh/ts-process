@@ -65,9 +65,48 @@ Processing records
 ------------------
 There are numerous packages for processing seismic timeseries. *tsprocess* is a platform to manage large number of stations and incidents. Therefore, one can plot a timeseries, however, with the processing labels and stations filters she can define which incidents, which stations, and what processing should be done on them before plotting the timeseries. Users never manually store any processed data. The function prototype is according to the following:
 
-*command(list of incidents, nested list of processing labels for each incident, list of station filters)*
+.. code-block:: console
 
-- This section is not completed.
+     command(list of incidents,
+              nested list of processing labels for each incident,
+              list of station filters,
+              dictionary of optional parameters)
+
+Depending on the command and optional parameters, The output will be in a different format; however, in almost all commands in this format, a list of records will be extracted from the database or will be generated. 
+
+- We track incidents with their *incident_name* attribute, which is defined by the author of the incident folder inside the *description.txt* file. 
+- Each incident goes through different processing steps. For each incident, we have a list of processing labels. If it passed as an empty list, it would return the original data. Processing steps will be applied by their order in the list. The first label will be applied first.
+- The intersection of different station filters will determine which station should be included in the final results. 
+- Optional parameters are a dictionary container that provides control over the final results.
+
+Optional parameters
+*******************
+
+Fine tuning the final results and storing the final results in the disk can be controlled by optional parameters. In the following a list of optional parameters and their functionality are presented. Optional parameters that are not suppported with the commands will be ignored. 
+
+    - **zoom_in_freq**
+
+        + parameter: a list of min and max frequency (Hz) [float, float]
+        + In plots: it will apply limit on frequency axis representation. 
+        + Data is not modified.
+
+    - **zoom_in_time** 
+
+        + parameter: a list of min and max time (s) [float, float]
+        + In plots: it will apply limit on time axis representation. 
+        + Data is not modified.
+
+    - **zoom_in_rsp** 
+
+        + parameter: a list of min and max period (s) [float, float]
+        + In plots: it will apply limit on period axis representation. 
+        + Data is not modified.
+        
+
+
+
+
+
 
 
 Show stations on the map

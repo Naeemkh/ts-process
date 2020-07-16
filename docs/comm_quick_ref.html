@@ -98,7 +98,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#list-of-available-incidents">List of available incidents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-filter-for-selecting-stations">Adding filter for selecting stations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-processing-label">Adding processing label</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#processing-records">Processing records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#processing-records">Processing records</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optional-parameters">Optional parameters</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#show-stations-on-the-map">Show stations on the map</a></li>
 </ul>
 </li>
@@ -289,10 +292,54 @@
 <div class="section" id="processing-records">
 <h2>Processing records<a class="headerlink" href="#processing-records" title="Permalink to this headline">¶</a></h2>
 <p>There are numerous packages for processing seismic timeseries. <em>tsprocess</em> is a platform to manage large number of stations and incidents. Therefore, one can plot a timeseries, however, with the processing labels and stations filters she can define which incidents, which stations, and what processing should be done on them before plotting the timeseries. Users never manually store any processed data. The function prototype is according to the following:</p>
-<p><em>command(list of incidents, nested list of processing labels for each incident, list of station filters)</em></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">command(list of incidents,</span>
+<span class="go">         nested list of processing labels for each incident,</span>
+<span class="go">         list of station filters,</span>
+<span class="go">         dictionary of optional parameters)</span>
+</pre></div>
+</div>
+<p>Depending on the command and optional parameters, The output will be in a different format; however, in almost all commands in this format, a list of records will be extracted from the database or will be generated.</p>
 <ul class="simple">
-<li><p>This section is not completed.</p></li>
+<li><p>We track incidents with their <em>incident_name</em> attribute, which is defined by the author of the incident folder inside the <em>description.txt</em> file.</p></li>
+<li><p>Each incident goes through different processing steps. For each incident, we have a list of processing labels. If it passed as an empty list, it would return the original data. Processing steps will be applied by their order in the list. The first label will be applied first.</p></li>
+<li><p>The intersection of different station filters will determine which station should be included in the final results.</p></li>
+<li><p>Optional parameters are a dictionary container that provides control over the final results.</p></li>
 </ul>
+<div class="section" id="optional-parameters">
+<h3>Optional parameters<a class="headerlink" href="#optional-parameters" title="Permalink to this headline">¶</a></h3>
+<p>Fine tuning the final results and storing the final results in the disk can be controlled by optional parameters. In the following a list of optional parameters and their functionality are presented. Optional parameters that are not suppported with the commands will be ignored.</p>
+<blockquote>
+<div><ul>
+<li><p><strong>zoom_in_freq</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>parameter: a list of min and max frequency (Hz) [float, float]</p></li>
+<li><p>In plots: it will apply limit on frequency axis representation.</p></li>
+<li><p>Data is not modified.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>zoom_in_time</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>parameter: a list of min and max time (s) [float, float]</p></li>
+<li><p>In plots: it will apply limit on time axis representation.</p></li>
+<li><p>Data is not modified.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>zoom_in_rsp</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>parameter: a list of min and max period (s) [float, float]</p></li>
+<li><p>In plots: it will apply limit on period axis representation.</p></li>
+<li><p>Data is not modified.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</div>
 </div>
 <div class="section" id="show-stations-on-the-map">
 <h2>Show stations on the map<a class="headerlink" href="#show-stations-on-the-map" title="Permalink to this headline">¶</a></h2>

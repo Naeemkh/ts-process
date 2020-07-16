@@ -1,6 +1,8 @@
 import math
+import inspect
 
 import numpy as np
+from .log import LOGGER
 
 def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
     """
@@ -100,3 +102,20 @@ def get_points(samples):
     # points is the least base-2 number that is greater than max samples
     power = int(math.log(max(samples), 2)) + 1
     return 2**power
+
+
+def check_opt_param_minmax(opt_params, key):
+
+    if opt_params.get(key, None):
+        try:
+            x_min, x_max = (opt_params.get(key, None))
+            x_lim = [x_min, x_max]
+            if x_min > x_max:
+                raise ValueError
+        except ValueError:
+            LOGGER.error(key + " limit min should be less than max")
+            x_lim = None
+        except Exception as e:
+            LOGGER.error(e)
+            x_lim = None
+    return x_lim

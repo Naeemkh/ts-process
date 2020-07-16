@@ -23,7 +23,6 @@ class TimeSeries:
         'shift':'',
         'taper':'flag: front, end, all; m: number of samples for tapering',
         'cut':'',
-        'zoom_in_freq':'f_min, f_max',
         'zero_pad':''
     }
 
@@ -131,22 +130,6 @@ class TimeSeries:
     
         return window
 
-    def _zoom_in_freq(self, f_min, f_max):
-        """
-        Picks the part of fft that is between f_min and f_max; and updates the 
-        initial point.
-        """
-        new_init_point = f_min
-        
-        index_1 = int(np.floor((f_min - self.f_init_point)/self.delta_f))
-        index_2 = int(np.floor((f_max - self.f_init_point)/self.delta_f))
-
-        new_f_value = self.fft_value[index_1:index_2]
-        
-        return new_init_point, new_f_value
-
-
-
     def _apply(self, label_name):
         """ Applies the requested label_name on the timeseries """
         
@@ -186,13 +169,6 @@ class TimeSeries:
         if label_type == 'cut_in_time':
             print(f"{label_type} is not implemented.")
         
-        if label_type == 'zoom_in_freq':
-            new_init_point, new_f_value = self._zoom_in_freq(**label_kwargs)
-            tmp_record = self
-            tmp_record.f_init_point = new_init_point
-            tmp_record.fft_value = new_f_value
-            return tmp_record
-
         if label_type == 'zero_pad':
             print(f"{label_type} is not implemented.")
         

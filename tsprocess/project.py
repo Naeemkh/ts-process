@@ -21,6 +21,7 @@ from .station import Station
 from .incident import Incident
 from .database import DataBase
 from .timeseries import TimeSeries
+from .ts_utils import check_opt_param_minmax
 
 
 class Project:
@@ -224,7 +225,7 @@ class Project:
             print(item, '-->', Station.station_filters[item])
 
     # Analysis interface
-    def plot_velocity_records(self, list_inc,list_process,list_filters):
+    def plot_velocity_records(self, list_inc,list_process,list_filters,opt_params):
         """ Plots 3 velocity timeseries one page per station and their
          fft values"""
         
@@ -254,7 +255,10 @@ class Project:
                 axarr[i][0] = plt.subplot2grid((3,3),(i,0),rowspan=1, colspan=2)
                 axarr[i][1] = plt.subplot2grid((3,3),(i,2),rowspan=1, colspan=1)
                 axarr[i][0].grid(True)
-                
+
+            x_lim_f = check_opt_param_minmax(opt_params, 'zoom_in_freq')
+            x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
+                           
 
             for i,item in enumerate(record):
                 if not item:
@@ -263,14 +267,18 @@ class Project:
                  self.color_code[i], label=list_inc[i])
                 axarr[0][1].plot(item.freq_vec,abs(item.vel_h1.fft_value),
                  self.color_code[i], label=list_inc[i])   
+                axarr[1][1].plot(item.freq_vec,abs(item.vel_h2.fft_value),
+                 self.color_code[i], label=list_inc[i])  
                 axarr[1][0].plot(item.time_vec,item.vel_h2.value,
                  self.color_code[i], label=list_inc[i])
-                axarr[1][1].plot(item.freq_vec,abs(item.vel_h2.fft_value),
-                 self.color_code[i], label=list_inc[i])   
                 axarr[2][0].plot(item.time_vec,item.vel_ver.value,
                  self.color_code[i], label=list_inc[i])
                 axarr[2][1].plot(item.freq_vec,abs(item.vel_ver.fft_value),
                  self.color_code[i], label=list_inc[i])   
+
+            for i in range(3):
+                axarr[i][0].set_xlim(x_lim_t)
+                axarr[i][1].set_xlim(x_lim_f)
             
             axarr[0][0].legend()
             axarr[0][0].set_title(
@@ -284,7 +292,7 @@ class Project:
             # transparent=False, dpi=300)  
             # TODO: add another dictionary as metadata to the timeseries, a
 
-    def plot_acceleration_records(self, list_inc,list_process,list_filters):
+    def plot_acceleration_records(self, list_inc,list_process,list_filters, opt_params):
         """ Plots 3 velocity timeseries one page per station and their
          fft values"""
         
@@ -313,6 +321,9 @@ class Project:
                 axarr[i][0] = plt.subplot2grid((3,3),(i,0),rowspan=1, colspan=2)
                 axarr[i][1] = plt.subplot2grid((3,3),(i,2),rowspan=1, colspan=1)
                 axarr[i][0].grid(True)
+
+            x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
+            x_lim_rsp = check_opt_param_minmax(opt_params, 'zoom_in_rsp')
                
             for i,item in enumerate(record):
                 if not item:
@@ -335,7 +346,10 @@ class Project:
                  item.acc_ver.response_spectra[1], self.color_code[i],
                  label=list_inc[i])   
 
-            
+            for i in range(3):
+                axarr[i][0].set_xlim(x_lim_t)
+                axarr[i][1].set_xlim(x_lim_rsp)
+
             axarr[0][0].legend()
             axarr[0][0].set_title(
                 f'Station at incident {list_inc[0]}:'\
