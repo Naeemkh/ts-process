@@ -6,10 +6,14 @@ The core module for the project class.
 
 import os
 import hashlib
+from typing import Any, List, Set, Dict, Tuple, Optional
+
+
 import pandas as pd
+from ipywidgets import HTML
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from typing import Any, List, Set, Dict, Tuple, Optional
+from ipyleaflet import Map, Marker, basemaps, basemap_to_tiles, AwesomeIcon, Popup
 
 from .log import LOGGER
 from .record import Record
@@ -279,6 +283,100 @@ class Project:
             # plt.savefig("output_plot.pdf", format='pdf',
             # transparent=False, dpi=300)  
             # TODO: add another dictionary as metadata to the timeseries, a
+
+    def plot_acceleration_records(self, list_inc,list_process,list_filters):
+        """ Plots 3 velocity timeseries one page per station and their
+         fft values"""
+        
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+         # Check number of input timeseries
+        if len(records[0]) > len(self.color_code):
+            print("[ERROR]: Too many timeseries to plot!")
+            # sys.exit(-1)
+            return
+
+        plt.figure()
+        
+        for record in records:
+                             
+            fig, axarr = plt.subplots(nrows=3, ncols=3, figsize=(14, 9))
+            
+            # h1, h2, ver
+            for i in range(3):
+                axarr[i][0] = plt.subplot2grid((3,3),(i,0),rowspan=1, colspan=2)
+                axarr[i][1] = plt.subplot2grid((3,3),(i,2),rowspan=1, colspan=1)
+                axarr[i][0].grid(True)
+               
+            for i,item in enumerate(record):
+                if not item:
+                    continue
+                axarr[0][0].plot(item.time_vec,item.acc_h1.value,
+                 self.color_code[i], label=list_inc[i])
+                axarr[0][1].plot(item.acc_h1.response_spectra[0],
+                 item.acc_h1.response_spectra[1], self.color_code[i],
+                 label=list_inc[i])   
+
+                axarr[1][0].plot(item.time_vec,item.acc_h2.value,
+                 self.color_code[i], label=list_inc[i])
+                axarr[1][1].plot(item.acc_h2.response_spectra[0],
+                 item.acc_h2.response_spectra[1], self.color_code[i],
+                 label=list_inc[i])   
+
+                axarr[2][0].plot(item.time_vec,item.acc_ver.value,
+                 self.color_code[i], label=list_inc[i])
+                axarr[2][1].plot(item.acc_ver.response_spectra[0],
+                 item.acc_ver.response_spectra[1], self.color_code[i],
+                 label=list_inc[i])   
+
+            
+            axarr[0][0].legend()
+            axarr[0][0].set_title(
+                f'Station at incident {list_inc[0]}:'\
+                f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'\
+                f'{record[0].epicentral_distance: 0.2f} km'\
+                )    
+            fig.tight_layout()     
+           
+            # plt.savefig("output_plot.pdf", format='pdf',
+            # transparent=False, dpi=300)  
+            # TODO: add another dictionary as metadata to the timeseries, a
+
+
+    def show_stations_on_map(self,list_inc,list_process,list_filters):
+        
+        
+        records = self._extract_records(list_inc, list_process, list_filters)
+
+        m = Map(
+            basemap=basemap_to_tiles(basemaps.Esri.WorldImagery, "2020-04-08"),
+            center = (Station.pr_source_loc[0],Station.pr_source_loc[1]),
+            zoom = 8,
+            close_popup_on_click=True
+        )
+        for i in records:
+            lat = i[0].station.lat
+            lon = i[0].station.lon
+            marker = Marker(location=(lat, lon), draggable=False,
+             icon=AwesomeIcon(name="map-pin", marker_color='green',
+             icon_color='darkgreen'), opacity=0.8)
+            m.add_layer(marker)
+            message = HTML()
+            message.value = i[0].station.inc_st_name[list_inc[0]]
+            marker.popup = message
+
+        m.add_layer(Marker(icon=AwesomeIcon(name="star",
+         marker_color='red', icon_color='darkred'),
+         location=(Station.pr_source_loc[0],Station.pr_source_loc[1]),
+         draggable=False))
+        
+        return m
 
 
     def which_records(self, list_inc,list_process,list_filters):

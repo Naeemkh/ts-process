@@ -178,6 +178,7 @@
 
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
 <span class="kn">from</span> <span class="nn">.ts_library</span>  <span class="kn">import</span> <span class="n">FAS</span>
+<span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="n">cal_acc_response</span><span class="p">,</span> <span class="n">get_period</span><span class="p">,</span> <span class="n">get_points</span>
 
 <div class="viewcode-block" id="TimeSeries"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries">[docs]</a><span class="k">class</span> <span class="nc">TimeSeries</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; TimeSeries Abstract Class &quot;&quot;&quot;</span>
@@ -249,7 +250,8 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">sosfiltfilt</span><span class="p">(</span><span class="n">butter_sos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>    </div>
 
-    
+    <span class="k">def</span> <span class="nf">_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">factor</span>    
 
 <div class="viewcode-block" id="TimeSeries._taper"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._taper">[docs]</a>    <span class="k">def</span> <span class="nf">_taper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -341,7 +343,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
  
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
+            <span class="n">proc_data</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;shift&#39;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
@@ -437,8 +439,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Acc&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response_spectra</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_response_spectra</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_fft_value</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_response_spectra</span><span class="p">()</span>
+        
 
 <div class="viewcode-block" id="Acc.compute_integral"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc.compute_integral">[docs]</a>    <span class="k">def</span> <span class="nf">compute_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
@@ -446,7 +449,17 @@
 
 <div class="viewcode-block" id="Acc._compute_response_spectra"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc._compute_response_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">_compute_response_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Computes response spectra &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div></div>
+        <span class="n">tmin</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">tmax</span> <span class="o">=</span> <span class="mi">10</span>
+        
+        <span class="n">period</span> <span class="o">=</span> <span class="n">get_period</span><span class="p">(</span><span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="p">)</span>
+        <span class="n">rsp</span> <span class="o">=</span> <span class="n">cal_acc_response</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response_spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">period</span><span class="p">,</span> <span class="n">rsp</span><span class="p">]</span></div></div>
+
+
+
+
+        
 
 
 <div class="viewcode-block" id="Raw"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Raw">[docs]</a><span class="k">class</span> <span class="nc">Raw</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>

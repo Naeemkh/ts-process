@@ -81,7 +81,8 @@ class TimeSeries:
         data = sosfiltfilt(butter_sos, self.value)
         return data    
 
-    
+    def _scale(self, factor):
+        return self.value * factor    
 
     def _taper(self, flag, m):
         """
@@ -173,7 +174,7 @@ class TimeSeries:
             print(f"{label_type} is not implemented.")
  
         if label_type == 'scale':
-            print(f"{label_type} is not implemented.")
+            proc_data =  self._scale(**label_kwargs)
 
         if label_type == 'shift':
             print(f"{label_type} is not implemented.")

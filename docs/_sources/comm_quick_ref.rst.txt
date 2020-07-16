@@ -61,9 +61,26 @@ The following table shows different label types and their required arguments.
 - details about each label ....
 
 
-Processing Records
+Processing records
 ------------------
 There are numerous packages for processing seismic timeseries. *tsprocess* is a platform to manage large number of stations and incidents. Therefore, one can plot a timeseries, however, with the processing labels and stations filters she can define which incidents, which stations, and what processing should be done on them before plotting the timeseries. Users never manually store any processed data. The function prototype is according to the following:
 
 *command(list of incidents, nested list of processing labels for each incident, list of station filters)*
+
+- This section is not completed.
+
+
+Show stations on the map
+------------------------
+Using leaflet API, users can take a look at stations on the map. It follows the same function signature. The following command shows the stations in distance between 25 and 30 Km from 2014 5.1 La Habra, CA, earthquake. Stations' popups shows station names.   
+
+.. code-block:: console
+
+    $ p1.show_stations_on_map(['hercules101'],[[]],['lesst30','moret25'])
+
+
+.. image:: images/png/quick_ref_leaflet.png
+   :alt: leaflet image of stations
+   :width: 600px
+   :align: center 
 

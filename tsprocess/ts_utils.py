@@ -16,7 +16,7 @@ def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
     ini_vel: initial velocity\n
 
     Originial version is writting by: Leonardo Ramirez-Guzman
-
+    TODO: this function is very slow requires some attention. 
     """
     signal_size = acc.size
 

@@ -98,7 +98,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#list-of-available-incidents">List of available incidents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-filter-for-selecting-stations">Adding filter for selecting stations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-processing-label">Adding processing label</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#processing-records">Processing Records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#processing-records">Processing records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#show-stations-on-the-map">Show stations on the map</a></li>
 </ul>
 </li>
 </ul>
@@ -286,9 +287,20 @@
 </ul>
 </div>
 <div class="section" id="processing-records">
-<h2>Processing Records<a class="headerlink" href="#processing-records" title="Permalink to this headline">¶</a></h2>
+<h2>Processing records<a class="headerlink" href="#processing-records" title="Permalink to this headline">¶</a></h2>
 <p>There are numerous packages for processing seismic timeseries. <em>tsprocess</em> is a platform to manage large number of stations and incidents. Therefore, one can plot a timeseries, however, with the processing labels and stations filters she can define which incidents, which stations, and what processing should be done on them before plotting the timeseries. Users never manually store any processed data. The function prototype is according to the following:</p>
 <p><em>command(list of incidents, nested list of processing labels for each incident, list of station filters)</em></p>
+<ul class="simple">
+<li><p>This section is not completed.</p></li>
+</ul>
+</div>
+<div class="section" id="show-stations-on-the-map">
+<h2>Show stations on the map<a class="headerlink" href="#show-stations-on-the-map" title="Permalink to this headline">¶</a></h2>
+<p>Using leaflet API, users can take a look at stations on the map. It follows the same function signature. The following command shows the stations in distance between 25 and 30 Km from 2014 5.1 La Habra, CA, earthquake. Stations’ popups shows station names.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p1.show_stations_on_map<span class="o">([</span><span class="s1">&#39;hercules101&#39;</span><span class="o">]</span>,<span class="o">[[]]</span>,<span class="o">[</span><span class="s1">&#39;lesst30&#39;</span>,<span class="s1">&#39;moret25&#39;</span><span class="o">])</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/quick_ref_leaflet.png"><img alt="leaflet image of stations" class="align-center" src="_images/quick_ref_leaflet.png" style="width: 600px;" /></a>
 </div>
 </div>
 
