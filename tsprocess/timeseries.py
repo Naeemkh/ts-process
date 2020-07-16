@@ -227,11 +227,6 @@ class TimeSeries:
         freq, afs = FAS(self.value, self.delta_t, len(self.value), fmin, fmax, s_factor)
         self.delta_f = freq[1] - freq[0]
         self.fft_value = afs
-        
-
-
-
-
 
 class Disp(TimeSeries):
     """ Disp Class """
@@ -244,7 +239,6 @@ class Disp(TimeSeries):
     def compute_diff(self):
         """ Returns Vel instance """
         pass
-
 
 class Vel(TimeSeries):
     """ Vel Class """
@@ -261,7 +255,6 @@ class Vel(TimeSeries):
     def compute_integral(self):
         """ Returns Disp instance """
         pass
-
 
 class Acc(TimeSeries):
     """ Acc Class """
@@ -287,12 +280,6 @@ class Acc(TimeSeries):
         rsp = cal_acc_response(period, self.value, self.delta_t)
         self.response_spectra = [period, rsp]
 
-
-
-
-        
-
-
 class Raw(TimeSeries):
     """ Raw Class """
     def __init__(self, raw_value, dt, t_init_point, poles, zeros, constant):
@@ -303,7 +290,6 @@ class Raw(TimeSeries):
     def to_velocity(self):
         """ Returns Vel instance """
         pass
-
 
 class Unitless(TimeSeries):
     """ Unitless Class """
