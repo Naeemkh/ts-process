@@ -52,7 +52,7 @@ The following table shows different label types and their required arguments.
  scale              "factor": scaling factor
  shift              "amount": shifting amount in seconds
  taper              "m": number of points, "flag": "front","end","all" 
- cut            
+ cut                "m": number of points, "flag": "front","end", "t_diff":cut time (s)
  zero_pad           "m": number of points, "flag": "front","end", "t_diff":added time (s)  
 =================  ======================================================================
 

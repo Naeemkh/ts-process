@@ -660,6 +660,26 @@ before adding zeros.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="tsprocess.ts_utils.seism_cutting">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">seism_cutting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flag</span></em>, <em class="sig-param"><span class="n">t_diff</span></em>, <em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">timeseries</span></em>, <em class="sig-param"><span class="n">delta_t</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#seism_cutting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.seism_cutting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cuts data in the front or at the end of an numpy array
+apply taper after cutting</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">flag - ‘front’ or ‘end’ - flag to indicate from where to cut samples</div>
+<div class="line">t_diff - how much time to cut (in seconds)</div>
+<div class="line">m - number of samples for tapering</div>
+<div class="line">timeseries - Input timeseries</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">timeseries - Output timeseries after cutting</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="tsprocess.ts_utils.smooth">
 <code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">smooth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">factor</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#smooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the data in the input array</p>

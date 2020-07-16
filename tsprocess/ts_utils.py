@@ -249,3 +249,45 @@ def seism_appendzeros(flag, t_diff, m, timeseries, delta_t):
         ts_vec = np.append(ts_vec, zeros)
 
     return ts_vec
+
+
+def seism_cutting(flag, t_diff, m, timeseries, delta_t):
+    """
+    Cuts data in the front or at the end of an numpy array
+    apply taper after cutting
+
+    Inputs:
+        | flag - 'front' or 'end' - flag to indicate from where to cut samples
+        | t_diff - how much time to cut (in seconds)
+        | m - number of samples for tapering
+        | timeseries - Input timeseries
+
+    Outputs:
+        | timeseries - Output timeseries after cutting
+        
+    """
+    ts_vec = timeseries.copy()
+    num = int(t_diff / delta_t)
+
+    if num >= len(ts_vec):
+        print("[ERROR]: fail to cut timeseries.")
+        return timeseries
+
+    if flag == 'front' and num != 0:
+        # cutting timeseries
+        ts_vec = ts_vec[num:]
+
+        # applying taper at the front
+        window = taper('front', m, ts_vec)
+        ts_vec = ts_vec * window
+
+    elif flag == 'end' and num != 0:
+        num *= -1
+        # cutting timeseries
+        ts_vec = ts_vec[:num]
+
+        # applying taper at the end
+        window = taper('front', m, ts_vec)
+        ts_vec = ts_vec * window
+
+    return ts_vec
