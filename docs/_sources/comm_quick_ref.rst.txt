@@ -42,9 +42,9 @@ In *tsprocess* we assign a unique Id for each seismic record. Any processing act
   
 The following table shows different label types and their required arguments. 
 
-=================  =======================================================  
+=================  ======================================================================  
    Label Type      Required Arguments                   
-=================  =======================================================  
+=================  ======================================================================  
  lowpass_filter     "N":order, "fc": corner frequency    
  highpass_filter    "N":order, "fc": corner frequency    
  bandpass_filter
@@ -53,8 +53,8 @@ The following table shows different label types and their required arguments.
  shift              "amount": shifting amount in seconds
  taper              "m": number of points, "flag": "front","end","all" 
  cut            
- zero_pad              
-=================  =======================================================
+ zero_pad           "m": number of points, "flag": "front","end", "t_diff":added time (s)  
+=================  ======================================================================
 
 - details about each label ....
 

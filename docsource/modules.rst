@@ -23,3 +23,6 @@ This section includes modules that are used in this project.
 
 .. automodule:: tsprocess.station
     :members: 
+
+.. automodule:: tsprocess.ts_utils
+    :members: 

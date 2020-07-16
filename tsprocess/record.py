@@ -78,7 +78,8 @@ class Record:
         self.unique_id_1 = self.generate_uid()
         self.unique_id_2 = self.generate_uid()
         return
-
+ 
+    
     def _compute_time_vec(self):
         # all records should have the most common length and dt
         pass
@@ -104,9 +105,6 @@ class Record:
         pass
 
     def export_to_edge(self, filename):
-        pass
-
-    def _apply(self):
         pass
 
     @staticmethod
@@ -234,7 +232,13 @@ class Record:
         tmp_acc_h2 = record.acc_h2._apply(processing_label)
         tmp_acc_ver = record.acc_ver._apply(processing_label)
 
-        return Record(record.time_vec, tmp_disp_h1, tmp_disp_h2, tmp_disp_ver,
+        
+        # TODO: check time vector
+        tmp_time_vector = range(len(tmp_disp_h1.value))*\
+                record.acc_h1.delta_t + record.acc_h1.t_init_point
+
+
+        return Record(tmp_time_vector, tmp_disp_h1, tmp_disp_h2, tmp_disp_ver,
                                        tmp_vel_h1, tmp_vel_h2, tmp_vel_ver,
                                        tmp_acc_h1, tmp_acc_h2, tmp_acc_ver,
                                        record.station, record.source_params)

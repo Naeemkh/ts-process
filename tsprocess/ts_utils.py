@@ -2,6 +2,8 @@ import math
 import inspect
 
 import numpy as np
+from scipy.signal import kaiser
+
 from .log import LOGGER
 
 def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
@@ -9,16 +11,16 @@ def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
     Returns maximum values of displacement, velocity, and acceleration.
     
     Inputs:
-    
-    acc: accleration input signal\n
-    dt:  time step\n
-    csi: damping ratio\n
-    period: oscilator's period\n
-    ini_disp: initial displacement\n
-    ini_vel: initial velocity\n
+        | acc: accleration input signal
+        | dt:  time step
+        | csi: damping ratio
+        | period: oscilator's period
+        | ini_disp: initial displacement
+        | ini_vel: initial velocity
 
-    Originial version is writting by: Leonardo Ramirez-Guzman
-    TODO: this function is very slow requires some attention. 
+        | Originial version is writting by: Leonardo Ramirez-Guzman
+        | TODO: this function is very slow requires some attention. 
+
     """
     signal_size = acc.size
 
@@ -66,18 +68,14 @@ def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
 
     return maxdisp, maxvel, maxacc
 
-
-
-
 def cal_acc_response(period, data, delta_t):
     """
     Returns the response for acceleration only
 
     Inputs:
-
-    period: osilator's period\n
-    data: acceleration input signal\n
-    delta_ts: time step\n
+        | period: osilator's period
+        | data: acceleration input signal
+        | delta_ts: time step
 
     """
     rsp = np.zeros(len(period))
@@ -88,6 +86,7 @@ def cal_acc_response(period, data, delta_t):
 
 def get_period(tmin, tmax):
     """ Return an array of period T """
+    
     # tmin = 1/fmax
     # tmax = 1/fmin
     a = np.log10(tmin)
@@ -105,7 +104,7 @@ def get_points(samples):
 
 
 def check_opt_param_minmax(opt_params, key):
-
+    x_lim = None
     if opt_params.get(key, None):
         try:
             x_min, x_max = (opt_params.get(key, None))
@@ -119,3 +118,134 @@ def check_opt_param_minmax(opt_params, key):
             LOGGER.error(e)
             x_lim = None
     return x_lim
+
+def smooth(data, factor):
+    """
+    Smooth the data in the input array
+
+    Inputs:
+        | data - input array
+        | factor - used to calculate the smooth factor
+
+    Outputs:
+        | data - smoothed array
+
+    """
+    # factor = 3; c = 0.5, 0.25, 0.25
+    # TODO: fix coefficients for factors other than 3
+    c = 0.5 / (factor - 1)
+    for i in range(1, data.size - 1):
+        data[i] = 0.5 * data[i] + c * data[i - 1] + c * data[i + 1]
+    return data
+
+
+def FAS(data, dt, points, fmin, fmax, s_factor):
+    """
+    Calculates the FAS of the input array using NumPy's fft Library
+
+    Inputs:
+        | data - input array
+        | dt - delta t for the input array
+        | points - length of the transformed axis in the fft output
+        | fmin - min frequency for results
+        | fmax - max frequency for results
+        | s_factor - smooth factor to be used for the smooth function
+        
+    Outputs:
+        | freq - frequency array
+        | afs - fas
+    """
+
+    afs = abs(np.fft.fft(data, points)) * dt
+    freq = (1 / dt) * np.array(range(points)) / points
+
+    deltaf = (1 / dt) / points
+
+    inif = int(fmin / deltaf)
+    endf = int(fmax / deltaf) + 1
+
+    afs = afs[inif:endf]
+    afs = smooth(afs, s_factor)
+    freq = freq[inif:endf]
+    return freq, afs
+
+
+def taper(flag, m, ts_vec):
+        """
+        Returns a Kaiser window created by a Besel function
+    
+        Inputs:
+            | flag - set to 'front', 'end', or 'all' to taper at the beginning,
+                   at the end, or at both ends of the timeseries
+            | m - number of samples for tapering
+            | window - Taper window
+        """
+        samples = len(ts_vec)
+    
+        window = kaiser(2*m+1, beta=14)
+    
+        if flag == 'front':
+            # cut and replace the second half of window with 1s
+            ones = np.ones(samples-m-1)
+            window = window[0:(m+1)]
+            window = np.concatenate([window, ones])
+    
+        elif flag == 'end':
+            # cut and replace the first half of window with 1s
+            ones = np.ones(samples-m-1)
+            window = window[(m+1):]
+            window = np.concatenate([ones, window])
+    
+        elif flag == 'all':
+            ones = np.ones(samples-2*m-1)
+            window = np.concatenate([window[0:(m+1)], ones, window[(m+1):]])
+    
+        # avoid concatenate error
+        if window.size < samples:
+            window = np.append(window, 1)
+    
+        if window.size != samples:
+            # print(window.size)
+            # print(samples)
+            print("[ERROR]: taper and data do not have the same number of\
+                 samples.")
+            window = np.ones(samples)
+    
+        return window
+
+def seism_appendzeros(flag, t_diff, m, timeseries, delta_t):
+    """
+    Adds zeros in the front or at the end of an numpy array, applies taper 
+    before adding zeros.
+
+    Inputs:
+        | flag - 'front' or 'end' - tapering flag passed to the taper function
+        | t_diff - how much time to add (in seconds)
+        | m - number of samples for tapering
+        | ts_vec - Input timeseries
+    
+    Outputs:
+        | timeseries - zero-padded timeseries.    
+    """
+    ts_vec = timeseries.copy()
+    num = int(t_diff / delta_t)
+    zeros = np.zeros(num)
+
+    if flag == 'front':
+        # applying taper in the front
+        if m != 0:
+            window = taper('front', m, ts_vec)
+            ts_vec = ts_vec * window
+
+        # adding zeros in front of data
+        ts_vec = np.append(zeros, ts_vec)
+
+    elif flag == 'end':
+        if m != 0:
+            # applying taper in the front
+            window = taper('end', m, ts_vec)
+            ts_vec = ts_vec * window
+
+        ts_vec = np.append(ts_vec, zeros)
+
+    return ts_vec

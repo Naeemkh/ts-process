@@ -19,9 +19,13 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - logging
 - response spectra
 - ipyleafleat stations location 
+- optional parameters for commands
+- Readme: New collaborator added.
+- Readme: Documentation page added.
 
 ### Changed
 - package name (ts-process -> tsprocess)
+
 
 ### Fixed
 

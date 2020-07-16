@@ -8,8 +8,9 @@ from scipy.signal import (sosfiltfilt, filtfilt, ellip, butter, zpk2sos,
                           decimate, kaiser)
 
 from .database import DataBase as db
-from .ts_library  import FAS
-from .ts_utils import cal_acc_response, get_period, get_points
+# from .ts_library  import FAS
+from .ts_utils import (cal_acc_response, get_period, get_points, FAS, taper,
+                       seism_appendzeros)
 
 class TimeSeries:
     """ TimeSeries Abstract Class """
@@ -23,7 +24,8 @@ class TimeSeries:
         'shift':'',
         'taper':'flag: front, end, all; m: number of samples for tapering',
         'cut':'',
-        'zero_pad':''
+        'zero_pad':'flag: fron, end; m: number of samples for tapering,\
+        t_diff: time to add'
     }
 
     def __init__(self):
@@ -83,52 +85,52 @@ class TimeSeries:
     def _scale(self, factor):
         return self.value * factor    
 
-    def _taper(self, flag, m):
-        """
-        Returns a Kaiser window created by a Besel function
+    # def _taper(self, flag, m):
+    #     """
+    #     Returns a Kaiser window created by a Besel function
     
-        Inputs:
+    #     Inputs:
 
-            flag - set to 'front', 'end', or 'all' to taper at the beginning,
-                   at the end, or at both ends of the timeseries
+    #         flag - set to 'front', 'end', or 'all' to taper at the beginning,
+    #                at the end, or at both ends of the timeseries
 
-            m - number of samples for tapering
+    #         m - number of samples for tapering
 
-            window - Taper window
+    #         window - Taper window
 
-        """
-        samples = len(self.value)
+    #     """
+    #     samples = len(self.value)
     
-        window = kaiser(2*m+1, beta=14)
+    #     window = kaiser(2*m+1, beta=14)
     
-        if flag == 'front':
-            # cut and replace the second half of window with 1s
-            ones = np.ones(samples-m-1)
-            window = window[0:(m+1)]
-            window = np.concatenate([window, ones])
+    #     if flag == 'front':
+    #         # cut and replace the second half of window with 1s
+    #         ones = np.ones(samples-m-1)
+    #         window = window[0:(m+1)]
+    #         window = np.concatenate([window, ones])
     
-        elif flag == 'end':
-            # cut and replace the first half of window with 1s
-            ones = np.ones(samples-m-1)
-            window = window[(m+1):]
-            window = np.concatenate([ones, window])
+    #     elif flag == 'end':
+    #         # cut and replace the first half of window with 1s
+    #         ones = np.ones(samples-m-1)
+    #         window = window[(m+1):]
+    #         window = np.concatenate([ones, window])
     
-        elif flag == 'all':
-            ones = np.ones(samples-2*m-1)
-            window = np.concatenate([window[0:(m+1)], ones, window[(m+1):]])
+    #     elif flag == 'all':
+    #         ones = np.ones(samples-2*m-1)
+    #         window = np.concatenate([window[0:(m+1)], ones, window[(m+1):]])
     
-        # avoid concatenate error
-        if window.size < samples:
-            window = np.append(window, 1)
+    #     # avoid concatenate error
+    #     if window.size < samples:
+    #         window = np.append(window, 1)
     
-        if window.size != samples:
-            print(window.size)
-            print(samples)
-            print("[ERROR]: taper and data do not have the same number of\
-                 samples.")
-            window = np.ones(samples)
+    #     if window.size != samples:
+    #         print(window.size)
+    #         print(samples)
+    #         print("[ERROR]: taper and data do not have the same number of\
+    #              samples.")
+    #         window = np.ones(samples)
     
-        return window
+    #     return window
 
     def _apply(self, label_name):
         """ Applies the requested label_name on the timeseries """
@@ -163,15 +165,22 @@ class TimeSeries:
             print(f"{label_type} is not implemented.")
 
         if label_type == 'taper':
-            taper_window = self._taper(**label_kwargs)
+            def extract_params(flag, m):
+                return flag, m
+            p = extract_params(**label_kwargs)
+            taper_window = taper(p[0], p[1], self.value)
             proc_data = self.value * taper_window            
 
         if label_type == 'cut_in_time':
             print(f"{label_type} is not implemented.")
         
         if label_type == 'zero_pad':
-            print(f"{label_type} is not implemented.")
-        
+            def extract_params(flag, t_diff, m):
+                return flag, t_diff, m
+            p = extract_params(**label_kwargs)
+            proc_data = seism_appendzeros(p[0], p[1], p[2],self.value,
+             self.delta_t)
+               
           
         if ts_type == "Disp":
             return Disp(proc_data, self.delta_t, self.t_init_point)
@@ -238,7 +247,6 @@ class Acc(TimeSeries):
         super().__init__()
         self.type = "Acc"
         self._add_values(value, dt, t_init_point)
-        self.response_spectra = None
         self._compute_fft_value()
         self._compute_response_spectra()
         

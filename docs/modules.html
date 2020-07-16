@@ -499,21 +499,6 @@ results in the metadata attribute.</p>
 <dd><p>Returns a lowpass filtered (the Butterworth filter) signal value.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="tsprocess.timeseries.TimeSeries._taper">
-<code class="sig-name descname">_taper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flag</span></em>, <em class="sig-param"><span class="n">m</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._taper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._taper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a Kaiser window created by a Besel function</p>
-<p>Inputs:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>flag - set to ‘front’, ‘end’, or ‘all’ to taper at the beginning,</dt><dd><p>at the end, or at both ends of the timeseries</p>
-</dd>
-</dl>
-<p>m - number of samples for tapering</p>
-<p>window - Taper window</p>
-</div></blockquote>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -591,6 +576,121 @@ function only by original record.</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-tsprocess.ts_utils"></span><dl class="py function">
+<dt id="tsprocess.ts_utils.FAS">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">FAS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">points</span></em>, <em class="sig-param"><span class="n">fmin</span></em>, <em class="sig-param"><span class="n">fmax</span></em>, <em class="sig-param"><span class="n">s_factor</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#FAS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.FAS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the FAS of the input array using NumPy’s fft Library</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">data - input array</div>
+<div class="line">dt - delta t for the input array</div>
+<div class="line">points - length of the transformed axis in the fft output</div>
+<div class="line">fmin - min frequency for results</div>
+<div class="line">fmax - max frequency for results</div>
+<div class="line">s_factor - smooth factor to be used for the smooth function</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">freq - frequency array</div>
+<div class="line">afs - fas</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.cal_acc_response">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">cal_acc_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">period</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">delta_t</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#cal_acc_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.cal_acc_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the response for acceleration only</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">period: osilator’s period</div>
+<div class="line">data: acceleration input signal</div>
+<div class="line">delta_ts: time step</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.get_period">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">get_period</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tmin</span></em>, <em class="sig-param"><span class="n">tmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#get_period"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.get_period" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array of period T</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.max_osc_response">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">max_osc_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">acc</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">csi</span></em>, <em class="sig-param"><span class="n">period</span></em>, <em class="sig-param"><span class="n">ini_disp</span></em>, <em class="sig-param"><span class="n">ini_vel</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#max_osc_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.max_osc_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns maximum values of displacement, velocity, and acceleration.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">acc: accleration input signal</div>
+<div class="line">dt:  time step</div>
+<div class="line">csi: damping ratio</div>
+<div class="line">period: oscilator’s period</div>
+<div class="line">ini_disp: initial displacement</div>
+<div class="line">ini_vel: initial velocity</div>
+</div>
+<div class="line-block">
+<div class="line">Originial version is writting by: Leonardo Ramirez-Guzman</div>
+<div class="line">TODO: this function is very slow requires some attention.</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.seism_appendzeros">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">seism_appendzeros</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flag</span></em>, <em class="sig-param"><span class="n">t_diff</span></em>, <em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">timeseries</span></em>, <em class="sig-param"><span class="n">delta_t</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#seism_appendzeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.seism_appendzeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds zeros in the front or at the end of an numpy array, applies taper
+before adding zeros.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">flag - ‘front’ or ‘end’ - tapering flag passed to the taper function</div>
+<div class="line">t_diff - how much time to add (in seconds)</div>
+<div class="line">m - number of samples for tapering</div>
+<div class="line">ts_vec - Input timeseries</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">timeseries - zero-padded timeseries.</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.smooth">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">smooth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">factor</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#smooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the data in the input array</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">data - input array</div>
+<div class="line">factor - used to calculate the smooth factor</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">data - smoothed array</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.taper">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">taper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flag</span></em>, <em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">ts_vec</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#taper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.taper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Kaiser window created by a Besel function</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">flag - set to ‘front’, ‘end’, or ‘all’ to taper at the beginning,
+at the end, or at both ends of the timeseries</div>
+<div class="line">m - number of samples for tapering</div>
+<div class="line">window - Taper window</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
