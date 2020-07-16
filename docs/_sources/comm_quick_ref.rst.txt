@@ -53,8 +53,6 @@ The following table shows different label types and their required arguments.
  shift              "amount": shifting amount in seconds
  taper              "m": number of points, "flag": "front","end","all" 
  cut            
- zoom_in_freq       "f_min": minimum frequency, f_max: maximum frequency
- zoom_in_rsp   
  zero_pad              
 =================  =======================================================
 
