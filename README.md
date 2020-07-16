@@ -6,6 +6,10 @@ This is a collection of Python3-based software programs that are ground motions 
 
 These codes have been developed as part of earthquake ground motion research performed by the Southern California Earthquake Center (SCEC) www.scec.org.
 
+## Documentation
+
+Documentation is hosted at https://naeemkh.github.io/tsprocess/
+
 ## Primary Developers of ts-process library:
 
 * Ricardo Taborda - Universidad EAFIT Medellín Colombia
