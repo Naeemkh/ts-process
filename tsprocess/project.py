@@ -30,19 +30,32 @@ class Project:
     color_code  = ['k', 'r', 'b', 'm', 'g', 'c', 'y', 'brown',
                    'gold', 'blueviolet', 'grey', 'pink']
 
-    def __init__(self,name):
-        """ initiating a project"""
-        self.name = name
-        self.pr_db = None
-        self.incidents = {}
-        self._connect_to_database()
-        self.metadata = {}
+    _instance = None
+
+    def __new__(cls,name):
+        if cls._instance is None:
+            cls._instance = super(Project,cls).__new__(cls)
+            # print("new in work")
+            cls._instance.name = name
+            cls._instance.pr_db = None
+            cls._instance.incidents = {}
+            cls._instance._connect_to_database()
+            cls._instance.metadata = {}
+            return cls._instance
+        else:
+            LOGGER.warning(f"Project named {cls._instance.name} "
+             "is already generated. Each session can support one project."
+             "This command will be ignored.")
+            print("One project per session. Command is ignored,"
+             "see the log file.")
+            return None 
         
     # database
-    def _connect_to_database(self):
+    @classmethod
+    def _connect_to_database(cls):
         """ Creates and connects to a database."""
-        self.pr_db = DataBase(self.name+"_db", cache_size=2000)
-        Record.pr_db = self.pr_db
+        cls.pr_db = DataBase(cls._instance.name+"_db", cache_size=2000)
+        Record.pr_db = cls.pr_db
 
     def close_database(self):
         """ Terminating the connection to the database."""
