@@ -361,6 +361,11 @@ class Project:
             # plt.savefig("output_plot.pdf", format='pdf',
             # transparent=False, dpi=300)  
             # TODO: add another dictionary as metadata to the timeseries, a
+    
+    
+    def plot_record_section(self, list_inc,list_process,list_filters,opt_params):
+        pass
+
 
 
     def show_stations_on_map(self,list_inc,list_process,list_filters):
