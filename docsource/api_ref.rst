@@ -1,5 +1,6 @@
-Commands Quick Reference
-========================
+API Reference
+=============
+
 In this section, a list of commands for common tasks is presented. In tsprocess, all commands are based on a project. One needs to add a project at the beggining of each processing session. 
 
 .. code-block:: console
@@ -47,7 +48,7 @@ The following table shows different label types and their required arguments.
 =================  ======================================================================  
  lowpass_filter     "N":order, "fc": corner frequency    
  highpass_filter    "N":order, "fc": corner frequency    
- bandpass_filter
+ bandpass_filter    "N":order, "fcs": [fc1, fc2] corner frequencies.
  rotate             "angle": rotation angle in degrees
  scale              "factor": scaling factor
  shift              "amount": shifting amount in seconds
