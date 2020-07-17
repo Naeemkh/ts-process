@@ -250,7 +250,6 @@ def seism_appendzeros(flag, t_diff, m, timeseries, delta_t):
 
     return ts_vec
 
-
 def seism_cutting(flag, t_diff, m, timeseries, delta_t):
     """
     Cuts data in the front or at the end of an numpy array
@@ -264,7 +263,7 @@ def seism_cutting(flag, t_diff, m, timeseries, delta_t):
 
     Outputs:
         | timeseries - Output timeseries after cutting
-        
+
     """
     ts_vec = timeseries.copy()
     num = int(t_diff / delta_t)

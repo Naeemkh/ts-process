@@ -16,7 +16,7 @@ Welcome to tsprocess!
    quickstart
    setup_env
    incidents
-   comm_quick_ref
+   api_ref
 
 .. toctree::
    :glob:
