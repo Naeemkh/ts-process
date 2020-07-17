@@ -24,6 +24,9 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - Readme: Documentation page added.
 - Seismic zeropad
 - Seismic cutting
+- seismic record section 
+- Response spectra
+
 
 
 ### Changed
