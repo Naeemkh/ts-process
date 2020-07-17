@@ -418,8 +418,8 @@ class Project:
         axarr.set_xlim(x_lim_t)
         axarr.legend()
         axarr.set_title(
-             f"Normalized Seismic Record Section -"+
-             f"Number of stations/incident: {k+1}"+
+             f"Normalized Seismic Record Section -"
+             f"Number of stations/incident: {k+1}"
              f"- Component: {comp}"
         )    
         fig.tight_layout()    
