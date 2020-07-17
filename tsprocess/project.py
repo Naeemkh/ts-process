@@ -204,9 +204,6 @@ class Project:
         for i,item in enumerate(TimeSeries.label_types):
             print(f"{i}: {item} - args: {TimeSeries.label_types[item]}")
 
-
-
-
     # station filtering
     def add_station_filter(self, station_filter_name, station_filter_type, hyper_parameters):
         """ Adds a new filter for selecting stations """
@@ -364,7 +361,68 @@ class Project:
     
     
     def plot_record_section(self, list_inc,list_process,list_filters,opt_params):
-        pass
+        """ Plots seismic record section """
+        
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+
+        # Check number of input timeseries
+        if len(records[0]) > len(self.color_code):
+            print("[ERROR]: Too many timeseries to plot!")
+            # sys.exit(-1)
+            return
+      
+        x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
+        comp = opt_params.get('comp',None)
+
+        if not comp or (comp not in ["h1","h2","ver"]):
+            if comp:
+                LOGGER.warning(f"The component: {comp} is not supported. "+
+                     "h1 is used.")
+            comp = "h1"
+        
+        fig, axarr = plt.subplots(nrows=1, ncols=1, figsize=(14, 9))
+
+        for k,record in enumerate(records):
+            for i,item in enumerate(record):
+                if not item:
+                    continue
+                                               
+                if comp=="h1":
+                    tmp_data = (0.8*item.vel_h1.value/item.vel_h1.peak_vv)+\
+                        item.epicentral_distance
+                elif comp == "h2":
+                    tmp_data = (0.8*item.vel_h2.value/item.vel_h2.peak_vv)+\
+                        item.epicentral_distance
+                elif comp == "ver":
+                    tmp_data = (0.8*item.vel_ver.value/item.vel_ver.peak_vv)+\
+                        item.epicentral_distance
+                else: 
+                    LOGGER.error("Should never get here. Double check.")
+                                    
+                if k == 0: 
+                    legend_label=list_inc[i]    
+                else:
+                    legend_label=None
+
+                axarr.plot(item.time_vec, tmp_data, self.color_code[i], 
+                label=legend_label, linewidth=0.2)
+            
+        axarr.set_xlabel('Time (s)')
+        axarr.set_ylabel('Epicentral Distance (km)')        
+        axarr.set_xlim(x_lim_t)
+        axarr.legend()
+        axarr.set_title(
+             f"Normalized Seismic Record Section -"+
+             f"Number of stations/incident: {k+1}"+
+             f"- Component: {comp}"
+        )    
+        fig.tight_layout()    
 
 
 
