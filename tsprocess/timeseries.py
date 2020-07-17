@@ -18,9 +18,9 @@ class TimeSeries:
     label_types = {
         'lowpass_filter':'fc: corner freq (Hz); N: order (default:4)',
         'highpass_filter':'fc: corner freq (Hz); N: order (default:4)',
-        'bandpass_filter':'',
+        'bandpass_filter':'fcs: corner freqs (Hz); N: order (default:4)',
         'rotate':'',
-        'scale':'',
+        'scale':'factor',
         'shift':'',
         'taper':'flag: front, end, all; m: number of samples for tapering',
         'cut':'flag: front, end; m: number of samples for tapering,\
@@ -77,11 +77,22 @@ class TimeSeries:
         """ Returns a lowpass filtered (the Butterworth filter) signal value."""
         Fs = 1/self.delta_t
         Wn = fc/(Fs/2)
-        z, p, k = butter(N=N, Wn=Wn, btype='highpath', analog=False,
+        z, p, k = butter(N=N, Wn=Wn, btype='highpass', analog=False,
          output='zpk')
         butter_sos = zpk2sos(z, p, k)
         data = sosfiltfilt(butter_sos, self.value)
         return data    
+
+    def _bandpass_filter(self, fcs, N = 4 ):
+        """ Returns a lowpass filtered (the Butterworth filter) signal value."""
+        Fs = 1/self.delta_t
+        Wn = fcs/(Fs/2)
+        z, p, k = butter(N=N, Wn=Wn, btype='bandpass', analog=False,
+         output='zpk')
+        butter_sos = zpk2sos(z, p, k)
+        data = sosfiltfilt(butter_sos, self.value)
+        return data    
+
 
     def _scale(self, factor):
         return self.value * factor    
@@ -107,7 +118,7 @@ class TimeSeries:
             proc_data = self._highpass_filter(**label_kwargs)
  
         if label_type == 'bandpass_filter':
-            print(f"{label_type} is not implemented.")
+            proc_data = self._bandpass_filter(**label_kwargs)
  
         if label_type == 'rotate':
             print(f"{label_type} is not implemented.")
