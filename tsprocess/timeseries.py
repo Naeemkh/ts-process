@@ -182,6 +182,9 @@ class TimeSeries:
         freq, afs = FAS(self.value, self.delta_t, len(self.value), fmin, fmax, s_factor)
         self.delta_f = freq[1] - freq[0]
         self.fft_value = afs
+        self.peak_vv = np.max(abs(self.value))
+        self.peak_vt = np.argmax(abs(self.value))
+
 
 class Disp(TimeSeries):
     """ Disp Class """
