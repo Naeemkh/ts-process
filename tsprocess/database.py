@@ -11,8 +11,6 @@ class DataBase:
     """ DataBase class (singleton pattern)
     >>> 5 + 6
     11
-    >>> 7 * 8
-    55
     """
 
     _instance = None

@@ -55,7 +55,7 @@ class Project:
     def _connect_to_database(cls):
         """ Creates and connects to a database.
         >>> 4 * 3
-        11
+        12
         """
         cls.pr_db = DataBase(cls._instance.name+"_db", cache_size=2000)
         Record.pr_db = cls.pr_db
