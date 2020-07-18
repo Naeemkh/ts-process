@@ -20,7 +20,8 @@ from .station import Station
 from .incident import Incident
 from .database import DataBase
 from .timeseries import TimeSeries
-from .ts_utils import check_opt_param_minmax
+from .ts_utils import (check_opt_param_minmax,
+                      is_lat_valid, is_lon_valid, is_depth_valid)
 
 class Project:
     """ Project Class """
@@ -82,28 +83,39 @@ class Project:
         
         #TODO these checks do not follow EAFP
         if "incident_name" not in inc_des.keys():
-            print("incident name is not provided in the description.txt file.")
+            LOGGER.warning("incident name is not provided in the"
+            " description.txt file.")
             return
 
         if "incident_type" not in inc_des.keys():
-            print("incident type is not provided in the description.txt file.")
+            LOGGER.warning("incident name is not provided in the"
+            " description.txt file.")
             return
 
         if inc_des["incident_type"] not in Incident.valid_incidents:
-            print(f"Incident type is not supported (valid incidents:\
-             {Incident.valid_incidents})")
+            LOGGER.warning(f"The incident type is not supported (valid "
+             f"incidents: {Incident.valid_incidents})")
             return
 
         if inc_des["incident_name"] in self.incidents.keys():
-            print([f"incident name should be a unique name. Current incidents:\
-             {self.incidents.keys} "])
+            LOGGER.warning(f"The provided incident name" 
+              f" ({inc_des['incident_name']}) has been used before.\n"
+              "The incident name should be a unique name. Current incidents: "
+             f"{list(self.incidents.keys())} ")
             return
 
         # load incident
         self._load_incident(incident_folder,inc_des)
       
     def _load_incident(self, incident_folder, incident_description):
-        """ load incidents into the project's incidents dictionary """
+        """ load incidents into the project's incidents dictionary
+        
+        Inputs:
+
+            | incident_folder: path to incident folder
+            | incident_description: dictionary of incident's description
+
+         """
 
         if incident_description["incident_type"] == "hercules":
             self.incidents[incident_description["incident_name"]] = \
@@ -120,7 +132,12 @@ class Project:
 
     @staticmethod
     def _read_incident_description(incident_folder):
-        """ Extract incident descriptions """
+        """ Extract incident descriptions
+        
+        Inputs:
+
+            incident_folder: path to incident folder.
+         """
         incident_description = {}
         incident_description["incident_folder"] = incident_folder
         with open(os.path.join(incident_folder,'description.txt'),'r') as fp:
@@ -142,26 +159,20 @@ class Project:
         """
         records = []
         for station in Station.list_of_stations:
-            # if station passes the list_filters
-            # go forward.
-            # else continue.
-
            
             ignore_this_station = False
             for st_f in list_filters:
                 if not station._check_station_filter(st_f):
-                    # station could not pass at list one of filters.
+                    # station could not pass at least one of the filters.
                     ignore_this_station = True
                     break
             
             if ignore_this_station:
                 continue
 
-
             st_records = []
             for i,incident_item in enumerate(list_inc):
                 # choose the equivalent station for that incident.
-
                 incident_metadata = self.incidents[incident_item].metadata
 
                 st_name_inc = station.inc_st_name[incident_item]
@@ -175,11 +186,11 @@ class Project:
         return records
 
     def _is_incident_valid(self,list_incidents):
-        """ Checks if the requested processing label is a valid lable """
+        """ Checks if the requested processing label is a valid label """
         for inc in list_incidents:
             if inc not in self.incidents:
-                print(\
-                    f"{inc} is not a valid incident name. Command ignored."\
+                LOGGER.warning(
+                    f"{inc} is not a valid incident name. Command ignored."
                     )
                 return False
         
@@ -191,7 +202,21 @@ class Project:
     
     # source
     def add_source_hypocenter(self,lat, lon, depth):
-        """ Adds earthquake hypocenter to the project. """
+        """ Adds earthquake hypocenter to the project.
+        
+        Inputs: 
+
+            | lat: latitude (-90,90)
+            | lon: longitude (-180, 180)
+            | depth: in meters (positive toward earth interior) 
+                
+        """
+        
+        if not(is_lat_valid(lat) and is_lon_valid(lon) and
+         is_depth_valid(depth)):
+            LOGGER.error('Source is not added.')  
+            return
+        
         self.metadata["project_source_hypocenter"] = (lat, lon, depth)
         Station.pr_source_loc = (lat, lon, depth)
 
@@ -209,13 +234,18 @@ class Project:
             print(item, '-->', TimeSeries.processing_labels[item])
 
     def _is_processing_label_valid(self,list_process):
-        """ Checks if the requested processing label is a valid lable """
+        """ Checks if the requested processing label is a valid lable
+        
+        Input:
+            list_process: List of processing labels
+        
+        """
         for group in list_process:
             for pr_l in group:
                 if pr_l not in TimeSeries.processing_labels:
-                    print(
-                        f"{pr_l} is not a valid processing label. Command\
-                            ignored."
+                    LOGGER.error(
+                        f"{pr_l} is not a valid processing label. Command"
+                            "ignored."
                         )
                     return False
         
@@ -227,9 +257,11 @@ class Project:
             print(f"{i}: {item} - args: {TimeSeries.label_types[item]}")
 
     # station filtering
-    def add_station_filter(self, station_filter_name, station_filter_type, hyper_parameters):
+    def add_station_filter(self, station_filter_name, station_filter_type,
+     hyper_parameters):
         """ Adds a new filter for selecting stations """
-        Station.add_station_filter(station_filter_name, station_filter_type, hyper_parameters)
+        Station.add_station_filter(station_filter_name, station_filter_type,
+         hyper_parameters)
     
     def valid_station_filter_type(self):
         """ Returns a list of valid filters for selecting stations. """
