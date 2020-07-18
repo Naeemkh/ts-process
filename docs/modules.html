@@ -405,8 +405,26 @@ None.</p>
 <dl class="py method">
 <dt id="tsprocess.project.Project.plot_acceleration_records">
 <code class="sig-name descname">plot_acceleration_records</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_acceleration_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_acceleration_records" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots 3 velocity timeseries one page per station and their
-fft values</p>
+<dd><p>Plots 3 acceleration timeseries one page per station and their
+response spectra plots</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+<dt>Optional parameters:</dt><dd><div class="line-block">
+<div class="line">zoom_in_time : [tmin, tmax]</div>
+<div class="line">Horizontal zoom in time axis for better presentation. Data is not
+modified.</div>
+<div class="line">zoom_in_rsp : [period_min, period_max]</div>
+<div class="line">Horizontal zoom in period axis for better presentation. Data is
+not modified.</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

@@ -438,7 +438,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Project.list_of_station_filters"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_station_filters">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_station_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Returns a list of available processing labels&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Returns a list of available processing labels &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Station</span><span class="o">.</span><span class="n">station_filters</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">Station</span><span class="o">.</span><span class="n">station_filters</span><span class="p">:</span>
@@ -459,8 +459,7 @@
         
          <span class="c1"># Check number of input timeseries</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ERROR]: Too many timeseries to plot!&quot;</span><span class="p">)</span>
-            <span class="c1"># sys.exit(-1)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than defined colors.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -513,8 +512,23 @@
             <span class="c1"># TODO: add another dictionary as metadata to the timeseries, a</span>
 
 <div class="viewcode-block" id="Project.plot_acceleration_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_acceleration_records">[docs]</a>    <span class="k">def</span> <span class="nf">plot_acceleration_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span> <span class="n">opt_params</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Plots 3 velocity timeseries one page per station and their</span>
-<span class="sd">         fft values&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Plots 3 acceleration timeseries one page per station and their </span>
+<span class="sd">        response spectra plots</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Optional parameters:</span>
+<span class="sd">            | zoom_in_time : [tmin, tmax]</span>
+<span class="sd">            | Horizontal zoom in time axis for better presentation. Data is not</span>
+<span class="sd">              modified. </span>
+<span class="sd">            | zoom_in_rsp : [period_min, period_max]</span>
+<span class="sd">            | Horizontal zoom in period axis for better presentation. Data is </span>
+<span class="sd">              not modified. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
             <span class="k">return</span>
