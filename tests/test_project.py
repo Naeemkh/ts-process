@@ -11,7 +11,7 @@ class TestProject(unittest.TestCase):
         self.assertTrue(isinstance(p_1,Project))
 
         p_2 = Project("project2")
-        self.assertFalse(isinstance(p_2,Project))
+        self.assertEqual(p_1,p_2)
 
     def tearDown(self):
         files = [glob.glob(e) for e in ['*.sqlite', '*.log']]

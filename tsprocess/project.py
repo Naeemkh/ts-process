@@ -8,7 +8,6 @@ import os
 import hashlib
 from typing import Any, List, Set, Dict, Tuple, Optional
 
-
 import pandas as pd
 from ipywidgets import HTML
 import matplotlib.pyplot as plt
@@ -22,7 +21,6 @@ from .incident import Incident
 from .database import DataBase
 from .timeseries import TimeSeries
 from .ts_utils import check_opt_param_minmax
-
 
 class Project:
     """ Project Class """
@@ -46,19 +44,14 @@ class Project:
             LOGGER.warning(f"Project named {cls._instance.name} "
              "is already generated. Each session can support one project."
              "This command will be ignored.")
-            print("One project per session. Command is ignored,"
-             "see the log file.")
-            return None 
-        
+            return cls._instance
+         
     # database
     @classmethod
     def _connect_to_database(cls):
-        """ Creates and connects to a database.
-        >>> 4 * 3
-        12
-        """
-        cls.pr_db = DataBase(cls._instance.name+"_db", cache_size=2000)
-        Record.pr_db = cls.pr_db
+        """ Creates and connects to a database."""
+        cls._instance.pr_db = DataBase(cls._instance.name+"_db", cache_size=2000)
+        Record.pr_db = cls._instance.pr_db
 
     def close_database(self):
         """ Terminating the connection to the database."""
@@ -66,14 +59,27 @@ class Project:
 
     # Incidents
     def add_incident(self, incident_folder):
-        """ Adds a new incident to the project."""
-        if not self.pr_db.connected:
-            print("database is not connected")
-            return
+        """ Adds a new incident to the project.
         
+        Inputs:
+
+            incident_folder: absolute or relative path to the incident folder.
+        
+        """
+
+        if not hasattr(self, 'pr_db'):
+            LOGGER.error("Project does not have database."
+             "Regenerate the project.")
+            return
+
+        elif not self.pr_db.connected:
+            LOGGER.error("Project has database. But not connected." 
+            "Regenerate the project.")
+            return
+
         # read the description file of incident
         inc_des = self._read_incident_description(incident_folder)
-
+        
         #TODO these checks do not follow EAFP
         if "incident_name" not in inc_des.keys():
             print("incident name is not provided in the description.txt file.")
@@ -180,7 +186,7 @@ class Project:
         return True
 
     def remove_incident(self, incident_name):
-        """Removes incident from the project. """
+        """Removes incident from the project."""
         pass
     
     # source

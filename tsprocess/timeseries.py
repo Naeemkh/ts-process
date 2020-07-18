@@ -7,8 +7,8 @@ import numpy as np
 from scipy.signal import (sosfiltfilt, filtfilt, ellip, butter, zpk2sos,
                           decimate, kaiser)
 
+from .log import LOGGER
 from .database import DataBase as db
-# from .ts_library  import FAS
 from .ts_utils import (cal_acc_response, get_period, get_points, FAS, taper,
                        seism_appendzeros, seism_cutting)
 
@@ -50,9 +50,8 @@ class TimeSeries:
     @classmethod
     def _add_processing_label(cls, label_name, label_type, argument_dict):
         if label_name in cls.processing_labels:
-            #TODO probably customize exception should be a better option
-            #  to handle this.
-            print("Label name has been used. Command is ignored.")
+            LOGGER.warning(f"label name: '{label_name}' has been already used. "
+            "Try another name.")
             return
 
         if label_type not in cls.label_types:

@@ -174,7 +174,8 @@ class Record:
     def _get_processed_record(record, list_process):
         """ Returns the processed records based on hash value of the 
         record and the processing label. Developers should call this
-        function only by original record."""
+        function only by original record.
+        """
 
         # by this point the list of process has been controled for valid items. 
         
