@@ -1,7 +1,9 @@
 import os
 import glob
 import unittest
+import doctest
 
+import tsprocess.database as database
 from tsprocess.database import DataBase
 
 class TestDataBase(unittest.TestCase):
@@ -31,8 +33,16 @@ class TestDataBase(unittest.TestCase):
                 os.remove(f)
             except Exception:
                 pass
+
+    def load_tests(loader, tests, ignore):
+        tests.addTests(doctest.DocTestSuite(database))
+        return tests
         
 
 
 
 
+suite = unittest.TestSuite()
+suite.addTest(doctest.DocTestSuite(database))
+runner = unittest.TextTestRunner(verbosity=2)
+runner.run(suite)
