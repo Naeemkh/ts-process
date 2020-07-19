@@ -108,7 +108,8 @@ class SeismicSource:
         with open(os.path.join(self.source_directory,'strike.in'), 'r') as fp:
             self.strike = [float(i) for i in (fp.read().split())]
 
-        with open(os.path.join(self.source_directory,'slipfunction.in'), 'r') as fp:
+        with open(os.path.join(self.source_directory,
+         'slipfunction.in'), 'r') as fp:
             
             while True:
                 line = fp.readline()

@@ -30,8 +30,6 @@ class Incident:
         self._extract_input_parameters()
         self._extract_station_name_location()
         self._extract_seismic_source_data()
-        # self.source
-        # self.notes
 
     def _extract_input_parameters(self):
         """ Extracts input parameters from the incident folder. Stores the
@@ -39,7 +37,8 @@ class Incident:
 
         if self.metadata["incident_type"] == "hercules":
             # TODO move each part of reading files into a function.
-            with open(os.path.join(self.folder_path,self.metadata['inputfiles_parameters']), 'r') as fp:
+            with open(os.path.join(self.folder_path,
+             self.metadata['inputfiles_parameters']), 'r') as fp:
                 while True:
                     line = fp.readline()
                     if not line:
@@ -67,7 +66,8 @@ class Incident:
 
         if self.metadata["incident_type"] == "hercules":
             n_st = int(self.metadata["number_output_stations"])
-            with open(os.path.join(self.metadata["incident_folder"],self.metadata['inputfiles_parameters']), 'r') as fp:
+            with open(os.path.join(self.metadata["incident_folder"],
+             self.metadata['inputfiles_parameters']), 'r') as fp:
                 
                 start_reading_stations = False
                 while True:
@@ -76,7 +76,8 @@ class Incident:
                         break
                     if line.startswith("#"):
                         continue
-                    if ("output_stations" in line) and ("=" in line) and (len(line.split())==2):
+                    if (("output_stations" in line) and ("=" in line) and
+                     (len(line.split())==2)):
                         start_reading_stations = True
                     
                     if start_reading_stations:
@@ -91,7 +92,8 @@ class Incident:
                                             float(tmp_line[0].strip()),\
                                             float(tmp_line[1].strip()),\
                                             float(tmp_line[2].strip()),\
-                                            self.metadata["incident_name"],'station.'+str(i))] 
+                                            self.metadata["incident_name"],
+                                             'station.'+str(i))] 
                                     )
                                 i = i + 1
                         break
@@ -108,10 +110,13 @@ class Incident:
     def _extract_seismic_source_data(self):
         """ extracts seismic source details. """
         self.metadata["incident_source_hypocenter"] = \
-        tuple([float(i.strip()) for i in self.metadata["source_hypocenter"].split(",")])
+        tuple([float(i.strip()) for
+         i in self.metadata["source_hypocenter"].split(",")])
         source_relative_path = self.metadata["source_directory"]
-        source_folder = os.path.join(self.metadata["incident_folder"],source_relative_path)
-        self.source = SeismicSource(source_folder, self.metadata["incident_type"])
+        source_folder = os.path.join(self.metadata["incident_folder"],
+         source_relative_path)
+        self.source = SeismicSource(source_folder,
+         self.metadata["incident_type"])
 
 
 

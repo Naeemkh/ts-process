@@ -8,7 +8,6 @@ import os
 import hashlib
 from typing import Any, List, Set, Dict, Tuple, Optional
 
-
 import pandas as pd
 from ipywidgets import HTML
 import matplotlib.pyplot as plt
@@ -21,8 +20,8 @@ from .station import Station
 from .incident import Incident
 from .database import DataBase
 from .timeseries import TimeSeries
-from .ts_utils import check_opt_param_minmax
-
+from .ts_utils import (check_opt_param_minmax,
+                      is_lat_valid, is_lon_valid, is_depth_valid)
 
 class Project:
     """ Project Class """
@@ -46,19 +45,14 @@ class Project:
             LOGGER.warning(f"Project named {cls._instance.name} "
              "is already generated. Each session can support one project."
              "This command will be ignored.")
-            print("One project per session. Command is ignored,"
-             "see the log file.")
-            return None 
-        
+            return cls._instance
+         
     # database
     @classmethod
     def _connect_to_database(cls):
-        """ Creates and connects to a database.
-        >>> 4 * 3
-        12
-        """
-        cls.pr_db = DataBase(cls._instance.name+"_db", cache_size=2000)
-        Record.pr_db = cls.pr_db
+        """ Creates and connects to a database."""
+        cls._instance.pr_db = DataBase(cls._instance.name+"_db", cache_size=2000)
+        Record.pr_db = cls._instance.pr_db
 
     def close_database(self):
         """ Terminating the connection to the database."""
@@ -66,38 +60,62 @@ class Project:
 
     # Incidents
     def add_incident(self, incident_folder):
-        """ Adds a new incident to the project."""
-        if not self.pr_db.connected:
-            print("database is not connected")
-            return
+        """ Adds a new incident to the project.
         
+        Inputs:
+
+            incident_folder: absolute or relative path to the incident folder.
+        
+        """
+
+        if not hasattr(self, 'pr_db'):
+            LOGGER.error("Project does not have database."
+             "Regenerate the project.")
+            return
+
+        elif not self.pr_db.connected:
+            LOGGER.error("Project has database. But not connected." 
+            "Regenerate the project.")
+            return
+
         # read the description file of incident
         inc_des = self._read_incident_description(incident_folder)
-
+        
         #TODO these checks do not follow EAFP
         if "incident_name" not in inc_des.keys():
-            print("incident name is not provided in the description.txt file.")
+            LOGGER.warning("incident name is not provided in the"
+            " description.txt file.")
             return
 
         if "incident_type" not in inc_des.keys():
-            print("incident type is not provided in the description.txt file.")
+            LOGGER.warning("incident name is not provided in the"
+            " description.txt file.")
             return
 
         if inc_des["incident_type"] not in Incident.valid_incidents:
-            print(f"Incident type is not supported (valid incidents:\
-             {Incident.valid_incidents})")
+            LOGGER.warning(f"The incident type is not supported (valid "
+             f"incidents: {Incident.valid_incidents})")
             return
 
         if inc_des["incident_name"] in self.incidents.keys():
-            print([f"incident name should be a unique name. Current incidents:\
-             {self.incidents.keys} "])
+            LOGGER.warning(f"The provided incident name" 
+              f" ({inc_des['incident_name']}) has been used before.\n"
+              "The incident name should be a unique name. Current incidents: "
+             f"{list(self.incidents.keys())} ")
             return
 
         # load incident
         self._load_incident(incident_folder,inc_des)
       
     def _load_incident(self, incident_folder, incident_description):
-        """ load incidents into the project's incidents dictionary """
+        """ load incidents into the project's incidents dictionary
+        
+        Inputs:
+
+            | incident_folder: path to incident folder
+            | incident_description: dictionary of incident's description
+
+         """
 
         if incident_description["incident_type"] == "hercules":
             self.incidents[incident_description["incident_name"]] = \
@@ -114,7 +132,12 @@ class Project:
 
     @staticmethod
     def _read_incident_description(incident_folder):
-        """ Extract incident descriptions """
+        """ Extract incident descriptions
+        
+        Inputs:
+
+            incident_folder: path to incident folder.
+         """
         incident_description = {}
         incident_description["incident_folder"] = incident_folder
         with open(os.path.join(incident_folder,'description.txt'),'r') as fp:
@@ -136,26 +159,20 @@ class Project:
         """
         records = []
         for station in Station.list_of_stations:
-            # if station passes the list_filters
-            # go forward.
-            # else continue.
-
            
             ignore_this_station = False
             for st_f in list_filters:
                 if not station._check_station_filter(st_f):
-                    # station could not pass at list one of filters.
+                    # station could not pass at least one of the filters.
                     ignore_this_station = True
                     break
             
             if ignore_this_station:
                 continue
 
-
             st_records = []
             for i,incident_item in enumerate(list_inc):
                 # choose the equivalent station for that incident.
-
                 incident_metadata = self.incidents[incident_item].metadata
 
                 st_name_inc = station.inc_st_name[incident_item]
@@ -169,23 +186,37 @@ class Project:
         return records
 
     def _is_incident_valid(self,list_incidents):
-        """ Checks if the requested processing label is a valid lable """
+        """ Checks if the requested processing label is a valid label """
         for inc in list_incidents:
             if inc not in self.incidents:
-                print(\
-                    f"{inc} is not a valid incident name. Command ignored."\
+                LOGGER.warning(
+                    f"{inc} is not a valid incident name. Command ignored."
                     )
                 return False
         
         return True
 
     def remove_incident(self, incident_name):
-        """Removes incident from the project. """
+        """Removes incident from the project."""
         pass
     
     # source
     def add_source_hypocenter(self,lat, lon, depth):
-        """ Adds earthquake hypocenter to the project. """
+        """ Adds earthquake hypocenter to the project.
+        
+        Inputs: 
+
+            | lat: latitude (-90,90)
+            | lon: longitude (-180, 180)
+            | depth: in meters (positive toward earth interior) 
+                
+        """
+        
+        if not(is_lat_valid(lat) and is_lon_valid(lon) and
+         is_depth_valid(depth)):
+            LOGGER.error('Source is not added.')  
+            return
+        
         self.metadata["project_source_hypocenter"] = (lat, lon, depth)
         Station.pr_source_loc = (lat, lon, depth)
 
@@ -203,13 +234,18 @@ class Project:
             print(item, '-->', TimeSeries.processing_labels[item])
 
     def _is_processing_label_valid(self,list_process):
-        """ Checks if the requested processing label is a valid lable """
+        """ Checks if the requested processing label is a valid lable
+        
+        Input:
+            list_process: List of processing labels
+        
+        """
         for group in list_process:
             for pr_l in group:
                 if pr_l not in TimeSeries.processing_labels:
-                    print(
-                        f"{pr_l} is not a valid processing label. Command\
-                            ignored."
+                    LOGGER.error(
+                        f"{pr_l} is not a valid processing label. Command"
+                            "ignored."
                         )
                     return False
         
@@ -221,9 +257,11 @@ class Project:
             print(f"{i}: {item} - args: {TimeSeries.label_types[item]}")
 
     # station filtering
-    def add_station_filter(self, station_filter_name, station_filter_type, hyper_parameters):
+    def add_station_filter(self, station_filter_name, station_filter_type,
+     hyper_parameters):
         """ Adds a new filter for selecting stations """
-        Station.add_station_filter(station_filter_name, station_filter_type, hyper_parameters)
+        Station.add_station_filter(station_filter_name, station_filter_type,
+         hyper_parameters)
     
     def valid_station_filter_type(self):
         """ Returns a list of valid filters for selecting stations. """
@@ -231,7 +269,7 @@ class Project:
             print(f"{i}: {item}")
 
     def list_of_station_filters(self):
-        """ Returns a list of available processing labels"""
+        """ Returns a list of available processing labels """
         if not Station.station_filters:
             return
         for item in Station.station_filters:
@@ -239,21 +277,38 @@ class Project:
 
     # Analysis interface
     def plot_velocity_records(self, list_inc,list_process,list_filters,opt_params):
-        """ Plots 3 velocity timeseries one page per station and their
-         fft values"""
+        """ Plots 3 velocity timeseries one page per station and their 
+        fft amplitude spectra plots
+        
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+            | zoom_in_time : [tmin, tmax] in seconds
+            | Horizontal zoom in time axis for better presentation. Data is not
+              modified. 
+            | zoom_in_freq : [freq_min, freq_max] in Hertz
+            | Horizontal zoom in period axis for better presentation. Data is 
+              not modified. 
+        """
         
         if not self._is_incident_valid(list_inc):
+            LOGGER.warning("At least one incident is not valid.")
             return
 
         if not self._is_processing_label_valid(list_process):
+            LOGGER.warning("At least one processing label is not valid.")
             return
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
          # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
-            print("[ERROR]: Too many timeseries to plot!")
-            # sys.exit(-1)
+            LOGGER.error(f"Number of timeseries are more than dedicated" 
+            "colors.")
             return
 
         plt.figure()
@@ -303,11 +358,26 @@ class Project:
            
             # plt.savefig("output_plot.pdf", format='pdf',
             # transparent=False, dpi=300)  
-            # TODO: add another dictionary as metadata to the timeseries, a
+            # TODO: come up with a better dynamic name to save figures. 
 
     def plot_acceleration_records(self, list_inc,list_process,list_filters, opt_params):
-        """ Plots 3 velocity timeseries one page per station and their
-         fft values"""
+        """ Plots 3 acceleration timeseries one page per station and their 
+        response spectra plots
+        
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+            | zoom_in_time : [tmin, tmax] in seconds
+            | Horizontal zoom in time axis for better presentation. Data is not
+              modified. 
+            | zoom_in_rsp : [period_min, period_max] in seconds
+            | Horizontal zoom in period axis for better presentation. Data is 
+              not modified. 
+        """
         
         if not self._is_incident_valid(list_inc):
             return
@@ -319,8 +389,8 @@ class Project:
         
          # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
-            print("[ERROR]: Too many timeseries to plot!")
-            # sys.exit(-1)
+            LOGGER.error(f"Number of timeseries are more than dedicated" 
+            "colors.")
             return
 
         plt.figure()
@@ -365,19 +435,30 @@ class Project:
 
             axarr[0][0].legend()
             axarr[0][0].set_title(
-                f'Station at incident {list_inc[0]}:'\
-                f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'\
-                f'{record[0].epicentral_distance: 0.2f} km'\
-                )    
+             f'Station at incident {list_inc[0]}:'
+             f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'
+             f'{record[0].epicentral_distance: 0.2f} km'
+            )    
             fig.tight_layout()     
            
             # plt.savefig("output_plot.pdf", format='pdf',
             # transparent=False, dpi=300)  
-            # TODO: add another dictionary as metadata to the timeseries, a
     
-    
-    def plot_record_section(self, list_inc,list_process,list_filters,opt_params):
-        """ Plots seismic record section """
+    def plot_record_section(self, list_inc,list_process,list_filters,
+     opt_params):
+        """ Plots seismic record section  
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+            | zoom_in_time : [tmin, tmax] in seconds
+            | Horizontal zoom in time axis for better presentation. Data is not
+              modified. 
+        """
         
         if not self._is_incident_valid(list_inc):
             return
@@ -389,8 +470,8 @@ class Project:
 
         # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
-            print("[ERROR]: Too many timeseries to plot!")
-            # sys.exit(-1)
+            LOGGER.error(f"Number of timeseries are more than dedicated" 
+            "colors.")
             return
       
         x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
@@ -398,8 +479,8 @@ class Project:
 
         if not comp or (comp not in ["h1","h2","ver"]):
             if comp:
-                LOGGER.warning(f"The component: {comp} is not supported. "+
-                     "h1 is used.")
+                LOGGER.warning(f"The component: {comp} is not supported. "
+                  "h1 is used.")
             comp = "h1"
         
         fig, axarr = plt.subplots(nrows=1, ncols=1, figsize=(14, 9))
@@ -409,7 +490,7 @@ class Project:
                 if not item:
                     continue
                                                
-                if comp=="h1":
+                if comp == "h1":
                     tmp_data = (0.8*item.vel_h1.value/item.vel_h1.peak_vv)+\
                         item.epicentral_distance
                 elif comp == "h2":
@@ -434,17 +515,29 @@ class Project:
         axarr.set_xlim(x_lim_t)
         axarr.legend()
         axarr.set_title(
-             f"Normalized Seismic Record Section -"
-             f"Number of stations/incident: {k+1}"
-             f"- Component: {comp}"
+         f"Normalized Seismic Record Section -"
+         f"Number of stations/incident: {k+1}"
+         f"- Component: {comp}"
         )    
         fig.tight_layout()    
 
 
 
-    def show_stations_on_map(self,list_inc,list_process,list_filters):
-        
-        
+    def show_stations_on_map(self,list_inc,list_process,list_filters,
+     opt_params):
+        """ Returns an interactive map of source and stations, use only in 
+        Jupyter Notebooks.  
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+
+        """
+                
         records = self._extract_records(list_inc, list_process, list_filters)
 
         m = Map(
@@ -453,6 +546,7 @@ class Project:
             zoom = 8,
             close_popup_on_click=True
         )
+
         for i in records:
             lat = i[0].station.lat
             lon = i[0].station.lon
@@ -472,8 +566,18 @@ class Project:
         return m
 
 
-    def which_records(self, list_inc,list_process,list_filters):
-        """Represent all records that will pass a given filters"""
+    def which_records(self, list_inc,list_process,list_filters, opt_params):
+        """ Print outs all records that pass the given filters 
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+        """
+        
         if not self._is_incident_valid(list_inc):
             return
 
@@ -487,7 +591,7 @@ class Project:
 
     
     def list_of_incidents(self):
-        """Returns list of incidents."""
+        """ Returns a list of incidents."""
         return list(self.incidents.keys())
 
 
@@ -496,10 +600,8 @@ class Project:
         compares the incidents' meta data
 
         Inputs:
-
-            ls_inc: list of incident names
-
-            only_differerences: True or False
+            | ls_inc: list of incident names
+            | only_differerences: True or False
 
         """
 
@@ -524,8 +626,7 @@ class Project:
         return table_df
 
 
-
-        
+  
 
 
         

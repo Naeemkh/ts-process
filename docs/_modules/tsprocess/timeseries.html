@@ -172,12 +172,13 @@
 <span class="sd">====================================</span>
 <span class="sd">The core module for the TimeSeries class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="p">(</span><span class="n">sosfiltfilt</span><span class="p">,</span> <span class="n">filtfilt</span><span class="p">,</span> <span class="n">ellip</span><span class="p">,</span> <span class="n">butter</span><span class="p">,</span> <span class="n">zpk2sos</span><span class="p">,</span>
                           <span class="n">decimate</span><span class="p">,</span> <span class="n">kaiser</span><span class="p">)</span>
 
+<span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
-<span class="c1"># from .ts_library  import FAS</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">cal_acc_response</span><span class="p">,</span> <span class="n">get_period</span><span class="p">,</span> <span class="n">get_points</span><span class="p">,</span> <span class="n">FAS</span><span class="p">,</span> <span class="n">taper</span><span class="p">,</span>
                        <span class="n">seism_appendzeros</span><span class="p">,</span> <span class="n">seism_cutting</span><span class="p">)</span>
 
@@ -187,9 +188,9 @@
     <span class="n">label_types</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;lowpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fc: corner freq (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
         <span class="s1">&#39;highpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fc: corner freq (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fcs: corner freqs (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
         <span class="s1">&#39;rotate&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;scale&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;scale&#39;</span><span class="p">:</span><span class="s1">&#39;factor&#39;</span><span class="p">,</span>
         <span class="s1">&#39;shift&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="s1">&#39;taper&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end, all; m: number of samples for tapering&#39;</span><span class="p">,</span>
         <span class="s1">&#39;cut&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end; m: number of samples for tapering,</span><span class="se">\</span>
@@ -209,31 +210,42 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">f_init_point</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_vv</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vt</span> <span class="o">=</span> <span class="kc">None</span>
-        
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vt</span> <span class="o">=</span> <span class="kc">None</span>        
 
     <span class="k">def</span> <span class="nf">add_note</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="TimeSeries._add_processing_label"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._add_processing_label">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_add_processing_label</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Adds new processing label to the timeseries class. </span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | label_name: optional processing label name</span>
+<span class="sd">            | label_type: should be one of the valid label types</span>
+<span class="sd">            | argument_dict: dictionary of arguments that is required for that </span>
+<span class="sd">              processing label type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">label_name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
-            <span class="c1">#TODO probably customize exception should be a better option</span>
-            <span class="c1">#  to handle this.</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Label name has been used. Command is ignored.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;label name: &#39;</span><span class="si">{</span><span class="n">label_name</span><span class="si">}</span><span class="s2">&#39; has been already used. &quot;</span>
+            <span class="s2">&quot;Try another name.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">label_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">:</span>
-            <span class="c1">#TODO probably customize exception should be a better option</span>
-            <span class="c1">#  to handle this.</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Label type is not supported. Command is ignored.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Label type is not supported. Command is ignored.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         
-        <span class="bp">cls</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">]</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="TimeSeries._lowpass_filter"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._lowpass_filter">[docs]</a>    <span class="k">def</span> <span class="nf">_lowpass_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Returns a lowpass filtered (the Butterworth filter) signal value.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Returns a lowpass filtered (the Butterworth filter) signal value.</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | fc: corner frequency (Hz)</span>
+<span class="sd">            | N: filter order (default value = 4)</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Fs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
         <span class="n">Wn</span> <span class="o">=</span> <span class="n">fc</span><span class="o">/</span><span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="n">analog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -243,24 +255,60 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TimeSeries._highpass_filter"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._highpass_filter">[docs]</a>    <span class="k">def</span> <span class="nf">_highpass_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Returns a lowpass filtered (the Butterworth filter) signal value.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Returns a highpass filtered (the Butterworth filter) signal value.</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | fc: corner frequency (Hz)</span>
+<span class="sd">            | N: filter order (default value = 4)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Fs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
         <span class="n">Wn</span> <span class="o">=</span> <span class="n">fc</span><span class="o">/</span><span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;highpath&#39;</span><span class="p">,</span> <span class="n">analog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;highpass&#39;</span><span class="p">,</span> <span class="n">analog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
          <span class="n">output</span><span class="o">=</span><span class="s1">&#39;zpk&#39;</span><span class="p">)</span>
         <span class="n">butter_sos</span> <span class="o">=</span> <span class="n">zpk2sos</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">sosfiltfilt</span><span class="p">(</span><span class="n">butter_sos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>    </div>
 
-    <span class="k">def</span> <span class="nf">_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">factor</span>    
+<div class="viewcode-block" id="TimeSeries._bandpass_filter"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._bandpass_filter">[docs]</a>    <span class="k">def</span> <span class="nf">_bandpass_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcs</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">4</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a bandpass filtered (the Butterworth filter) signal value.</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | fc: corner frequencies (Hz)</span>
+<span class="sd">            | N: filter order (default value = 4)</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Fs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
+        <span class="n">Wn</span> <span class="o">=</span> <span class="n">fcs</span><span class="o">/</span><span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;bandpass&#39;</span><span class="p">,</span> <span class="n">analog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+         <span class="n">output</span><span class="o">=</span><span class="s1">&#39;zpk&#39;</span><span class="p">)</span>
+        <span class="n">butter_sos</span> <span class="o">=</span> <span class="n">zpk2sos</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sosfiltfilt</span><span class="p">(</span><span class="n">butter_sos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>    </div>
+
+
+<div class="viewcode-block" id="TimeSeries._scale"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._scale">[docs]</a>    <span class="k">def</span> <span class="nf">_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a scaled signal.</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            factor: scaling factor (e.g., 2 for doubling amplitude)</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">factor</span>    </div>
 
 <div class="viewcode-block" id="TimeSeries._apply"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._apply">[docs]</a>    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Applies the requested label_name on the timeseries &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Applies the requested label_name on the timeseries</span>
+
+<span class="sd">        Input: </span>
+<span class="sd">            label_name: processing label name</span>
+<span class="sd">        </span>
+<span class="sd">        Output:</span>
+<span class="sd">            processed timeseries</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="n">label_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processing_labels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="c1"># this should never be invoked. I have checked the labels before. </span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Label is not supported, ignored.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Label is not supported, ignored.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         
         <span class="c1">#timeseries type</span>
@@ -276,16 +324,18 @@
             <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_highpass_filter</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
  
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
+            <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bandpass_filter</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
  
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;rotate&#39;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
+            <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
  
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span>
             <span class="n">proc_data</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;shift&#39;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
+            <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
 
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;taper&#39;</span><span class="p">:</span>
             <span class="k">def</span> <span class="nf">extract_params</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
@@ -300,16 +350,14 @@
             <span class="n">p</span> <span class="o">=</span> <span class="n">extract_params</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
             <span class="n">proc_data</span> <span class="o">=</span> <span class="n">seism_cutting</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">)</span>
-               
-        
+                       
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;zero_pad&#39;</span><span class="p">:</span>
             <span class="k">def</span> <span class="nf">extract_params</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">t_diff</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">flag</span><span class="p">,</span> <span class="n">t_diff</span><span class="p">,</span> <span class="n">m</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">extract_params</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
             <span class="n">proc_data</span> <span class="o">=</span> <span class="n">seism_appendzeros</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">)</span>
-               
-          
+                         
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Disp&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
 
@@ -320,7 +368,7 @@
             <span class="k">return</span> <span class="n">Acc</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Raw&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span>
             <span class="k">return</span> </div>
 
     
@@ -331,15 +379,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="n">dt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span> <span class="o">=</span> <span class="n">t_init_point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_compute_fft_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+<div class="viewcode-block" id="TimeSeries._compute_fft_value"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._compute_fft_value">[docs]</a>    <span class="k">def</span> <span class="nf">_compute_fft_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; omputes FFT value &quot;&quot;&quot;</span>
         <span class="n">fmin</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="n">fmax</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
         <span class="n">s_factor</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="n">freq</span><span class="p">,</span> <span class="n">afs</span> <span class="o">=</span> <span class="n">FAS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">,</span> <span class="n">s_factor</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delta_f</span> <span class="o">=</span> <span class="n">freq</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">freq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fft_value</span> <span class="o">=</span> <span class="n">afs</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fft_value</span> <span class="o">=</span> <span class="n">afs</span></div></div>
+
 
 <div class="viewcode-block" id="Disp"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp">[docs]</a><span class="k">class</span> <span class="nc">Disp</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Disp Class &quot;&quot;&quot;</span>

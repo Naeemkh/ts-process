@@ -1,3 +1,9 @@
+"""
+ts_utils.py
+====================================
+The core module for timeseries helper functions.
+"""
+
 import math
 import inspect
 
@@ -85,15 +91,19 @@ def cal_acc_response(period, data, delta_t):
 
 
 def get_period(tmin, tmax):
-    """ Return an array of period T """
+    """ Return an array of period T 
     
-    # tmin = 1/fmax
-    # tmax = 1/fmin
+    >>> a = get_period(0.1,10)
+    >>> print(f"{a[2] :.8f}")
+    0.16237767
+    """
+
     a = np.log10(tmin)
     b = np.log10(tmax)
 
     period = np.linspace(a, b, 20)
     period = np.power(10, period)
+
     return period
 
 
@@ -290,3 +300,78 @@ def seism_cutting(flag, t_diff, m, timeseries, delta_t):
         ts_vec = ts_vec * window
 
     return ts_vec
+
+
+def is_lat_valid(lat):
+    """ 
+    Controls if latitude is in a valide range. 
+    
+    Inputs:
+    
+        lat: latitude in degrees
+    
+    Output:
+        True or False
+
+    Example:
+
+    >>> is_lat_valid(-130)
+    False
+    """
+    try:
+        if lat<-90 or lat>90:
+            return False
+    except Exception as e:
+            LOGGER.error('Input is not valid for latitude ' + str(e))
+            return False
+    return True
+
+
+def is_lon_valid(lon):
+    """ 
+    Controls if longitude is in a valide range. 
+    
+    Inputs:
+    
+        lat: latitude in degrees
+    
+    Output:
+        True or False
+
+    Example:
+
+    >>> is_lon_valid(122)
+    True
+    """
+    try:
+        if lon<-180 or lon>180:
+            return False
+    except Exception as e:
+            LOGGER.error('Input is not valid for longitude '+ str(e))
+            return False
+    return True
+
+
+
+def is_depth_valid(depth):
+    """ 
+    Controls if depth is a valid number. Depth is considered positive towards
+    the earth interior.  
+    
+    Inputs:
+    
+        depth: depth in km
+    
+    Output:
+        True or False
+
+    Example:
+
+    >>> is_depth_valid('twenty')
+    False
+    """
+    if not isinstance(depth, (float,int)):
+        LOGGER.error('Input is not valid for depth. Should be a numeric number.')
+        return False
+
+    return True
