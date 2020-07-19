@@ -102,7 +102,7 @@ class DataBase:
                 return tmp
             except Exception:
                 LOGGER.debug(f"The requested key ({key}) is not in the"
-                 "database. Returns None.")
+                 " database. Returns None.")
                 return None
         else:
             return value

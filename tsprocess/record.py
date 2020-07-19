@@ -26,6 +26,7 @@ class Record:
                 vel_h1, vel_h2, vel_ver,
                 acc_h1, acc_h2, acc_ver,
                 station, source_params):
+
         self.station = station
         self.time_vec = time_vec
         self.freq_vec = None
@@ -53,13 +54,16 @@ class Record:
         self.processed = []
 
     def __str__(self):
-        return f"Record at {self.station.lat, self.station.lon} with"\
-               f"{self.epicentral_distance} km distance from source."     
+        return f"Record at {self.station.lat, self.station.lon} with "\
+               f"{self.epicentral_distance:.2f} km distance from source."    
 
-    @classmethod
-    def connect_to_database(cls, database_name, cache_size):
-        """ connecting to the projects databse """
-        cls.mydb = DataBase(database_name,cache_size)
+    def __repr__(self):
+        return f"Record({self.time_vec},"\
+               f"{self.disp_h1},{self.disp_h2},{self.disp_ver}"\
+               f"{self.vel_h1},{self.vel_h2},{self.vel_ver}"\
+               f"{self.acc_h1},{self.acc_h2},{self.acc_ver}"\
+               f"{self.station}.{self.source_params})"
+                        
 
     def _compute_source_dependent_params(self):
         # compute distance and azimuth
@@ -70,11 +74,12 @@ class Record:
     
     @staticmethod
     def generate_uid():
-        """ generates 16 chars random combo from string and numbers"""
+        """ generates 16 chars random combination from string and numbers"""
         char_list = string.ascii_uppercase + string.digits
         return ''.join(random.choice(char_list) for _ in range(16))
 
     def _compute_record_unique_ids(self):
+        """ Assigns two randomly generated 16 char id to each record. """
         self.unique_id_1 = self.generate_uid()
         self.unique_id_2 = self.generate_uid()
         return
@@ -109,6 +114,19 @@ class Record:
 
     @staticmethod
     def get_record(station_obj, incident_metadata, list_process):
+        """ Returns final processed reocord based on station, incident, and
+        required list of processes. If the record is found in database, it will
+        be returned, otherwise, it will be processed and will be returned. The
+        processed record will be stored in the database for future use.
+
+        Inputs:
+            | station_obj: a station object
+            | incident_metadata: a dictionary of incidance metadata
+            | list_process: list of required processes
+        
+        Output:
+            | record object
+        """
 
         incident_name = incident_metadata["incident_name"]
         incident_type = incident_metadata["incident_type"]
@@ -128,6 +146,9 @@ class Record:
         record_org = Record.pr_db.get_value(hash_val)
 
         if not record_org:
+            LOGGER.debug(f"Original Record of incident: {incident_name}  -"
+             f" type: {incident_type} at station: {st_name} has not been loaded"
+              " to the database. Loading ... " )
             # we need to load the data 
             if incident_type == "hercules":
                 station_folder = incident_metadata["output_stations_directory"]
@@ -156,7 +177,6 @@ class Record:
             # if by this point record is still is None, something is
             # wrong with the record. 
             # TODO handle corrupt record.
-            print('something is wrong with the record.')
             LOGGER.debug(f"{st_name} from {incident_name} could not load")
             return
             
@@ -165,7 +185,7 @@ class Record:
             return record_org
 
         
-        processed_record = Record._get_processed_record(record_org,\
+        processed_record = Record._get_processed_record(record_org,
              list_process)
 
         return processed_record
@@ -214,12 +234,18 @@ class Record:
  
     @staticmethod
     def _add_proc_key(record, hash_val):
+        """ Includes the hash value of the new processed record of this record
+         into record's processed attribute. It also updates the record on the
+         database.
+        """ 
         record.processed.append(hash_val)
         this_record_hash = record.this_record_hash
         Record.pr_db.set_value(this_record_hash,record)
 
     @staticmethod    
     def _apply(record, processing_label):
+        """ Applies the requested processing label on the record. Returns a 
+        new Record object representing the processed record. """
 
         # you are repeating yourself. Refactor it at the earliest
         # convenient.
@@ -246,6 +272,15 @@ class Record:
 
     @staticmethod
     def _haversine(lat1, lon1, lat2, lon2):
+        """ Computes distance of two geographical points.
+        
+        Inputs:
+            | lat and lon for point 1 and point 2
+
+        Outputs:
+            | distance betwee two points in km.
+        
+         """
         # convert decimal degrees to radians 
         # this method is also defined in station module.
         # TODO: move them to a util module. 
@@ -263,6 +298,17 @@ class Record:
 
     @staticmethod
     def _from_hercules(filename,station_obj,source_hypocenter):
+        """ Loads an instance of Hercules simulation results at one station.
+        Returns a Record object.
+        
+        Inputs:
+            | filename: station file name (e.g., station.10)
+            | station_obj: a station object corresponding that filename
+            | source_hypocenter: project source location
+
+        Outputs:
+            | Record object 
+        """
         times = []
         acc_h1 = []
         vel_h1 = []
@@ -301,7 +347,8 @@ class Record:
                     continue
                 pieces = line.split()
                 pieces = [float(piece) for piece in pieces]
-                # Write timeseries to files. Please not that Hercules files 
+                
+                # Write timeseries to files. Please note that Hercules files 
                 # have the vertical component positive pointing down so we have
                 # to flip it here to match the BBP format in which vertical
                 # component points up
@@ -318,8 +365,7 @@ class Record:
                 acc_ver.append(-1 * pieces[9])
 
         except IOError as e:
-            print(e)
-            # sys.exit(-1)
+            LOGGER.debug(str(e))            
         finally:
             input_fp.close()
             
@@ -349,7 +395,6 @@ class Record:
         acc_h2 = Acc(acc_h2, dt, times[0])
         acc_ver = Acc(acc_ver, dt, times[0])
     
-        # self.delta_t = times[1] - times[0]
         # Group headers
         # headers = [dis_header, vel_header, acc_header]
 

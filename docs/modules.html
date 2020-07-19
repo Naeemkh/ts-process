@@ -377,17 +377,19 @@ None.</p>
 <dt id="tsprocess.project.Project.compare_incidents">
 <code class="sig-name descname">compare_incidents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ls_inc</span></em>, <em class="sig-param"><span class="n">only_differences</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.compare_incidents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.compare_incidents" title="Permalink to this definition">¶</a></dt>
 <dd><p>compares the incidents’ meta data</p>
-<p>Inputs:</p>
-<blockquote>
-<div><p>ls_inc: list of incident names</p>
-<p>only_differerences: True or False</p>
-</div></blockquote>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">ls_inc: list of incident names</div>
+<div class="line">only_differerences: True or False</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.project.Project.list_of_incidents">
 <code class="sig-name descname">list_of_incidents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.list_of_incidents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.list_of_incidents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns list of incidents.</p>
+<dd><p>Returns a list of incidents.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -416,10 +418,10 @@ response spectra plots</p>
 </div>
 </dd>
 <dt>Optional parameters:</dt><dd><div class="line-block">
-<div class="line">zoom_in_time : [tmin, tmax]</div>
+<div class="line">zoom_in_time : [tmin, tmax] in seconds</div>
 <div class="line">Horizontal zoom in time axis for better presentation. Data is not
 modified.</div>
-<div class="line">zoom_in_rsp : [period_min, period_max]</div>
+<div class="line">zoom_in_rsp : [period_min, period_max] in seconds</div>
 <div class="line">Horizontal zoom in period axis for better presentation. Data is
 not modified.</div>
 </div>
@@ -431,19 +433,69 @@ not modified.</div>
 <dt id="tsprocess.project.Project.plot_record_section">
 <code class="sig-name descname">plot_record_section</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_record_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_record_section" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots seismic record section</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+<dt>Optional parameters:</dt><dd><div class="line-block">
+<div class="line">zoom_in_time : [tmin, tmax] in seconds</div>
+<div class="line">Horizontal zoom in time axis for better presentation. Data is not
+modified.</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.project.Project.plot_velocity_records">
 <code class="sig-name descname">plot_velocity_records</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_velocity_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_velocity_records" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots 3 velocity timeseries one page per station and their
-fft values</p>
+fft amplitude spectra plots</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+<dt>Optional parameters:</dt><dd><div class="line-block">
+<div class="line">zoom_in_time : [tmin, tmax] in seconds</div>
+<div class="line">Horizontal zoom in time axis for better presentation. Data is not
+modified.</div>
+<div class="line">zoom_in_freq : [freq_min, freq_max] in Hertz</div>
+<div class="line">Horizontal zoom in period axis for better presentation. Data is
+not modified.</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.project.Project.remove_incident">
 <code class="sig-name descname">remove_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.remove_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.remove_incident" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes incident from the project.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.project.Project.show_stations_on_map">
+<code class="sig-name descname">show_stations_on_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.show_stations_on_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.show_stations_on_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an interactive map of source and stations, use only in
+Jupyter Notebooks.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+</dl>
+<p>Optional parameters:</p>
 </dd></dl>
 
 <dl class="py method">
@@ -460,8 +512,18 @@ fft values</p>
 
 <dl class="py method">
 <dt id="tsprocess.project.Project.which_records">
-<code class="sig-name descname">which_records</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.which_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.which_records" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represent all records that will pass a given filters</p>
+<code class="sig-name descname">which_records</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.which_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.which_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print outs all records that pass the given filters</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+</dl>
+<p>Optional parameters:</p>
 </dd></dl>
 
 </dd></dl>
@@ -604,6 +666,46 @@ results in the metadata attribute.</p>
 <em class="property">class </em><code class="sig-prename descclassname">tsprocess.record.</code><code class="sig-name descname">Record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_vec</span></em>, <em class="sig-param"><span class="n">disp_h1</span></em>, <em class="sig-param"><span class="n">disp_h2</span></em>, <em class="sig-param"><span class="n">disp_ver</span></em>, <em class="sig-param"><span class="n">vel_h1</span></em>, <em class="sig-param"><span class="n">vel_h2</span></em>, <em class="sig-param"><span class="n">vel_ver</span></em>, <em class="sig-param"><span class="n">acc_h1</span></em>, <em class="sig-param"><span class="n">acc_h2</span></em>, <em class="sig-param"><span class="n">acc_ver</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">source_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record" title="Permalink to this definition">¶</a></dt>
 <dd><p>Record Class</p>
 <dl class="py method">
+<dt id="tsprocess.record.Record._add_proc_key">
+<em class="property">static </em><code class="sig-name descname">_add_proc_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">hash_val</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._add_proc_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._add_proc_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Includes the hash value of the new processed record of this record
+into record’s processed attribute. It also updates the record on the
+database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.record.Record._apply">
+<em class="property">static </em><code class="sig-name descname">_apply</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">processing_label</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the requested processing label on the record. Returns a
+new Record object representing the processed record.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.record.Record._compute_record_unique_ids">
+<code class="sig-name descname">_compute_record_unique_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._compute_record_unique_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._compute_record_unique_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns two randomly generated 16 char id to each record.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.record.Record._from_hercules">
+<em class="property">static </em><code class="sig-name descname">_from_hercules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">source_hypocenter</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._from_hercules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._from_hercules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads an instance of Hercules simulation results at one station.
+Returns a Record object.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">filename: station file name (e.g., station.10)</div>
+<div class="line">station_obj: a station object corresponding that filename</div>
+<div class="line">source_hypocenter: project source location</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">Record object</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.record.Record._get_processed_record">
 <em class="property">static </em><code class="sig-name descname">_get_processed_record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">list_process</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._get_processed_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._get_processed_record" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the processed records based on hash value of the
@@ -612,15 +714,46 @@ function only by original record.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="tsprocess.record.Record.connect_to_database">
-<em class="property">classmethod </em><code class="sig-name descname">connect_to_database</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">database_name</span></em>, <em class="sig-param"><span class="n">cache_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record.connect_to_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record.connect_to_database" title="Permalink to this definition">¶</a></dt>
-<dd><p>connecting to the projects databse</p>
+<dt id="tsprocess.record.Record._haversine">
+<em class="property">static </em><code class="sig-name descname">_haversine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat1</span></em>, <em class="sig-param"><span class="n">lon1</span></em>, <em class="sig-param"><span class="n">lat2</span></em>, <em class="sig-param"><span class="n">lon2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._haversine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._haversine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes distance of two geographical points.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">lat and lon for point 1 and point 2</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">distance betwee two points in km.</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.record.Record.generate_uid">
 <em class="property">static </em><code class="sig-name descname">generate_uid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record.generate_uid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record.generate_uid" title="Permalink to this definition">¶</a></dt>
-<dd><p>generates 16 chars random combo from string and numbers</p>
+<dd><p>generates 16 chars random combination from string and numbers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.record.Record.get_record">
+<em class="property">static </em><code class="sig-name descname">get_record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">incident_metadata</span></em>, <em class="sig-param"><span class="n">list_process</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record.get_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record.get_record" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns final processed reocord based on station, incident, and
+required list of processes. If the record is found in database, it will
+be returned, otherwise, it will be processed and will be returned. The
+processed record will be stored in the database for future use.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">station_obj: a station object</div>
+<div class="line">incident_metadata: a dictionary of incidance metadata</div>
+<div class="line">list_process: list of required processes</div>
+</div>
+</dd>
+<dt>Output:</dt><dd><div class="line-block">
+<div class="line">record object</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

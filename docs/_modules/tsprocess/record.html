@@ -195,6 +195,7 @@
                 <span class="n">vel_h1</span><span class="p">,</span> <span class="n">vel_h2</span><span class="p">,</span> <span class="n">vel_ver</span><span class="p">,</span>
                 <span class="n">acc_h1</span><span class="p">,</span> <span class="n">acc_h2</span><span class="p">,</span> <span class="n">acc_ver</span><span class="p">,</span>
                 <span class="n">station</span><span class="p">,</span> <span class="n">source_params</span><span class="p">):</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">station</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_vec</span> <span class="o">=</span> <span class="n">time_vec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">freq_vec</span> <span class="o">=</span> <span class="kc">None</span>
@@ -222,13 +223,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Record at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2"> with&quot;</span>\
-               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">}</span><span class="s2"> km distance from source.&quot;</span>     
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Record at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2"> with &quot;</span>\
+               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> km distance from source.&quot;</span>    
 
-<div class="viewcode-block" id="Record.connect_to_database"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record.connect_to_database">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">connect_to_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">database_name</span><span class="p">,</span> <span class="n">cache_size</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; connecting to the projects databse &quot;&quot;&quot;</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">mydb</span> <span class="o">=</span> <span class="n">DataBase</span><span class="p">(</span><span class="n">database_name</span><span class="p">,</span><span class="n">cache_size</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Record(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time_vec</span><span class="si">}</span><span class="s2">,&quot;</span>\
+               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">disp_h1</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">disp_h2</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">disp_ver</span><span class="si">}</span><span class="s2">&quot;</span>\
+               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vel_h1</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vel_h2</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vel_ver</span><span class="si">}</span><span class="s2">&quot;</span>\
+               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acc_h1</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acc_h2</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acc_ver</span><span class="si">}</span><span class="s2">&quot;</span>\
+               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source_params</span><span class="si">}</span><span class="s2">)&quot;</span>
+                        
 
     <span class="k">def</span> <span class="nf">_compute_source_dependent_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># compute distance and azimuth</span>
@@ -239,14 +243,15 @@
     
 <div class="viewcode-block" id="Record.generate_uid"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record.generate_uid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">generate_uid</span><span class="p">():</span>
-        <span class="sd">&quot;&quot;&quot; generates 16 chars random combo from string and numbers&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; generates 16 chars random combination from string and numbers&quot;&quot;&quot;</span>
         <span class="n">char_list</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">char_list</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">_compute_record_unique_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Record._compute_record_unique_ids"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._compute_record_unique_ids">[docs]</a>    <span class="k">def</span> <span class="nf">_compute_record_unique_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Assigns two randomly generated 16 char id to each record. &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_uid</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_uid</span><span class="p">()</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
  
     
     <span class="k">def</span> <span class="nf">_compute_time_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -276,8 +281,21 @@
     <span class="k">def</span> <span class="nf">export_to_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Record.get_record"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record.get_record">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_record</span><span class="p">(</span><span class="n">station_obj</span><span class="p">,</span> <span class="n">incident_metadata</span><span class="p">,</span> <span class="n">list_process</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns final processed reocord based on station, incident, and</span>
+<span class="sd">        required list of processes. If the record is found in database, it will</span>
+<span class="sd">        be returned, otherwise, it will be processed and will be returned. The</span>
+<span class="sd">        processed record will be stored in the database for future use.</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | station_obj: a station object</span>
+<span class="sd">            | incident_metadata: a dictionary of incidance metadata</span>
+<span class="sd">            | list_process: list of required processes</span>
+<span class="sd">        </span>
+<span class="sd">        Output:</span>
+<span class="sd">            | record object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">incident_name</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]</span>
         <span class="n">incident_type</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span>
@@ -297,6 +315,9 @@
         <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">hash_val</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">record_org</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original Record of incident: </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2">  -&quot;</span>
+             <span class="sa">f</span><span class="s2">&quot; type: </span><span class="si">{</span><span class="n">incident_type</span><span class="si">}</span><span class="s2"> at station: </span><span class="si">{</span><span class="n">st_name</span><span class="si">}</span><span class="s2"> has not been loaded&quot;</span>
+              <span class="s2">&quot; to the database. Loading ... &quot;</span> <span class="p">)</span>
             <span class="c1"># we need to load the data </span>
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
                 <span class="n">station_folder</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;output_stations_directory&quot;</span><span class="p">]</span>
@@ -325,7 +346,6 @@
             <span class="c1"># if by this point record is still is None, something is</span>
             <span class="c1"># wrong with the record. </span>
             <span class="c1"># TODO handle corrupt record.</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;something is wrong with the record.&#39;</span><span class="p">)</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2"> could not load&quot;</span><span class="p">)</span>
             <span class="k">return</span>
             
@@ -334,10 +354,10 @@
             <span class="k">return</span> <span class="n">record_org</span>
 
         
-        <span class="n">processed_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_get_processed_record</span><span class="p">(</span><span class="n">record_org</span><span class="p">,</span>\
+        <span class="n">processed_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_get_processed_record</span><span class="p">(</span><span class="n">record_org</span><span class="p">,</span>
              <span class="n">list_process</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">processed_record</span>
+        <span class="k">return</span> <span class="n">processed_record</span></div>
 
 <div class="viewcode-block" id="Record._get_processed_record"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._get_processed_record">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_processed_record</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">list_process</span><span class="p">):</span>
@@ -381,14 +401,20 @@
         
         <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">_get_processed_record</span><span class="p">(</span><span class="n">proc_record</span><span class="p">,</span> <span class="n">list_process</span><span class="p">)</span></div>
  
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Record._add_proc_key"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._add_proc_key">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_add_proc_key</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">hash_val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Includes the hash value of the new processed record of this record</span>
+<span class="sd">         into record&#39;s processed attribute. It also updates the record on the</span>
+<span class="sd">         database.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
         <span class="n">record</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hash_val</span><span class="p">)</span>
         <span class="n">this_record_hash</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">this_record_hash</span>
-        <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">this_record_hash</span><span class="p">,</span><span class="n">record</span><span class="p">)</span>
+        <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">this_record_hash</span><span class="p">,</span><span class="n">record</span><span class="p">)</span></div>
 
-    <span class="nd">@staticmethod</span>    
+<div class="viewcode-block" id="Record._apply"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._apply">[docs]</a>    <span class="nd">@staticmethod</span>    
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">processing_label</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Applies the requested processing label on the record. Returns a </span>
+<span class="sd">        new Record object representing the processed record. &quot;&quot;&quot;</span>
 
         <span class="c1"># you are repeating yourself. Refactor it at the earliest</span>
         <span class="c1"># convenient.</span>
@@ -411,10 +437,19 @@
         <span class="k">return</span> <span class="n">Record</span><span class="p">(</span><span class="n">tmp_time_vector</span><span class="p">,</span> <span class="n">tmp_disp_h1</span><span class="p">,</span> <span class="n">tmp_disp_h2</span><span class="p">,</span> <span class="n">tmp_disp_ver</span><span class="p">,</span>
                                        <span class="n">tmp_vel_h1</span><span class="p">,</span> <span class="n">tmp_vel_h2</span><span class="p">,</span> <span class="n">tmp_vel_ver</span><span class="p">,</span>
                                        <span class="n">tmp_acc_h1</span><span class="p">,</span> <span class="n">tmp_acc_h2</span><span class="p">,</span> <span class="n">tmp_acc_ver</span><span class="p">,</span>
-                                       <span class="n">record</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">source_params</span><span class="p">)</span>
+                                       <span class="n">record</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">source_params</span><span class="p">)</span></div>
 
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Record._haversine"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._haversine">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_haversine</span><span class="p">(</span><span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Computes distance of two geographical points.</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | lat and lon for point 1 and point 2</span>
+
+<span class="sd">        Outputs:</span>
+<span class="sd">            | distance betwee two points in km.</span>
+<span class="sd">        </span>
+<span class="sd">         &quot;&quot;&quot;</span>
         <span class="c1"># convert decimal degrees to radians </span>
         <span class="c1"># this method is also defined in station module.</span>
         <span class="c1"># TODO: move them to a util module. </span>
@@ -428,10 +463,21 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">dlat</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">dlon</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">c</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">asin</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> 
         <span class="n">r</span> <span class="o">=</span> <span class="mi">6371</span> <span class="c1"># in kilometers</span>
-        <span class="k">return</span> <span class="n">c</span> <span class="o">*</span> <span class="n">r</span>
+        <span class="k">return</span> <span class="n">c</span> <span class="o">*</span> <span class="n">r</span></div>
 
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Record._from_hercules"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._from_hercules">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_from_hercules</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span><span class="n">source_hypocenter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Loads an instance of Hercules simulation results at one station.</span>
+<span class="sd">        Returns a Record object.</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | filename: station file name (e.g., station.10)</span>
+<span class="sd">            | station_obj: a station object corresponding that filename</span>
+<span class="sd">            | source_hypocenter: project source location</span>
+
+<span class="sd">        Outputs:</span>
+<span class="sd">            | Record object </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">times</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">acc_h1</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">vel_h1</span> <span class="o">=</span> <span class="p">[]</span>
@@ -470,7 +516,8 @@
                     <span class="k">continue</span>
                 <span class="n">pieces</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                 <span class="n">pieces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">piece</span><span class="p">)</span> <span class="k">for</span> <span class="n">piece</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">]</span>
-                <span class="c1"># Write timeseries to files. Please not that Hercules files </span>
+                
+                <span class="c1"># Write timeseries to files. Please note that Hercules files </span>
                 <span class="c1"># have the vertical component positive pointing down so we have</span>
                 <span class="c1"># to flip it here to match the BBP format in which vertical</span>
                 <span class="c1"># component points up</span>
@@ -487,8 +534,7 @@
                 <span class="n">acc_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
 
         <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-            <span class="c1"># sys.exit(-1)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>            
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">input_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             
@@ -518,14 +564,13 @@
         <span class="n">acc_h2</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">acc_h2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">acc_ver</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">acc_ver</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     
-        <span class="c1"># self.delta_t = times[1] - times[0]</span>
         <span class="c1"># Group headers</span>
         <span class="c1"># headers = [dis_header, vel_header, acc_header]</span>
 
         <span class="k">return</span> <span class="n">Record</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">disp_h1</span><span class="p">,</span> <span class="n">disp_h2</span><span class="p">,</span> <span class="n">disp_ver</span><span class="p">,</span>
                     <span class="n">vel_h1</span><span class="p">,</span> <span class="n">vel_h2</span><span class="p">,</span> <span class="n">vel_ver</span><span class="p">,</span>
                     <span class="n">acc_h1</span><span class="p">,</span> <span class="n">acc_h2</span><span class="p">,</span> <span class="n">acc_ver</span><span class="p">,</span>
-                    <span class="n">station_obj</span><span class="p">,</span> <span class="n">source_hypocenter</span><span class="p">)</span></div>
+                    <span class="n">station_obj</span><span class="p">,</span> <span class="n">source_hypocenter</span><span class="p">)</span></div></div>
 
 </pre></div>
 
