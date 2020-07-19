@@ -3,6 +3,7 @@ timeseries.py
 ====================================
 The core module for the TimeSeries class.
 """
+
 import numpy as np
 from scipy.signal import (sosfiltfilt, filtfilt, ellip, butter, zpk2sos,
                           decimate, kaiser)
@@ -40,30 +41,42 @@ class TimeSeries:
         self.f_init_point = 0
         self.notes = None
         self.peak_vv = None
-        self.peak_vt = None
-        
-        
+        self.peak_vt = None        
 
     def add_note(self):
         pass
 
     @classmethod
     def _add_processing_label(cls, label_name, label_type, argument_dict):
+        """ Adds new processing label to the timeseries class. 
+
+        Inputs:
+            | label_name: optional processing label name
+            | label_type: should be one of the valid label types
+            | argument_dict: dictionary of arguments that is required for that 
+              processing label type.
+
+        """
+
         if label_name in cls.processing_labels:
             LOGGER.warning(f"label name: '{label_name}' has been already used. "
             "Try another name.")
             return
 
         if label_type not in cls.label_types:
-            #TODO probably customize exception should be a better option
-            #  to handle this.
-            print("Label type is not supported. Command is ignored.")
+            LOGGER.warning("Label type is not supported. Command is ignored.")
             return
         
         cls.processing_labels[label_name] = [label_type, argument_dict]
 
     def _lowpass_filter(self, fc, N = 4):
-        """ Returns a lowpass filtered (the Butterworth filter) signal value."""
+        """ Returns a lowpass filtered (the Butterworth filter) signal value.
+        
+        Inputs:
+            | fc: corner frequency (Hz)
+            | N: filter order (default value = 4)
+        
+        """
         Fs = 1/self.delta_t
         Wn = fc/(Fs/2)
         z, p, k = butter(N=N, Wn=Wn, btype='lowpass', analog=False,
@@ -73,7 +86,12 @@ class TimeSeries:
         return data
 
     def _highpass_filter(self, fc, N = 4):
-        """ Returns a lowpass filtered (the Butterworth filter) signal value."""
+        """ Returns a highpass filtered (the Butterworth filter) signal value.
+        
+        Inputs:
+            | fc: corner frequency (Hz)
+            | N: filter order (default value = 4)
+        """
         Fs = 1/self.delta_t
         Wn = fc/(Fs/2)
         z, p, k = butter(N=N, Wn=Wn, btype='highpass', analog=False,
@@ -83,7 +101,13 @@ class TimeSeries:
         return data    
 
     def _bandpass_filter(self, fcs, N = 4 ):
-        """ Returns a lowpass filtered (the Butterworth filter) signal value."""
+        """ Returns a bandpass filtered (the Butterworth filter) signal value.
+        
+        Inputs:
+            | fc: corner frequencies (Hz)
+            | N: filter order (default value = 4)
+        
+        """
         Fs = 1/self.delta_t
         Wn = fcs/(Fs/2)
         z, p, k = butter(N=N, Wn=Wn, btype='bandpass', analog=False,
@@ -94,14 +118,28 @@ class TimeSeries:
 
 
     def _scale(self, factor):
+        """ Returns a scaled signal.
+        
+        Inputs:
+            factor: scaling factor (e.g., 2 for doubling amplitude)
+        
+        """
         return self.value * factor    
 
     def _apply(self, label_name):
-        """ Applies the requested label_name on the timeseries """
+        """ Applies the requested label_name on the timeseries
+
+        Input: 
+            label_name: processing label name
+        
+        Output:
+            processed timeseries
+        
+        """
         
         if label_name not in self.processing_labels.keys():
             # this should never be invoked. I have checked the labels before. 
-            print("Label is not supported, ignored.")
+            LOGGER.warning("Label is not supported, ignored.")
             return
         
         #timeseries type
@@ -120,13 +158,15 @@ class TimeSeries:
             proc_data = self._bandpass_filter(**label_kwargs)
  
         if label_type == 'rotate':
-            print(f"{label_type} is not implemented.")
+            LOGGER.debug(f"{label_type} is not implemented.")
+            proc_data = self.value
  
         if label_type == 'scale':
             proc_data =  self._scale(**label_kwargs)
 
         if label_type == 'shift':
-            print(f"{label_type} is not implemented.")
+            LOGGER.debug(f"{label_type} is not implemented.")
+            proc_data = self.value
 
         if label_type == 'taper':
             def extract_params(flag, m):
@@ -141,16 +181,14 @@ class TimeSeries:
             p = extract_params(**label_kwargs)
             proc_data = seism_cutting(p[0], p[1], p[2],self.value,
              self.delta_t)
-               
-        
+                       
         if label_type == 'zero_pad':
             def extract_params(flag, t_diff, m):
                 return flag, t_diff, m
             p = extract_params(**label_kwargs)
             proc_data = seism_appendzeros(p[0], p[1], p[2],self.value,
              self.delta_t)
-               
-          
+                         
         if ts_type == "Disp":
             return Disp(proc_data, self.delta_t, self.t_init_point)
 
@@ -161,7 +199,7 @@ class TimeSeries:
             return Acc(proc_data, self.delta_t, self.t_init_point)
 
         if ts_type == "Raw":
-            print("Not implemented.")
+            LOGGER.warning("Not implemented.")
             return 
 
     
@@ -172,17 +210,17 @@ class TimeSeries:
         self.value = value
         self.delta_t = dt
         self.t_init_point = t_init_point
+        self.peak_vv = np.max(abs(self.value))
+        self.peak_vt = np.argmax(abs(self.value))
 
     def _compute_fft_value(self):
-
+        """ Computes FFT value by calling FAS function. """
         fmin = 0.1
         fmax = 1/self.delta_t
         s_factor = 3
         freq, afs = FAS(self.value, self.delta_t, len(self.value), fmin, fmax, s_factor)
         self.delta_f = freq[1] - freq[0]
         self.fft_value = afs
-        self.peak_vv = np.max(abs(self.value))
-        self.peak_vt = np.argmax(abs(self.value))
 
 
 class Disp(TimeSeries):

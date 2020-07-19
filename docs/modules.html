@@ -608,27 +608,85 @@ results in the metadata attribute.</p>
 <em class="property">class </em><code class="sig-prename descclassname">tsprocess.timeseries.</code><code class="sig-name descname">TimeSeries</code><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries" title="Permalink to this definition">¶</a></dt>
 <dd><p>TimeSeries Abstract Class</p>
 <dl class="py method">
+<dt id="tsprocess.timeseries.TimeSeries._add_processing_label">
+<em class="property">classmethod </em><code class="sig-name descname">_add_processing_label</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label_name</span></em>, <em class="sig-param"><span class="n">label_type</span></em>, <em class="sig-param"><span class="n">argument_dict</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._add_processing_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._add_processing_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds new processing label to the timeseries class.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">label_name: optional processing label name</div>
+<div class="line">label_type: should be one of the valid label types</div>
+<div class="line">argument_dict: dictionary of arguments that is required for that
+processing label type.</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.timeseries.TimeSeries._apply">
 <code class="sig-name descname">_apply</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._apply" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the requested label_name on the timeseries</p>
+<dl class="simple">
+<dt>Input:</dt><dd><p>label_name: processing label name</p>
+</dd>
+<dt>Output:</dt><dd><p>processed timeseries</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.timeseries.TimeSeries._bandpass_filter">
 <code class="sig-name descname">_bandpass_filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fcs</span></em>, <em class="sig-param"><span class="n">N</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._bandpass_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._bandpass_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a lowpass filtered (the Butterworth filter) signal value.</p>
+<dd><p>Returns a bandpass filtered (the Butterworth filter) signal value.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">fc: corner frequencies (Hz)</div>
+<div class="line">N: filter order (default value = 4)</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.timeseries.TimeSeries._compute_fft_value">
+<code class="sig-name descname">_compute_fft_value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._compute_fft_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._compute_fft_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>omputes FFT value</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.timeseries.TimeSeries._highpass_filter">
 <code class="sig-name descname">_highpass_filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fc</span></em>, <em class="sig-param"><span class="n">N</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._highpass_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._highpass_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a lowpass filtered (the Butterworth filter) signal value.</p>
+<dd><p>Returns a highpass filtered (the Butterworth filter) signal value.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">fc: corner frequency (Hz)</div>
+<div class="line">N: filter order (default value = 4)</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tsprocess.timeseries.TimeSeries._lowpass_filter">
 <code class="sig-name descname">_lowpass_filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fc</span></em>, <em class="sig-param"><span class="n">N</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._lowpass_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._lowpass_filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a lowpass filtered (the Butterworth filter) signal value.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">fc: corner frequency (Hz)</div>
+<div class="line">N: filter order (default value = 4)</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.timeseries.TimeSeries._scale">
+<code class="sig-name descname">_scale</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">factor</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/timeseries.html#TimeSeries._scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.timeseries.TimeSeries._scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a scaled signal.</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><p>factor: scaling factor (e.g., 2 for doubling amplitude)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
