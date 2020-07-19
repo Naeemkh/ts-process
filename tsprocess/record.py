@@ -402,4 +402,3 @@ class Record:
                     vel_h1, vel_h2, vel_ver,
                     acc_h1, acc_h2, acc_ver,
                     station_obj, source_hypocenter)
-

@@ -106,12 +106,10 @@ def get_period(tmin, tmax):
 
     return period
 
-
 def get_points(samples):
     # points is the least base-2 number that is greater than max samples
     power = int(math.log(max(samples), 2)) + 1
     return 2**power
-
 
 def check_opt_param_minmax(opt_params, key):
     x_lim = None
@@ -139,7 +137,6 @@ def smooth(data, factor):
 
     Outputs:
         | data - smoothed array
-
     """
     # factor = 3; c = 0.5, 0.25, 0.25
     # TODO: fix coefficients for factors other than 3
@@ -306,12 +303,11 @@ def is_lat_valid(lat):
     """ 
     Controls if latitude is in a valide range. 
     
-    Inputs:
-    
-        lat: latitude in degrees
+    Inputs:    
+        | lat: latitude in degrees
     
     Output:
-        True or False
+        | True or False
 
     Example:
 
@@ -331,12 +327,11 @@ def is_lon_valid(lon):
     """ 
     Controls if longitude is in a valide range. 
     
-    Inputs:
-    
-        lat: latitude in degrees
+    Inputs:    
+        | lat: latitude in degrees
     
     Output:
-        True or False
+        | True or False
 
     Example:
 
@@ -358,20 +353,20 @@ def is_depth_valid(depth):
     Controls if depth is a valid number. Depth is considered positive towards
     the earth interior.  
     
-    Inputs:
-    
-        depth: depth in km
+    Inputs:    
+        | depth: depth in km
     
     Output:
-        True or False
+        | True or False
 
     Example:
 
     >>> is_depth_valid('twenty')
     False
     """
+
     if not isinstance(depth, (float,int)):
-        LOGGER.error('Input is not valid for depth. Should be a numeric number.')
+        LOGGER.error('Input is not valid for depth. Should be a numeric value.')
         return False
 
     return True

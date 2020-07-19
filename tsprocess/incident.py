@@ -117,11 +117,3 @@ class Incident:
          source_relative_path)
         self.source = SeismicSource(source_folder,
          self.metadata["incident_type"])
-
-
-
-        
-        
-
-
-        

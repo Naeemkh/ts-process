@@ -275,12 +275,10 @@
 
     <span class="k">return</span> <span class="n">period</span></div>
 
-
 <span class="k">def</span> <span class="nf">get_points</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
     <span class="c1"># points is the least base-2 number that is greater than max samples</span>
     <span class="n">power</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="mi">2</span><span class="o">**</span><span class="n">power</span>
-
 
 <span class="k">def</span> <span class="nf">check_opt_param_minmax</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
     <span class="n">x_lim</span> <span class="o">=</span> <span class="kc">None</span>
@@ -308,7 +306,6 @@
 
 <span class="sd">    Outputs:</span>
 <span class="sd">        | data - smoothed array</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># factor = 3; c = 0.5, 0.25, 0.25</span>
     <span class="c1"># TODO: fix coefficients for factors other than 3</span>
@@ -475,12 +472,11 @@
     <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Controls if latitude is in a valide range. </span>
 <span class="sd">    </span>
-<span class="sd">    Inputs:</span>
-<span class="sd">    </span>
-<span class="sd">        lat: latitude in degrees</span>
+<span class="sd">    Inputs:    </span>
+<span class="sd">        | lat: latitude in degrees</span>
 <span class="sd">    </span>
 <span class="sd">    Output:</span>
-<span class="sd">        True or False</span>
+<span class="sd">        | True or False</span>
 
 <span class="sd">    Example:</span>
 
@@ -500,12 +496,11 @@
     <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Controls if longitude is in a valide range. </span>
 <span class="sd">    </span>
-<span class="sd">    Inputs:</span>
-<span class="sd">    </span>
-<span class="sd">        lat: latitude in degrees</span>
+<span class="sd">    Inputs:    </span>
+<span class="sd">        | lat: latitude in degrees</span>
 <span class="sd">    </span>
 <span class="sd">    Output:</span>
-<span class="sd">        True or False</span>
+<span class="sd">        | True or False</span>
 
 <span class="sd">    Example:</span>
 
@@ -527,20 +522,20 @@
 <span class="sd">    Controls if depth is a valid number. Depth is considered positive towards</span>
 <span class="sd">    the earth interior.  </span>
 <span class="sd">    </span>
-<span class="sd">    Inputs:</span>
-<span class="sd">    </span>
-<span class="sd">        depth: depth in km</span>
+<span class="sd">    Inputs:    </span>
+<span class="sd">        | depth: depth in km</span>
 <span class="sd">    </span>
 <span class="sd">    Output:</span>
-<span class="sd">        True or False</span>
+<span class="sd">        | True or False</span>
 
 <span class="sd">    Example:</span>
 
 <span class="sd">    &gt;&gt;&gt; is_depth_valid(&#39;twenty&#39;)</span>
 <span class="sd">    False</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Input is not valid for depth. Should be a numeric number.&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Input is not valid for depth. Should be a numeric value.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">return</span> <span class="kc">True</span></div>
