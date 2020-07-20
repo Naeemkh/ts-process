@@ -59,12 +59,16 @@ class DataBase:
 
         """
         try:
-            del self.db[key]
-            del self.cache[key]
+            del self.db[key]   
+            try: 
+                del self.cache[key]
+            except:
+                pass         
+            LOGGER.debug(f"Value {key} is removed from database.")
         except KeyError:
             LOGGER.warning(f"Tried to delete {key} on the database."
              "Something went wrong.")
-    
+     
     def get_value(self, key):
         """ Returns the value in the following order:
         
@@ -102,7 +106,7 @@ class DataBase:
         else:
             return value
 
-    def update_nested_container(self, key1, key2, value):
+    def update_nested_container(self, key1, key2, value, append=True):
         """ Updates nested container 
         
         Inputs:
@@ -111,7 +115,41 @@ class DataBase:
             | value is the value of key2
 
         """
-        pass
+        try:
+            tracker_container = self.db[key1]
+            if key2 in list(tracker_container.keys()):
+                if append:
+                    tracker_container[key2].extend(value)
+                else: 
+                    tracker_container[key2] = value
+                self.db[key1] = tracker_container
+                LOGGER.debug(f"Tracker for {key2} has been set. '{value}' added.")
+            else:
+                tracker_container[key2] = value
+                self.db[key1] = tracker_container
+                LOGGER.debug(f"Tracker for {key2} is set. '{value}' added.")
+
+        except Exception:
+            pass
+    
+    def get_nested_container(self, key):
+        """ Returns the value of the nested container, directly from database.
+
+        Inputs:
+            | key: container key
+
+        Outputs:
+            | If found, value, else returns None. 
+        
+        """
+        value = None
+        try:
+            value = self.db[key]
+            LOGGER.debug(f"Key: {key}. Container is loaded from the database.")
+        except:
+            LOGGER.debug(f"Key: {key}. Value is not found in the cache.")
+
+        return value
 
     def remove_nested_container(self, key1, key2):
         """ Removes key2 from tracking inside key1 container.

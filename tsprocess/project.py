@@ -9,6 +9,7 @@ import hashlib
 from typing import Any, List, Set, Dict, Tuple, Optional
 
 import pandas as pd
+import sqlite3
 from ipywidgets import HTML
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -20,6 +21,7 @@ from .station import Station
 from .incident import Incident
 from .database import DataBase
 from .timeseries import TimeSeries
+from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax,
                       is_lat_valid, is_lon_valid, is_depth_valid)
 
@@ -34,8 +36,8 @@ class Project:
     def __new__(cls,name):
         if cls._instance is None:
             cls._instance = super(Project,cls).__new__(cls)
-            # print("new in work")
             cls._instance.name = name
+            cls._instance.tracker_name = name + "_dbtracker"
             cls._instance.pr_db = None
             cls._instance.incidents = {}
             cls._instance._connect_to_database()
@@ -53,10 +55,23 @@ class Project:
         """ Creates and connects to a database."""
         cls._instance.pr_db = DataBase(cls._instance.name+"_db", cache_size=2000)
         Record.pr_db = cls._instance.pr_db
+        
+        cls._instance.pr_inc_tracker = DataBaseTracker(cls._instance.tracker_name,
+         cls._instance, buffer_capacity=3)
+        Record.pr_inc_tracker = cls._instance.pr_inc_tracker        
 
     def close_database(self):
         """ Terminating the connection to the database."""
+                
+        # writing data tracker in the buffer into the database
+        self.pr_inc_tracker.add_to_database()
+        self.pr_inc_tracker.buffer = {key: [] for 
+         key, _ in self.pr_inc_tracker.buffer.items()}
+
+        # closing database
         self.pr_db.close_db()
+
+    
 
     # Incidents
     def add_incident(self, incident_folder):
@@ -106,6 +121,7 @@ class Project:
 
         # load incident
         self._load_incident(incident_folder,inc_des)
+        self.pr_inc_tracker.start_tracking_incident(inc_des["incident_name"])
       
     def _load_incident(self, incident_folder, incident_description):
         """ load incidents into the project's incidents dictionary
@@ -157,6 +173,12 @@ class Project:
          stations there is no record for that incident, it should return 
          None. 
         """
+
+        if len(list_inc) != len(list_process):
+            LOGGER.error("Number of incidents, and number of nested lists of"
+             "processing labels should be the same.")
+            return
+
         records = []
         for station in Station.list_of_stations:
            
@@ -198,7 +220,45 @@ class Project:
 
     def remove_incident(self, incident_name):
         """Removes incident from the project."""
-        pass
+        
+        if incident_name not in self.incidents:
+            LOGGER.warning(f"'{incident_name}' is not exist."
+             f"List of available incidents: {self.incidents}")
+            return
+
+        # first remove the incident related records from database.
+        tmp_list_hash = self.pr_db.get_nested_container(
+            self.tracker_name)[incident_name]
+
+        # it might be a good idea to assign this to another thread or processor.
+        try:
+            for item in tmp_list_hash:
+                self.pr_db.delete_value(item)
+            LOGGER.debug(f"All records related to incident {incident_name}"
+             ", has been removed from database.")
+        except:
+            pass
+        
+        try:
+            self.incidents.pop(incident_name)
+            LOGGER.info(f"Incident {incident_name} is deleted.")
+        except Exception:
+            LOGGER.error(f"Could not delete incident '{incident_name}'")
+        
+        # Sqlite3 removes the data however, does nor release it.
+        # it keeps it for future use. We can manually clear the database.
+        conn=sqlite3.connect(self.name + '_db.sqlite')
+        conn.execute("VACUUM")
+        conn.close()
+
+        # clean the hash values from tracker:
+        self.pr_inc_tracker.remove_incident(incident_name)
+
+        
+    
+
+
+
     
     # source
     def add_source_hypocenter(self,lat, lon, depth):
@@ -586,6 +646,9 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
+        if not records:
+            return
+
         for item in records:
             print(item[0]) 
 
