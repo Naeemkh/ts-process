@@ -62,7 +62,7 @@ class Project:
 
     def close_database(self):
         """ Terminating the connection to the database."""
-                
+
         # writing data tracker in the buffer into the database
         self.pr_inc_tracker.add_to_database()
         self.pr_inc_tracker.buffer = {key: [] for 
@@ -70,8 +70,6 @@ class Project:
 
         # closing database
         self.pr_db.close_db()
-
-    
 
     # Incidents
     def add_incident(self, incident_folder):
@@ -253,12 +251,6 @@ class Project:
 
         # clean the hash values from tracker:
         self.pr_inc_tracker.remove_incident(incident_name)
-
-        
-    
-
-
-
     
     # source
     def add_source_hypocenter(self,lat, lon, depth):

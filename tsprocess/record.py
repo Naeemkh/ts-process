@@ -214,7 +214,8 @@ class Record:
             # this process has been done before, get it from database.
             tmp_rec = Record.pr_db.get_value(proc_hash_val)
             if tmp_rec:
-                return Record._get_processed_record(incident_name, tmp_rec,list_process)
+                return Record._get_processed_record(incident_name, tmp_rec,
+                 list_process)
             
                
         # if the code flow gets here, it means the requested label is not

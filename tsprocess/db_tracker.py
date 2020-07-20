@@ -77,17 +77,8 @@ class DataBaseTracker:
             print(e)
             LOGGER.debug(f"Something went wrong in adding tracking data.")
             
-
-
     def remove_incident(self, incident_name):
-        self.dt_db.update_nested_container(self.name, incident_name, [], append=False)
-
-        
-        
-
-
-    
-         
+        self.dt_db.update_nested_container(self.name, incident_name, [], append=False)              
 
 
     
