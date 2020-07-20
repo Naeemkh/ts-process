@@ -121,7 +121,7 @@ class TimeSeries:
         """ Returns a scaled signal.
         
         Inputs:
-            factor: scaling factor (e.g., 2 for doubling amplitude)
+            | factor: scaling factor (e.g., 2 for doubling amplitude)
         
         """
         return self.value * factor    
@@ -130,10 +130,10 @@ class TimeSeries:
         """ Applies the requested label_name on the timeseries
 
         Input: 
-            label_name: processing label name
+            | label_name: processing label name
         
         Output:
-            processed timeseries
+            | processed timeseries
         
         """
         
