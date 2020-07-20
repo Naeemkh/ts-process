@@ -6,6 +6,9 @@ This section includes modules that are used in this project.
 .. automodule:: tsprocess.database
     :members: 
 
+.. automodule:: tsprocess.db_tracker
+    :members: 
+
 .. automodule:: tsprocess.project
     :members: 
 

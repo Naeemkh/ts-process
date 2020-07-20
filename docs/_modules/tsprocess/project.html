@@ -178,6 +178,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
 <span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">HTML</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
@@ -189,6 +190,7 @@
 <span class="kn">from</span> <span class="nn">.incident</span> <span class="kn">import</span> <span class="n">Incident</span>
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
 <span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
+<span class="kn">from</span> <span class="nn">.db_tracker</span> <span class="kn">import</span> <span class="n">DataBaseTracker</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">check_opt_param_minmax</span><span class="p">,</span>
                       <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">)</span>
 
@@ -203,8 +205,8 @@
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Project</span><span class="p">,</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-            <span class="c1"># print(&quot;new in work&quot;)</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">tracker_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_dbtracker&quot;</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">incidents</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
@@ -221,10 +223,21 @@
     <span class="k">def</span> <span class="nf">_connect_to_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Creates and connects to a database.&quot;&quot;&quot;</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="n">DataBase</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_db&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
-        <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">pr_db</span></div>
+        <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">pr_db</span>
+        
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">pr_inc_tracker</span> <span class="o">=</span> <span class="n">DataBaseTracker</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">tracker_name</span><span class="p">,</span>
+         <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="p">,</span> <span class="n">buffer_capacity</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">Record</span><span class="o">.</span><span class="n">pr_inc_tracker</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">pr_inc_tracker</span>        </div>
 
 <div class="viewcode-block" id="Project.close_database"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.close_database">[docs]</a>    <span class="k">def</span> <span class="nf">close_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Terminating the connection to the database.&quot;&quot;&quot;</span>
+
+        <span class="c1"># writing data tracker in the buffer into the database</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pr_inc_tracker</span><span class="o">.</span><span class="n">add_to_database</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pr_inc_tracker</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> 
+         <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_inc_tracker</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="c1"># closing database</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">close_db</span><span class="p">()</span></div>
 
     <span class="c1"># Incidents</span>
@@ -274,7 +287,8 @@
             <span class="k">return</span>
 
         <span class="c1"># load incident</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_incident</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">,</span><span class="n">inc_des</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_incident</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">,</span><span class="n">inc_des</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pr_inc_tracker</span><span class="o">.</span><span class="n">start_tracking_incident</span><span class="p">(</span><span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">])</span></div>
       
 <div class="viewcode-block" id="Project._load_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._load_incident">[docs]</a>    <span class="k">def</span> <span class="nf">_load_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">,</span> <span class="n">incident_description</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; load incidents into the project&#39;s incidents dictionary</span>
@@ -326,6 +340,12 @@
 <span class="sd">         stations there is no record for that incident, it should return </span>
 <span class="sd">         None. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_inc</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Number of incidents, and number of nested lists of&quot;</span>
+             <span class="s2">&quot;processing labels should be the same.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">Station</span><span class="o">.</span><span class="n">list_of_stations</span><span class="p">:</span>
            
@@ -367,7 +387,39 @@
 
 <div class="viewcode-block" id="Project.remove_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.remove_incident">[docs]</a>    <span class="k">def</span> <span class="nf">remove_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Removes incident from the project.&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        
+        <span class="k">if</span> <span class="n">incident_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2">&#39; is not exist.&quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;List of available incidents: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># first remove the incident related records from database.</span>
+        <span class="n">tmp_list_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">get_nested_container</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracker_name</span><span class="p">)[</span><span class="n">incident_name</span><span class="p">]</span>
+
+        <span class="c1"># it might be a good idea to assign this to another thread or processor.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tmp_list_hash</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">delete_value</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All records related to incident </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2">&quot;</span>
+             <span class="s2">&quot;, has been removed from database.&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">incident_name</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incident </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2"> is deleted.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not delete incident &#39;</span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Sqlite3 removes the data however, does nor release it.</span>
+        <span class="c1"># it keeps it for future use. We can manually clear the database.</span>
+        <span class="n">conn</span><span class="o">=</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_db.sqlite&#39;</span><span class="p">)</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;VACUUM&quot;</span><span class="p">)</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># clean the hash values from tracker:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pr_inc_tracker</span><span class="o">.</span><span class="n">remove_incident</span><span class="p">(</span><span class="n">incident_name</span><span class="p">)</span></div>
     
     <span class="c1"># source</span>
 <div class="viewcode-block" id="Project.add_source_hypocenter"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_source_hypocenter">[docs]</a>    <span class="k">def</span> <span class="nf">add_source_hypocenter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
@@ -755,6 +807,9 @@
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> </div>
 

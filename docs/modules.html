@@ -101,6 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#database-py">database.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#db-tracker-py">db_tracker.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#project-py">project.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#incident-py">incident.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timeseries-py">timeseries.py</a></li>
@@ -235,6 +236,22 @@ on-disk database. If the key is not found, simply ignores it.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.database.DataBase.get_nested_container">
+<code class="sig-name descname">get_nested_container</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/database.html#DataBase.get_nested_container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.database.DataBase.get_nested_container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value of the nested container, directly from database.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">key: container key</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">If found, value, else returns None.</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.database.DataBase.get_value">
 <code class="sig-name descname">get_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/database.html#DataBase.get_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.database.DataBase.get_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the value in the following order:</p>
@@ -256,6 +273,13 @@ on-disk database. If the key is not found, simply ignores it.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.database.DataBase.remove_nested_container">
+<code class="sig-name descname">remove_nested_container</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key1</span></em>, <em class="sig-param"><span class="n">key2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/database.html#DataBase.remove_nested_container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.database.DataBase.remove_nested_container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes key2 from tracking inside key1 container.
+Not implemented.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.database.DataBase.set_value">
 <code class="sig-name descname">set_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/database.html#DataBase.set_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.database.DataBase.set_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the key and given value in the database. If the key exists,
@@ -269,6 +293,36 @@ command if needed.</p>
 </div>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.database.DataBase.update_nested_container">
+<code class="sig-name descname">update_nested_container</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key1</span></em>, <em class="sig-param"><span class="n">key2</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">append</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/database.html#DataBase.update_nested_container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.database.DataBase.update_nested_container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates nested container</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">key1 is the key for the contaier.</div>
+<div class="line">key2 is the key inside the container.</div>
+<div class="line">value is the value of key2</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-tsprocess.db_tracker"></span><div class="section" id="db-tracker-py">
+<h2>db_tracker.py<a class="headerlink" href="#db-tracker-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module for the DatabaseTracker class.</p>
+<dl class="py class">
+<dt id="tsprocess.db_tracker.DataBaseTracker">
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.db_tracker.</code><code class="sig-name descname">DataBaseTracker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">project</span></em>, <em class="sig-param"><span class="n">buffer_capacity</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/db_tracker.html#DataBaseTracker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.db_tracker.DataBaseTracker" title="Permalink to this definition">¶</a></dt>
+<dd><p>DatabaseTracker Class</p>
+<dl class="py method">
+<dt id="tsprocess.db_tracker.DataBaseTracker.start_tracking_incident">
+<code class="sig-name descname">start_tracking_incident</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/db_tracker.html#DataBaseTracker.start_tracking_incident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.db_tracker.DataBaseTracker.start_tracking_incident" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates an empty list for a new incident.</p>
 </dd></dl>
 
 </dd></dl>
@@ -777,7 +831,7 @@ Returns a Record object.</p>
 
 <dl class="py method">
 <dt id="tsprocess.record.Record._get_processed_record">
-<em class="property">static </em><code class="sig-name descname">_get_processed_record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">list_process</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._get_processed_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._get_processed_record" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">_get_processed_record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">incident_name</span></em>, <em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">list_process</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._get_processed_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._get_processed_record" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the processed records based on hash value of the
 record and the processing label. Developers should call this
 function only by original record.</p>

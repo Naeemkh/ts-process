@@ -161,6 +161,8 @@ class Record:
     
                     # put the record in the database.
                     Record.pr_db.set_value(hash_val,record_org)
+                    Record.pr_inc_tracker.track_incident_hash(incident_name,
+                     hash_val)
                 
                 except Exception as e:
                     LOGGER.debug(e)
@@ -185,13 +187,13 @@ class Record:
             return record_org
 
         
-        processed_record = Record._get_processed_record(record_org,
-             list_process)
+        processed_record = Record._get_processed_record(incident_name, 
+         record_org, list_process)
 
         return processed_record
 
     @staticmethod
-    def _get_processed_record(record, list_process):
+    def _get_processed_record(incident_name, record, list_process):
         """ Returns the processed records based on hash value of the 
         record and the processing label. Developers should call this
         function only by original record.
@@ -212,7 +214,8 @@ class Record:
             # this process has been done before, get it from database.
             tmp_rec = Record.pr_db.get_value(proc_hash_val)
             if tmp_rec:
-                return Record._get_processed_record(tmp_rec,list_process)
+                return Record._get_processed_record(incident_name, tmp_rec,
+                 list_process)
             
                
         # if the code flow gets here, it means the requested label is not
@@ -225,12 +228,14 @@ class Record:
         
         # put data in the database
         Record.pr_db.set_value(proc_hash_val,proc_record)
+        Record.pr_inc_tracker.track_incident_hash(incident_name,
+                    proc_hash_val)
 
         # add hash value into processed values
         # and update it on the data base.
         Record._add_proc_key(record, proc_hash_val)
         
-        return Record._get_processed_record(proc_record, list_process)
+        return Record._get_processed_record(incident_name, proc_record, list_process)
  
     @staticmethod
     def _add_proc_key(record, hash_val):
@@ -241,6 +246,7 @@ class Record:
         record.processed.append(hash_val)
         this_record_hash = record.this_record_hash
         Record.pr_db.set_value(this_record_hash,record)
+        # this hash value is already in the tracker. No need to add agian. 
 
     @staticmethod    
     def _apply(record, processing_label):
