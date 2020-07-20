@@ -106,6 +106,23 @@ class DataBase:
                 return None
         else:
             return value
+
+    def update_nested_container(self, key1, key2, value):
+        """ Updates nested container 
+        
+        Inputs:
+            | key1 is the key for the contaier.
+            | key2 is the key inside the container.
+            | value is the value of key2
+
+        """
+        pass
+
+    def remove_nested_container(self, key1, key2):
+        """ Removes key2 from tracking inside key1 container.
+        Not implemented.
+        """ 
+        pass
         
     def close_db(self):
         """ Commits changes to the database, closes the database, clears the 
