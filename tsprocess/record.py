@@ -165,8 +165,8 @@ class Record:
                      hash_val)
                 
                 except Exception as e:
-                    LOGGER.debug(e)
                     record_org = None
+                    LOGGER.warning(f"{st_name} from {incident_name} could not load. " + str(e))
                
             if incident_type == "awp":
                 print("AWP method is not implemented.")
@@ -179,7 +179,6 @@ class Record:
             # if by this point record is still is None, something is
             # wrong with the record. 
             # TODO handle corrupt record.
-            LOGGER.debug(f"{st_name} from {incident_name} could not load")
             return
             
         if not list_process:

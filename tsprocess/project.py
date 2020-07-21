@@ -367,7 +367,6 @@ class Project:
         
         for record in records:
             
-                 
             fig, axarr = plt.subplots(nrows=3, ncols=3, figsize=(14, 9))
             
             # h1, h2, UD
@@ -378,8 +377,9 @@ class Project:
 
             x_lim_f = check_opt_param_minmax(opt_params, 'zoom_in_freq')
             x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
-                           
 
+            station_name = None
+            epicentral_dist = None               
             for i,item in enumerate(record):
                 if not item:
                     continue
@@ -396,17 +396,27 @@ class Project:
                 axarr[2][1].plot(item.freq_vec,abs(item.vel_ver.fft_value),
                  self.color_code[i], label=list_inc[i])   
 
+                # station name
+                if not station_name:
+                    station_name = item.station.inc_st_name[list_inc[i]]
+                
+                # epicentral distance
+                if not epicentral_dist:
+                    epicentral_dist = f"{item.epicentral_distance: 0.2f}"
+ 
             for i in range(3):
                 axarr[i][0].set_xlim(x_lim_t)
                 axarr[i][1].set_xlim(x_lim_f)
             
             axarr[0][0].legend()
+
             axarr[0][0].set_title(
-                f'Station at incident {list_inc[0]}:'\
-                f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'\
-                f'{record[0].epicentral_distance: 0.2f} km'\
+                f'Station at incident {list_inc[0]}:'
+                f'{station_name} - epicenteral dist:'
+                f'{epicentral_dist} km'
                 )    
-            fig.tight_layout()     
+            fig.tight_layout()  
+
            
             # plt.savefig("output_plot.pdf", format='pdf',
             # transparent=False, dpi=300)  
@@ -460,6 +470,8 @@ class Project:
             x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
             x_lim_rsp = check_opt_param_minmax(opt_params, 'zoom_in_rsp')
                
+            station_name = None
+            epicentral_dist = None   
             for i,item in enumerate(record):
                 if not item:
                     continue
@@ -481,6 +493,14 @@ class Project:
                  item.acc_ver.response_spectra[1], self.color_code[i],
                  label=list_inc[i])   
 
+                # station name
+                if not station_name:
+                    station_name = item.station.inc_st_name[list_inc[i]]
+                
+                # epicentral distance
+                if not epicentral_dist:
+                    epicentral_dist = f"{item.epicentral_distance: 0.2f}"
+
             for i in range(3):
                 axarr[i][0].set_xlim(x_lim_t)
                 axarr[i][1].set_xlim(x_lim_rsp)
@@ -488,8 +508,8 @@ class Project:
             axarr[0][0].legend()
             axarr[0][0].set_title(
              f'Station at incident {list_inc[0]}:'
-             f'{record[0].station.inc_st_name[list_inc[0]]} - epicenteral dist:'
-             f'{record[0].epicentral_distance: 0.2f} km'
+             f'{station_name} - epicenteral dist:'
+             f'{epicentral_dist} km'
             )    
             fig.tight_layout()     
            
