@@ -376,3 +376,39 @@ def query_opt_params(opt_params, key):
     """ Returns the provided key in optional parameters dictionayr.
     Returns None if not found."""
     return opt_params.get(key, None)
+
+
+def write_into_file(filepath, message):
+
+    with open(filepath, 'a') as file1:
+        for item in message:
+            file1.writelines(item)
+
+
+def list2message(lst):
+    """ converts list of processing details into string message """
+    st = lst[0] 
+    for i,inc in enumerate(lst[1]):
+        st = st + "\n" + inc + ": "
+        for j,p in enumerate(lst[2][i]):
+            sep = ""
+            if j != 0:
+                sep = ", "
+            st = st + sep + p
+
+    st = st + "\nStation filters: "
+    for j in lst[3]:
+        st = st + j
+    st = st + "\nStation equivalency:\n"
+    for key, value in lst[4].items():
+        st = st + key + ": " + value + "\n"
+    
+    st = st + "\n----------------------------\n"
+
+    return st
+
+
+
+
+
+

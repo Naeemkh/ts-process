@@ -8,9 +8,11 @@ import os
 import hashlib
 from typing import Any, List, Set, Dict, Tuple, Optional
 
+
 import pandas as pd
 import sqlite3
 from ipywidgets import HTML
+from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.font_manager import FontProperties
@@ -23,8 +25,8 @@ from .incident import Incident
 from .database import DataBase
 from .timeseries import TimeSeries
 from .db_tracker import DataBaseTracker
-from .ts_utils import (check_opt_param_minmax, query_opt_params,
-                      is_lat_valid, is_lon_valid, is_depth_valid)
+from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
+                      list2message, is_lat_valid, is_lon_valid, is_depth_valid)
 from .ts_plot_utils import (plot_velocity_helper)
 
 
@@ -390,22 +392,27 @@ class Project:
             return
 
         for record in records:
-            plt1 = plot_velocity_helper(record,self.color_code,opt_params,
-             list_inc)
+            fig = plot_velocity_helper(record,self.color_code,opt_params,
+             list_inc, list_process)
                 
             if query_opt_params(opt_params, 'save_figure'):
                 
+                temp_record = None
+                for tmp_rc in record:
+                    if tmp_rc:
+                        temp_record = tmp_rc
+                        break
+
+                if not temp_record:
+                    LOGGER.warning('All records at this station are None. Ignored.')
+
                 # generate outputfile name
-                # first_instance + its_station + other_instances + counter.
-                
-                # append description files.
-                # new line
-                # file name
-                # details 
+                f_name_save = "f_velocity_plot_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+                details = [f_name_save, list_inc, list_process, list_filters, tmp_rc.station.inc_st_name]
+                write_into_file(os.path.join(self.path_to_output_dir,"output_item_description.txt"),list2message(details))
 
                 # save item.
-                plt.savefig("output_plot2.pdf", format='pdf',transparent=False, dpi=300)  
-
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save), format='pdf',transparent=False, dpi=300)  
 
     def plot_acceleration_records(self, list_inc,list_process,list_filters, opt_params):
         """ Plots 3 acceleration timeseries one page per station and their 

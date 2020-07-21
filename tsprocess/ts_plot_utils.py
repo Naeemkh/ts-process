@@ -13,7 +13,7 @@ from .ts_utils import check_opt_param_minmax, query_opt_params
 
 def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process):
     """ """
-    fig = plt.figure()
+    # fig = plt.figure()
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
         nrs = 7          
@@ -66,11 +66,12 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process)
     
     if with_details:
         footnote_font = FontProperties()
-        # footnote_font.set_family('sans-serif')
+        footnote_font.set_family('sans-serif')
         footnote_font.set_name('Courier')
         footnote_font.set_size(10)
-        axarr[3][0].text(1,17,"This is Courier!", fontproperties = footnote_font)
-        axarr[3][0].text(1,2,"This is Courier!")
+        max_height = 50 
+        axarr[3][0].text(1,0.8 * max_height,"Processing details go here", fontproperties = footnote_font)
+        
         axarr[3][0].set_xlim([0,50])
         axarr[3][0].set_ylim([0,50])
         axarr[3][0].get_xaxis().set_ticks([])
@@ -92,6 +93,3 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process)
     fig.tight_layout()  
 
     return fig
-    
-    # if query_opt_params(opt_params, 'save_figure'):
-    #     plt.savefig("output_plot2.pdf", format='pdf',transparent=False, dpi=300)  
