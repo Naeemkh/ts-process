@@ -680,9 +680,31 @@ class Project:
         table_df = pd.DataFrame(table, columns=column_names)
         return table_df
 
+    #Database
+    def database_summary(self):
+        """ Returns a summary of database """
 
-  
+        try:
+            db_file = self.name+'_db.sqlite'
+            database_size = os.path.getsize(db_file)
+        except OSError as e:
+            LOGGER.warning(f"{db_file} is not found.")
+            database_size = None
+        
+        db_keys = self.pr_db.db.keys()
+        list_of_trackers = [key for key in db_keys if
+         '_dbtracker' in key.lower()]
 
+        if database_size:
+            print(f"Database name: {db_file}")
+            print(f"Database size: {str(database_size/1000000)} MB.")
+            print(f"Number of items: {str(len(list(self.pr_db.db.keys())))}")
+            print(f"List of database trackers: {list_of_trackers}")
+            
+    def database_content(self):
+
+        for key, item in self.pr_db.db.items():
+            print(key," : ", item)
 
         
     
