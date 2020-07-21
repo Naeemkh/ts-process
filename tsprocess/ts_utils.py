@@ -370,3 +370,9 @@ def is_depth_valid(depth):
         return False
 
     return True
+
+
+def query_opt_params(opt_params, key):
+    """ Returns the provided key in optional parameters dictionayr.
+    Returns None if not found."""
+    return opt_params.get(key, None)
