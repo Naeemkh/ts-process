@@ -39,8 +39,10 @@ class Project:
             cls._instance.name = name
             cls._instance.tracker_name = name + "_dbtracker"
             cls._instance.pr_db = None
+            cls._instance.path_to_output_dir = None
             cls._instance.incidents = {}
             cls._instance._connect_to_database()
+            cls._instance._make_output_dir()
             cls._instance.metadata = {}
             return cls._instance
         else:
@@ -70,6 +72,27 @@ class Project:
 
         # closing database
         self.pr_db.close_db()
+
+    @classmethod
+    def _make_output_dir(cls):
+        """ Makes output_tsprocess directory in the working path. """
+        path_to_output = os.path.join(os.getcwd(),"output_tsprocess")
+
+        try:
+            os.mkdir(path_to_output)
+            cls._instance.path_to_output_dir = path_to_output
+            LOGGER.debug(f"{path_to_output} forlder is created.")
+        
+        except FileExistsError:
+            cls._instance.path_to_output_dir = path_to_output
+            LOGGER.debug(f"{path_to_output} forlder exists.")
+        
+        except OSError:
+            LOGGER.warning(f"Failed to create {path_to_output} folder.")
+        
+        
+
+
 
     # Incidents
     def add_incident(self, incident_folder):
