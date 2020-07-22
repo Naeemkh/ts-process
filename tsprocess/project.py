@@ -8,7 +8,6 @@ import os
 import hashlib
 from typing import Any, List, Set, Dict, Tuple, Optional
 
-
 import pandas as pd
 import sqlite3
 from ipywidgets import HTML
@@ -94,11 +93,7 @@ class Project:
         
         except OSError:
             LOGGER.warning(f"Failed to create {path_to_output} folder.")
-        
-        
-
-
-
+  
     # Incidents
     def add_incident(self, incident_folder):
         """ Adds a new incident to the project.
@@ -392,8 +387,8 @@ class Project:
             return
 
         for record in records:
-            fig = plot_velocity_helper(record,self.color_code,opt_params,
-             list_inc, list_process)
+            fig, message, f_name_save = plot_velocity_helper(record,self.color_code,opt_params,
+             list_inc, list_process, list_filters)
                 
             if query_opt_params(opt_params, 'save_figure'):
                 
@@ -406,10 +401,8 @@ class Project:
                 if not temp_record:
                     LOGGER.warning('All records at this station are None. Ignored.')
 
-                # generate outputfile name
-                f_name_save = "f_velocity_plot_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
-                details = [f_name_save, list_inc, list_process, list_filters, tmp_rc.station.inc_st_name]
-                write_into_file(os.path.join(self.path_to_output_dir,"output_item_description.txt"),list2message(details))
+                message = message + "\n----------------------------\n"
+                write_into_file(os.path.join(self.path_to_output_dir,"output_item_description.txt"),message)
 
                 # save item.
                 plt.savefig(os.path.join(self.path_to_output_dir,f_name_save), format='pdf',transparent=False, dpi=300)  

@@ -3,17 +3,20 @@ ts_plot_utils.py
 ====================================
 The core module for timeseries plot helper functions.
 """
-
+from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.font_manager import FontProperties
 
-from .ts_utils import check_opt_param_minmax, query_opt_params
+from .ts_utils import check_opt_param_minmax, query_opt_params, list2message
 
 
-def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process):
-    """ """
-    # fig = plt.figure()
+def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process,
+ list_filters):
+    """ Plots velocity timeseries and corresponding frequency spectra amplitude
+    for 3 components.
+    """
+    
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
         nrs = 7          
@@ -26,7 +29,6 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process)
         fig, axarr = plt.subplots(nrows=nrs, ncols=3, figsize=(14, 9))
         counter = 1
         rspan = 1
-
     
     # h1, h2, UD
     for i in range(3):
@@ -39,6 +41,7 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process)
     
     x_lim_f = check_opt_param_minmax(opt_params, 'zoom_in_freq')
     x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
+    
     station_name = None
     epicentral_dist = None               
     for i,item in enumerate(record):
@@ -59,21 +62,33 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process)
         # station name
         if not station_name:
             station_name = item.station.inc_st_name[list_inc[i]]
+            temp_record = item
         
         # epicentral distance
         if not epicentral_dist:
             epicentral_dist = f"{item.epicentral_distance: 0.2f}"
-    
+
+    axarr[0][0].set_ylabel('h1')
+    axarr[1][0].set_ylabel('h2')
+    axarr[2][0].set_ylabel('ver')
+    axarr[2][0].set_xlabel('Time (s)')
+    axarr[2][1].set_xlabel('Frequency (Hz)')
+
+    f_name_save = "f_velocity_plot_" +\
+         datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+    details = [f_name_save, list_inc, list_process, list_filters,
+     temp_record.station.inc_st_name]
+    message = list2message(details)
+
     if with_details:
         footnote_font = FontProperties()
-        footnote_font.set_family('sans-serif')
-        footnote_font.set_name('Courier')
-        footnote_font.set_size(10)
-        max_height = 50 
-        axarr[3][0].text(1,0.8 * max_height,"Processing details go here", fontproperties = footnote_font)
+        footnote_font.set_size(6)
+        max_height = 100 
+        axarr[3][0].text(1,0.8 * max_height,message, va = 'top',
+         fontproperties = footnote_font, wrap=True)
         
         axarr[3][0].set_xlim([0,50])
-        axarr[3][0].set_ylim([0,50])
+        axarr[3][0].set_ylim([0,max_height])
         axarr[3][0].get_xaxis().set_ticks([])
         axarr[3][0].get_yaxis().set_ticks([])
     
@@ -91,5 +106,4 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process)
         )    
     
     fig.tight_layout()  
-
-    return fig
+    return fig, message, f_name_save
