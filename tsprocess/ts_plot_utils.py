@@ -305,3 +305,91 @@ def plot_acceleration_helper(record, color_code, opt_params, list_inc,
 
 
 
+def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_process,list_filters):
+    
+    # Check number of input incidents
+    if len(records[0]) > len(color_code):
+        LOGGER.error(f"Number of timeseries are more than dedicated" 
+        "colors.")
+        return
+
+    with_details = False
+    if query_opt_params(opt_params, 'save_figure'):  
+        nrs = 7          
+        fig, axarr = plt.subplots(nrows=nrs, ncols=1, figsize=(14, 9))
+        rspan = 6
+        with_details = True
+    else:
+        nrs = 1
+        fig, axarr = plt.subplots(nrows=nrs, ncols=1, figsize=(14, 9))
+        rspan = 1
+    
+    axarr[0] = plt.subplot2grid((nrs,1),(0,0),rowspan=rspan, colspan=1)
+
+    if with_details:
+        axarr[1] = plt.subplot2grid((nrs,1),(6,0),rowspan=1, colspan=1)
+
+    x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
+
+    comp = opt_params.get('comp',None)
+    if not comp or (comp not in ["h1","h2","ver"]):
+        if comp:
+            LOGGER.warning(f"The component: {comp} is not supported. "
+              "h1 is used.")
+        comp = "h1"
+    
+    for k,record in enumerate(records):
+        for i,item in enumerate(record):
+            if not item:
+                continue
+                                           
+            if comp == "h1":
+                tmp_data = (0.8*item.vel_h1.value/item.vel_h1.peak_vv)+\
+                    item.epicentral_distance
+            elif comp == "h2":
+                tmp_data = (0.8*item.vel_h2.value/item.vel_h2.peak_vv)+\
+                    item.epicentral_distance
+            elif comp == "ver":
+                tmp_data = (0.8*item.vel_ver.value/item.vel_ver.peak_vv)+\
+                    item.epicentral_distance
+            else: 
+                LOGGER.error("Should never get here. Double check.")
+                                
+            if k == 0: 
+                legend_label=list_inc[i]    
+            else:
+                legend_label=None
+            axarr[0].plot(item.time_vec, tmp_data, color_code[i], 
+            label=legend_label, linewidth=0.2)
+        
+    axarr[0].set_xlabel('Time (s)')
+    axarr[0].set_ylabel('Epicentral Distance (km)')        
+    axarr[0].set_xlim(x_lim_t)
+    axarr[0].legend()
+    axarr[0].set_title(
+     f"Normalized Seismic Record Section -"
+     f"Number of stations/incident: {k+1}"
+     f"- Component: {comp}"
+    )    
+
+    f_name_save = "f_recordsection_plot_" +\
+    datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+    details = [f_name_save, list_inc, list_process, list_filters,{}]
+    message = list2message(details)
+
+    if with_details:
+        footnote_font = FontProperties()
+        footnote_font.set_size(6)
+        max_height = 100 
+        axarr[1].text(1,0.8 * max_height,message, va = 'top',
+         fontproperties = footnote_font, wrap=True)
+        
+        axarr[1].set_xlim([0,50])
+        axarr[1].set_ylim([0,max_height])
+        axarr[1].get_xaxis().set_ticks([])
+        axarr[1].get_yaxis().set_ticks([])
+    
+    fig.tight_layout() 
+
+    return fig, message, f_name_save
+        

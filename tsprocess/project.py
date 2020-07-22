@@ -27,7 +27,7 @@ from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
                       list2message, is_lat_valid, is_lon_valid, is_depth_valid)
 from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
-                            plot_acceleration_helper)
+                            plot_acceleration_helper, plot_recordsection_helper)
 
 
 class Project:
@@ -540,60 +540,17 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
 
-        # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
-            LOGGER.error(f"Number of timeseries are more than dedicated" 
-            "colors.")
-            return
-      
-        x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
-        comp = opt_params.get('comp',None)
+        fig, message, f_name_save = plot_recordsection_helper(records,
+            self.color_code,opt_params,list_inc, list_process, list_filters)
 
-        if not comp or (comp not in ["h1","h2","ver"]):
-            if comp:
-                LOGGER.warning(f"The component: {comp} is not supported. "
-                  "h1 is used.")
-            comp = "h1"
-        
-        fig, axarr = plt.subplots(nrows=1, ncols=1, figsize=(14, 9))
-
-        for k,record in enumerate(records):
-            for i,item in enumerate(record):
-                if not item:
-                    continue
-                                               
-                if comp == "h1":
-                    tmp_data = (0.8*item.vel_h1.value/item.vel_h1.peak_vv)+\
-                        item.epicentral_distance
-                elif comp == "h2":
-                    tmp_data = (0.8*item.vel_h2.value/item.vel_h2.peak_vv)+\
-                        item.epicentral_distance
-                elif comp == "ver":
-                    tmp_data = (0.8*item.vel_ver.value/item.vel_ver.peak_vv)+\
-                        item.epicentral_distance
-                else: 
-                    LOGGER.error("Should never get here. Double check.")
-                                    
-                if k == 0: 
-                    legend_label=list_inc[i]    
-                else:
-                    legend_label=None
-
-                axarr.plot(item.time_vec, tmp_data, self.color_code[i], 
-                label=legend_label, linewidth=0.2)
+        if query_opt_params(opt_params, 'save_figure'):
             
-        axarr.set_xlabel('Time (s)')
-        axarr.set_ylabel('Epicentral Distance (km)')        
-        axarr.set_xlim(x_lim_t)
-        axarr.legend()
-        axarr.set_title(
-         f"Normalized Seismic Record Section -"
-         f"Number of stations/incident: {k+1}"
-         f"- Component: {comp}"
-        )    
-        fig.tight_layout()    
-
-
+            message = message + "\n----------------------------\n"
+            write_into_file(os.path.join(self.path_to_output_dir,
+            "output_item_description.txt"),message)
+            # save item.
+            plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+             format='pdf',transparent=False, dpi=300)  
 
     def show_stations_on_map(self,list_inc,list_process,list_filters,
      opt_params):
