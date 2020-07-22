@@ -14,7 +14,9 @@ from .ts_utils import check_opt_param_minmax, query_opt_params, list2message
 def plot_displacement_helper(record, color_code, opt_params, list_inc,
  list_process, list_filters):
     """ Plots displacement timeseries and corresponding frequency spectra
-     amplitude for 3 components.
+     amplitude for 3 components. It is an internal function for
+     plot_displacement_records methods in the Project class.
+     should not be directly used by the end users.
     """
     
     with_details = False
@@ -110,8 +112,10 @@ def plot_displacement_helper(record, color_code, opt_params, list_inc,
 
 def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process,
  list_filters):
-    """ Plots velocity timeseries and corresponding frequency spectra amplitude
-    for 3 components.
+    """ Plots velocity timeseries and corresponding frequency spectra
+     amplitude for 3 components. It is an internal function for
+     plot_velocity_records methods in the Project class.
+     should not be directly used by the end users.
     """
     
     with_details = False
@@ -207,7 +211,10 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process,
 
 def plot_acceleration_helper(record, color_code, opt_params, list_inc,
  list_process, list_filters):
-    """ 
+    """ Plots acceleration timeseries and corresponding response spectra
+     amplitude for 3 components. It is an internal function for
+     plot_acceleration_records methods in the Project class.
+     should not be directly used by the end users.
     """
     
     with_details = False
@@ -306,7 +313,10 @@ def plot_acceleration_helper(record, color_code, opt_params, list_inc,
 
 
 def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_process,list_filters):
-    
+    """ Plots seismic record section. It is an internal function for
+     plot_record_section methods in the Project class.
+     should not be directly used by the end users.
+    """
     # Check number of input incidents
     if len(records[0]) > len(color_code):
         LOGGER.error(f"Number of timeseries are more than dedicated" 
@@ -391,5 +401,4 @@ def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_proc
     
     fig.tight_layout() 
 
-    return fig, message, f_name_save
-        
+    return fig, message, f_name_save        

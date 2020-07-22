@@ -400,8 +400,7 @@ class Project:
 
                 # save item.
                 plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
-                 format='pdf',transparent=False, dpi=300)  
-                 
+                 format='pdf',transparent=False, dpi=300)                 
 
     def plot_velocity_records(self, list_inc,list_process,list_filters,opt_params):
         """ Plots 3 velocity timeseries one page per station and their 

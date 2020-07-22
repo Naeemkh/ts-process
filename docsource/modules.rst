@@ -29,3 +29,6 @@ This section includes modules that are used in this project.
 
 .. automodule:: tsprocess.ts_utils
     :members: 
+
+.. automodule:: tsprocess.ts_plot_utils
+    :members: 

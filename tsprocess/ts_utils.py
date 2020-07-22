@@ -388,9 +388,9 @@ def write_into_file(filepath, message):
 def list2message(lst):
     """ converts list of processing details into string message
     details include: 
-    [file_name, list_inc, list_processing, list_station_filter,
-     station_incident dictionary]
-     """
+    | file_name, list_inc, list_processing, list_station_filter, 
+    station_incident dictionary
+    """
     st = lst[0] 
     for i,inc in enumerate(lst[1]):
         st = st + "\n" + inc + ": "
