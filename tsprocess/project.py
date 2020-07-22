@@ -11,8 +11,10 @@ from typing import Any, List, Set, Dict, Tuple, Optional
 import pandas as pd
 import sqlite3
 from ipywidgets import HTML
+from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.font_manager import FontProperties
 from ipyleaflet import Map, Marker, basemaps, basemap_to_tiles, AwesomeIcon, Popup
 
 from .log import LOGGER
@@ -22,8 +24,11 @@ from .incident import Incident
 from .database import DataBase
 from .timeseries import TimeSeries
 from .db_tracker import DataBaseTracker
-from .ts_utils import (check_opt_param_minmax,
-                      is_lat_valid, is_lon_valid, is_depth_valid)
+from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
+                      list2message, is_lat_valid, is_lon_valid, is_depth_valid)
+from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
+                            plot_acceleration_helper, plot_recordsection_helper)
+
 
 class Project:
     """ Project Class """
@@ -39,8 +44,10 @@ class Project:
             cls._instance.name = name
             cls._instance.tracker_name = name + "_dbtracker"
             cls._instance.pr_db = None
+            cls._instance.path_to_output_dir = None
             cls._instance.incidents = {}
             cls._instance._connect_to_database()
+            cls._instance._make_output_dir()
             cls._instance.metadata = {}
             return cls._instance
         else:
@@ -71,6 +78,23 @@ class Project:
         # closing database
         self.pr_db.close_db()
 
+    @classmethod
+    def _make_output_dir(cls):
+        """ Makes output_tsprocess directory in the working path. """
+        path_to_output = os.path.join(os.getcwd(),"output_tsprocess")
+
+        try:
+            os.mkdir(path_to_output)
+            cls._instance.path_to_output_dir = path_to_output
+            LOGGER.debug(f"{path_to_output} forlder is created.")
+        
+        except FileExistsError:
+            cls._instance.path_to_output_dir = path_to_output
+            LOGGER.debug(f"{path_to_output} forlder exists.")
+        
+        except OSError:
+            LOGGER.warning(f"Failed to create {path_to_output} folder.")
+  
     # Incidents
     def add_incident(self, incident_folder):
         """ Adds a new incident to the project.
@@ -328,6 +352,56 @@ class Project:
             print(item, '-->', Station.station_filters[item])
 
     # Analysis interface
+    def plot_displacement_records(self, list_inc,list_process,list_filters,
+    opt_params):
+        """ Plots 3 displacement timeseries one page per station and their 
+        fft amplitude spectra plots
+        
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+            | zoom_in_time : [tmin, tmax] in seconds
+            | Horizontal zoom in time axis for better presentation. Data is not
+              modified. 
+            | zoom_in_freq : [freq_min, freq_max] in Hertz
+            | Horizontal zoom in period axis for better presentation. Data is 
+              not modified. 
+        """
+        
+        if not self._is_incident_valid(list_inc):
+            LOGGER.warning("At least one incident is not valid.")
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            LOGGER.warning("At least one processing label is not valid.")
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+        # Check number of input timeseries
+        if len(records[0]) > len(self.color_code):
+            LOGGER.error(f"Number of timeseries are more than dedicated" 
+            "colors.")
+            return
+
+        for record in records:
+            fig, message, f_name_save = plot_displacement_helper(record,
+             self.color_code,opt_params, list_inc, list_process, list_filters)
+                
+            if query_opt_params(opt_params, 'save_figure'):
+                
+                message = message + "\n----------------------------\n"
+                write_into_file(os.path.join(self.path_to_output_dir,
+                "output_item_description.txt"),message)
+
+                # save item.
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+                 format='pdf',transparent=False, dpi=300)                 
+
     def plot_velocity_records(self, list_inc,list_process,list_filters,opt_params):
         """ Plots 3 velocity timeseries one page per station and their 
         fft amplitude spectra plots
@@ -357,72 +431,40 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
-         # Check number of input timeseries
+        # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
 
-        plt.figure()
-        
         for record in records:
-            
-            fig, axarr = plt.subplots(nrows=3, ncols=3, figsize=(14, 9))
-            
-            # h1, h2, UD
-            for i in range(3):
-                axarr[i][0] = plt.subplot2grid((3,3),(i,0),rowspan=1, colspan=2)
-                axarr[i][1] = plt.subplot2grid((3,3),(i,2),rowspan=1, colspan=1)
-                axarr[i][0].grid(True)
-
-            x_lim_f = check_opt_param_minmax(opt_params, 'zoom_in_freq')
-            x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
-
-            station_name = None
-            epicentral_dist = None               
-            for i,item in enumerate(record):
-                if not item:
-                    continue
-                axarr[0][0].plot(item.time_vec,item.vel_h1.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[0][1].plot(item.freq_vec,abs(item.vel_h1.fft_value),
-                 self.color_code[i], label=list_inc[i])   
-                axarr[1][1].plot(item.freq_vec,abs(item.vel_h2.fft_value),
-                 self.color_code[i], label=list_inc[i])  
-                axarr[1][0].plot(item.time_vec,item.vel_h2.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[2][0].plot(item.time_vec,item.vel_ver.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[2][1].plot(item.freq_vec,abs(item.vel_ver.fft_value),
-                 self.color_code[i], label=list_inc[i])   
-
-                # station name
-                if not station_name:
-                    station_name = item.station.inc_st_name[list_inc[i]]
+            fig, message, f_name_save = plot_velocity_helper(record,
+             self.color_code,opt_params, list_inc, list_process, list_filters)
                 
-                # epicentral distance
-                if not epicentral_dist:
-                    epicentral_dist = f"{item.epicentral_distance: 0.2f}"
- 
-            for i in range(3):
-                axarr[i][0].set_xlim(x_lim_t)
-                axarr[i][1].set_xlim(x_lim_f)
-            
-            axarr[0][0].legend()
+            if query_opt_params(opt_params, 'save_figure'):
+                
+                # temp_record = None
+                # for tmp_rc in record:
+                #     if tmp_rc:
+                #         temp_record = tmp_rc
+                #         break
 
-            axarr[0][0].set_title(
-                f'Station at incident {list_inc[0]}:'
-                f'{station_name} - epicenteral dist:'
-                f'{epicentral_dist} km'
-                )    
-            fig.tight_layout()  
+                # if not temp_record:
+                #     LOGGER.warning(
+                #         'All records at this station are None. Ignored.')
 
-           
-            # plt.savefig("output_plot.pdf", format='pdf',
-            # transparent=False, dpi=300)  
-            # TODO: come up with a better dynamic name to save figures. 
+                message = message + "\n----------------------------\n"
+                write_into_file(os.path.join(self.path_to_output_dir,
+                "output_item_description.txt"),message)
 
-    def plot_acceleration_records(self, list_inc,list_process,list_filters, opt_params):
+                # save item.
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+                 format='pdf',transparent=False, dpi=300)  
+
+
+    def plot_acceleration_records(self, list_inc,list_process,list_filters,
+     opt_params):
+
         """ Plots 3 acceleration timeseries one page per station and their 
         response spectra plots
         
@@ -442,79 +484,36 @@ class Project:
         """
         
         if not self._is_incident_valid(list_inc):
+            LOGGER.warning("At least one incident is not valid.")
             return
 
         if not self._is_processing_label_valid(list_process):
+            LOGGER.warning("At least one processing label is not valid.")
             return
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
-         # Check number of input timeseries
+        # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
 
-        plt.figure()
-        
         for record in records:
-                             
-            fig, axarr = plt.subplots(nrows=3, ncols=3, figsize=(14, 9))
-            
-            # h1, h2, ver
-            for i in range(3):
-                axarr[i][0] = plt.subplot2grid((3,3),(i,0),rowspan=1, colspan=2)
-                axarr[i][1] = plt.subplot2grid((3,3),(i,2),rowspan=1, colspan=1)
-                axarr[i][0].grid(True)
-
-            x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
-            x_lim_rsp = check_opt_param_minmax(opt_params, 'zoom_in_rsp')
-               
-            station_name = None
-            epicentral_dist = None   
-            for i,item in enumerate(record):
-                if not item:
-                    continue
-                axarr[0][0].plot(item.time_vec,item.acc_h1.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[0][1].plot(item.acc_h1.response_spectra[0],
-                 item.acc_h1.response_spectra[1], self.color_code[i],
-                 label=list_inc[i])   
-
-                axarr[1][0].plot(item.time_vec,item.acc_h2.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[1][1].plot(item.acc_h2.response_spectra[0],
-                 item.acc_h2.response_spectra[1], self.color_code[i],
-                 label=list_inc[i])   
-
-                axarr[2][0].plot(item.time_vec,item.acc_ver.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[2][1].plot(item.acc_ver.response_spectra[0],
-                 item.acc_ver.response_spectra[1], self.color_code[i],
-                 label=list_inc[i])   
-
-                # station name
-                if not station_name:
-                    station_name = item.station.inc_st_name[list_inc[i]]
+            fig, message, f_name_save = plot_acceleration_helper(record,
+            self.color_code,opt_params,
+             list_inc, list_process, list_filters)
                 
-                # epicentral distance
-                if not epicentral_dist:
-                    epicentral_dist = f"{item.epicentral_distance: 0.2f}"
+            if query_opt_params(opt_params, 'save_figure'):
+                
+                message = message + "\n----------------------------\n"
+                write_into_file(os.path.join(self.path_to_output_dir,
+                "output_item_description.txt"),message)
 
-            for i in range(3):
-                axarr[i][0].set_xlim(x_lim_t)
-                axarr[i][1].set_xlim(x_lim_rsp)
-
-            axarr[0][0].legend()
-            axarr[0][0].set_title(
-             f'Station at incident {list_inc[0]}:'
-             f'{station_name} - epicenteral dist:'
-             f'{epicentral_dist} km'
-            )    
-            fig.tight_layout()     
-           
-            # plt.savefig("output_plot.pdf", format='pdf',
-            # transparent=False, dpi=300)  
+                # save item.
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+                 format='pdf',transparent=False, dpi=300)  
+          
     
     def plot_record_section(self, list_inc,list_process,list_filters,
      opt_params):
@@ -540,60 +539,17 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
 
-        # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
-            LOGGER.error(f"Number of timeseries are more than dedicated" 
-            "colors.")
-            return
-      
-        x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
-        comp = opt_params.get('comp',None)
+        fig, message, f_name_save = plot_recordsection_helper(records,
+            self.color_code,opt_params,list_inc, list_process, list_filters)
 
-        if not comp or (comp not in ["h1","h2","ver"]):
-            if comp:
-                LOGGER.warning(f"The component: {comp} is not supported. "
-                  "h1 is used.")
-            comp = "h1"
-        
-        fig, axarr = plt.subplots(nrows=1, ncols=1, figsize=(14, 9))
-
-        for k,record in enumerate(records):
-            for i,item in enumerate(record):
-                if not item:
-                    continue
-                                               
-                if comp == "h1":
-                    tmp_data = (0.8*item.vel_h1.value/item.vel_h1.peak_vv)+\
-                        item.epicentral_distance
-                elif comp == "h2":
-                    tmp_data = (0.8*item.vel_h2.value/item.vel_h2.peak_vv)+\
-                        item.epicentral_distance
-                elif comp == "ver":
-                    tmp_data = (0.8*item.vel_ver.value/item.vel_ver.peak_vv)+\
-                        item.epicentral_distance
-                else: 
-                    LOGGER.error("Should never get here. Double check.")
-                                    
-                if k == 0: 
-                    legend_label=list_inc[i]    
-                else:
-                    legend_label=None
-
-                axarr.plot(item.time_vec, tmp_data, self.color_code[i], 
-                label=legend_label, linewidth=0.2)
+        if query_opt_params(opt_params, 'save_figure'):
             
-        axarr.set_xlabel('Time (s)')
-        axarr.set_ylabel('Epicentral Distance (km)')        
-        axarr.set_xlim(x_lim_t)
-        axarr.legend()
-        axarr.set_title(
-         f"Normalized Seismic Record Section -"
-         f"Number of stations/incident: {k+1}"
-         f"- Component: {comp}"
-        )    
-        fig.tight_layout()    
-
-
+            message = message + "\n----------------------------\n"
+            write_into_file(os.path.join(self.path_to_output_dir,
+            "output_item_description.txt"),message)
+            # save item.
+            plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+             format='pdf',transparent=False, dpi=300)  
 
     def show_stations_on_map(self,list_inc,list_process,list_filters,
      opt_params):

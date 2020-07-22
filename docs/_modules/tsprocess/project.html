@@ -180,8 +180,10 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">sqlite3</span>
 <span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">HTML</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
+<span class="kn">from</span> <span class="nn">matplotlib.font_manager</span> <span class="kn">import</span> <span class="n">FontProperties</span>
 <span class="kn">from</span> <span class="nn">ipyleaflet</span> <span class="kn">import</span> <span class="n">Map</span><span class="p">,</span> <span class="n">Marker</span><span class="p">,</span> <span class="n">basemaps</span><span class="p">,</span> <span class="n">basemap_to_tiles</span><span class="p">,</span> <span class="n">AwesomeIcon</span><span class="p">,</span> <span class="n">Popup</span>
 
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
@@ -191,8 +193,11 @@
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
 <span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
 <span class="kn">from</span> <span class="nn">.db_tracker</span> <span class="kn">import</span> <span class="n">DataBaseTracker</span>
-<span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">check_opt_param_minmax</span><span class="p">,</span>
-                      <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">check_opt_param_minmax</span><span class="p">,</span> <span class="n">query_opt_params</span><span class="p">,</span> <span class="n">write_into_file</span><span class="p">,</span>
+                      <span class="n">list2message</span><span class="p">,</span> <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.ts_plot_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">plot_displacement_helper</span><span class="p">,</span> <span class="n">plot_velocity_helper</span><span class="p">,</span>
+                            <span class="n">plot_acceleration_helper</span><span class="p">,</span> <span class="n">plot_recordsection_helper</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Project Class &quot;&quot;&quot;</span>
@@ -208,8 +213,10 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">tracker_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_dbtracker&quot;</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">pr_db</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">path_to_output_dir</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">incidents</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_make_output_dir</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
         <span class="k">else</span><span class="p">:</span>
@@ -240,6 +247,23 @@
         <span class="c1"># closing database</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">close_db</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="Project._make_output_dir"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._make_output_dir">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_make_output_dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Makes output_tsprocess directory in the working path. &quot;&quot;&quot;</span>
+        <span class="n">path_to_output</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s2">&quot;output_tsprocess&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path_to_output</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">path_to_output_dir</span> <span class="o">=</span> <span class="n">path_to_output</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_to_output</span><span class="si">}</span><span class="s2"> forlder is created.&quot;</span><span class="p">)</span>
+        
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">path_to_output_dir</span> <span class="o">=</span> <span class="n">path_to_output</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_to_output</span><span class="si">}</span><span class="s2"> forlder exists.&quot;</span><span class="p">)</span>
+        
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create </span><span class="si">{</span><span class="n">path_to_output</span><span class="si">}</span><span class="s2"> folder.&quot;</span><span class="p">)</span></div>
+  
     <span class="c1"># Incidents</span>
 <div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Adds a new incident to the project.</span>
@@ -497,6 +521,56 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">Station</span><span class="o">.</span><span class="n">station_filters</span><span class="p">[</span><span class="n">item</span><span class="p">])</span></div>
 
     <span class="c1"># Analysis interface</span>
+<div class="viewcode-block" id="Project.plot_displacement_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_displacement_records">[docs]</a>    <span class="k">def</span> <span class="nf">plot_displacement_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+    <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Plots 3 displacement timeseries one page per station and their </span>
+<span class="sd">        fft amplitude spectra plots</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Optional parameters:</span>
+<span class="sd">            | zoom_in_time : [tmin, tmax] in seconds</span>
+<span class="sd">            | Horizontal zoom in time axis for better presentation. Data is not</span>
+<span class="sd">              modified. </span>
+<span class="sd">            | zoom_in_freq : [freq_min, freq_max] in Hertz</span>
+<span class="sd">            | Horizontal zoom in period axis for better presentation. Data is </span>
+<span class="sd">              not modified. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one incident is not valid.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one processing label is not valid.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+        <span class="c1"># Check number of input timeseries</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
+            <span class="s2">&quot;colors.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_displacement_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
+                
+                <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+                <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
+
+                <span class="c1"># save item.</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+                 <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>                 </div>
+
 <div class="viewcode-block" id="Project.plot_velocity_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_velocity_records">[docs]</a>    <span class="k">def</span> <span class="nf">plot_velocity_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span><span class="n">opt_params</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Plots 3 velocity timeseries one page per station and their </span>
 <span class="sd">        fft amplitude spectra plots</span>
@@ -526,62 +600,40 @@
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
-         <span class="c1"># Check number of input timeseries</span>
+        <span class="c1"># Check number of input timeseries</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
             <span class="s2">&quot;colors.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-        
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            
-                 
-            <span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
-            
-            <span class="c1"># h1, h2, UD</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_velocity_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
+                
+                <span class="c1"># temp_record = None</span>
+                <span class="c1"># for tmp_rc in record:</span>
+                <span class="c1">#     if tmp_rc:</span>
+                <span class="c1">#         temp_record = tmp_rc</span>
+                <span class="c1">#         break</span>
 
-            <span class="n">x_lim_f</span> <span class="o">=</span> <span class="n">check_opt_param_minmax</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;zoom_in_freq&#39;</span><span class="p">)</span>
-            <span class="n">x_lim_t</span> <span class="o">=</span> <span class="n">check_opt_param_minmax</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;zoom_in_time&#39;</span><span class="p">)</span>
-                           
+                <span class="c1"># if not temp_record:</span>
+                <span class="c1">#     LOGGER.warning(</span>
+                <span class="c1">#         &#39;All records at this station are None. Ignored.&#39;)</span>
 
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">freq_vec</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">fft_value</span><span class="p">),</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>   
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">freq_vec</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">fft_value</span><span class="p">),</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>  
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">freq_vec</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">fft_value</span><span class="p">),</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>   
+                <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+                <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_t</span><span class="p">)</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_f</span><span class="p">)</span>
-            
-            <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-            <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Station at incident </span><span class="si">{</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">:&#39;</span>\
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="si">}</span><span class="s1"> - epicenteral dist:&#39;</span>\
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">:</span><span class="s1"> 0.2f</span><span class="si">}</span><span class="s1"> km&#39;</span>\
-                <span class="p">)</span>    
-            <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>     </div>
-           
-            <span class="c1"># plt.savefig(&quot;output_plot.pdf&quot;, format=&#39;pdf&#39;,</span>
-            <span class="c1"># transparent=False, dpi=300)  </span>
-            <span class="c1"># TODO: come up with a better dynamic name to save figures. </span>
+                <span class="c1"># save item.</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+                 <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  </div>
 
-<div class="viewcode-block" id="Project.plot_acceleration_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_acceleration_records">[docs]</a>    <span class="k">def</span> <span class="nf">plot_acceleration_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span> <span class="n">opt_params</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Project.plot_acceleration_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_acceleration_records">[docs]</a>    <span class="k">def</span> <span class="nf">plot_acceleration_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+     <span class="n">opt_params</span><span class="p">):</span>
+
         <span class="sd">&quot;&quot;&quot; Plots 3 acceleration timeseries one page per station and their </span>
 <span class="sd">        response spectra plots</span>
 <span class="sd">        </span>
@@ -601,69 +653,36 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one incident is not valid.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one processing label is not valid.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
-         <span class="c1"># Check number of input timeseries</span>
+        <span class="c1"># Check number of input timeseries</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
             <span class="s2">&quot;colors.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-        
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-                             
-            <span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
-            
-            <span class="c1"># h1, h2, ver</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_acceleration_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span>
+             <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
+                
+                <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+                <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
 
-            <span class="n">x_lim_t</span> <span class="o">=</span> <span class="n">check_opt_param_minmax</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;zoom_in_time&#39;</span><span class="p">)</span>
-            <span class="n">x_lim_rsp</span> <span class="o">=</span> <span class="n">check_opt_param_minmax</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;zoom_in_rsp&#39;</span><span class="p">)</span>
-               
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">response_spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                 <span class="n">item</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">response_spectra</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                 <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>   
-
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">response_spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                 <span class="n">item</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">response_spectra</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                 <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>   
-
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span><span class="n">item</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                 <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">response_spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                 <span class="n">item</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">response_spectra</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                 <span class="n">label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>   
-
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_t</span><span class="p">)</span>
-                <span class="n">axarr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_rsp</span><span class="p">)</span>
-
-            <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-            <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
-             <span class="sa">f</span><span class="s1">&#39;Station at incident </span><span class="si">{</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">:&#39;</span>
-             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="si">}</span><span class="s1"> - epicenteral dist:&#39;</span>
-             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="si">:</span><span class="s1"> 0.2f</span><span class="si">}</span><span class="s1"> km&#39;</span>
-            <span class="p">)</span>    
-            <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>     </div>
-           
-            <span class="c1"># plt.savefig(&quot;output_plot.pdf&quot;, format=&#39;pdf&#39;,</span>
-            <span class="c1"># transparent=False, dpi=300)  </span>
+                <span class="c1"># save item.</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+                 <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  </div>
+          
     
 <div class="viewcode-block" id="Project.plot_record_section"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_record_section">[docs]</a>    <span class="k">def</span> <span class="nf">plot_record_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
      <span class="n">opt_params</span><span class="p">):</span>
@@ -689,60 +708,17 @@
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
 
-        <span class="c1"># Check number of input timeseries</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
-            <span class="s2">&quot;colors.&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-      
-        <span class="n">x_lim_t</span> <span class="o">=</span> <span class="n">check_opt_param_minmax</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;zoom_in_time&#39;</span><span class="p">)</span>
-        <span class="n">comp</span> <span class="o">=</span> <span class="n">opt_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_recordsection_helper</span><span class="p">(</span><span class="n">records</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">comp</span> <span class="ow">or</span> <span class="p">(</span><span class="n">comp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span><span class="s2">&quot;h2&quot;</span><span class="p">,</span><span class="s2">&quot;ver&quot;</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="n">comp</span><span class="p">:</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The component: </span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2"> is not supported. &quot;</span>
-                  <span class="s2">&quot;h1 is used.&quot;</span><span class="p">)</span>
-            <span class="n">comp</span> <span class="o">=</span> <span class="s2">&quot;h1&quot;</span>
-        
-        <span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">record</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">records</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                                               
-                <span class="k">if</span> <span class="n">comp</span> <span class="o">==</span> <span class="s2">&quot;h1&quot;</span><span class="p">:</span>
-                    <span class="n">tmp_data</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.8</span><span class="o">*</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">peak_vv</span><span class="p">)</span><span class="o">+</span>\
-                        <span class="n">item</span><span class="o">.</span><span class="n">epicentral_distance</span>
-                <span class="k">elif</span> <span class="n">comp</span> <span class="o">==</span> <span class="s2">&quot;h2&quot;</span><span class="p">:</span>
-                    <span class="n">tmp_data</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.8</span><span class="o">*</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">item</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">peak_vv</span><span class="p">)</span><span class="o">+</span>\
-                        <span class="n">item</span><span class="o">.</span><span class="n">epicentral_distance</span>
-                <span class="k">elif</span> <span class="n">comp</span> <span class="o">==</span> <span class="s2">&quot;ver&quot;</span><span class="p">:</span>
-                    <span class="n">tmp_data</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.8</span><span class="o">*</span><span class="n">item</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">item</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">peak_vv</span><span class="p">)</span><span class="o">+</span>\
-                        <span class="n">item</span><span class="o">.</span><span class="n">epicentral_distance</span>
-                <span class="k">else</span><span class="p">:</span> 
-                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Should never get here. Double check.&quot;</span><span class="p">)</span>
-                                    
-                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
-                    <span class="n">legend_label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">legend_label</span><span class="o">=</span><span class="kc">None</span>
-
-                <span class="n">axarr</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span> <span class="n">tmp_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> 
-                <span class="n">label</span><span class="o">=</span><span class="n">legend_label</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
             
-        <span class="n">axarr</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
-        <span class="n">axarr</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Epicentral Distance (km)&#39;</span><span class="p">)</span>        
-        <span class="n">axarr</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_t</span><span class="p">)</span>
-        <span class="n">axarr</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-        <span class="n">axarr</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
-         <span class="sa">f</span><span class="s2">&quot;Normalized Seismic Record Section -&quot;</span>
-         <span class="sa">f</span><span class="s2">&quot;Number of stations/incident: </span><span class="si">{</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
-         <span class="sa">f</span><span class="s2">&quot;- Component: </span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>    
-        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>    </div>
-
-
+            <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+            <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
+            <span class="c1"># save item.</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  </div>
 
 <div class="viewcode-block" id="Project.show_stations_on_map"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.show_stations_on_map">[docs]</a>    <span class="k">def</span> <span class="nf">show_stations_on_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
      <span class="n">opt_params</span><span class="p">):</span>
@@ -847,11 +823,33 @@
                 <span class="n">table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
 
         <span class="n">table_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">table_df</span></div></div>
+        <span class="k">return</span> <span class="n">table_df</span></div>
 
+    <span class="c1">#Database</span>
+<div class="viewcode-block" id="Project.database_summary"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.database_summary">[docs]</a>    <span class="k">def</span> <span class="nf">database_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a summary of database &quot;&quot;&quot;</span>
 
-  
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_db.sqlite&#39;</span>
+            <span class="n">database_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_file</span><span class="si">}</span><span class="s2"> is not found.&quot;</span><span class="p">)</span>
+            <span class="n">database_size</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="n">db_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">list_of_trackers</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">db_keys</span> <span class="k">if</span>
+         <span class="s1">&#39;_dbtracker&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
 
+        <span class="k">if</span> <span class="n">database_size</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database name: </span><span class="si">{</span><span class="n">db_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database size: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">database_size</span><span class="o">/</span><span class="mi">1000000</span><span class="p">)</span><span class="si">}</span><span class="s2"> MB.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of items: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;List of database trackers: </span><span class="si">{</span><span class="n">list_of_trackers</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            
+    <span class="k">def</span> <span class="nf">database_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s2">&quot; : &quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
 
         
     

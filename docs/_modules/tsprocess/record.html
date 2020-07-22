@@ -334,8 +334,8 @@
                      <span class="n">hash_val</span><span class="p">)</span>
                 
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                     <span class="n">record_org</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2"> could not load. &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
                
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AWP method is not implemented.&quot;</span><span class="p">)</span>
@@ -348,7 +348,6 @@
             <span class="c1"># if by this point record is still is None, something is</span>
             <span class="c1"># wrong with the record. </span>
             <span class="c1"># TODO handle corrupt record.</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2"> could not load&quot;</span><span class="p">)</span>
             <span class="k">return</span>
             
         <span class="k">if</span> <span class="ow">not</span> <span class="n">list_process</span><span class="p">:</span>
