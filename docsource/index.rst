@@ -1,5 +1,7 @@
-Welcome to tsprocess!
-=====================
+tsprocess
+==========
+*Ground motion time series processing tools*
+
 
 .. figure:: images/svg/overview.svg 
    :alt: overview
