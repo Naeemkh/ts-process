@@ -1,5 +1,12 @@
 Welcome to tsprocess!
-======================
+=====================
+
+.. figure:: images/svg/overview.svg 
+   :alt: overview
+   :width: 600px
+   :align: center 
+
+   By generating a unique hash value for data and actions on the data, **tsprocess** guarantees that each process is carried out once and the results are stored once.
 
 .. toctree::
    :glob:
