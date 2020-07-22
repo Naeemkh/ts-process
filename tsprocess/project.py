@@ -26,7 +26,7 @@ from .timeseries import TimeSeries
 from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
                       list2message, is_lat_valid, is_lon_valid, is_depth_valid)
-from .ts_plot_utils import (plot_velocity_helper)
+from .ts_plot_utils import (plot_velocity_helper, plot_acceleration_helper)
 
 
 class Project:
@@ -387,27 +387,33 @@ class Project:
             return
 
         for record in records:
-            fig, message, f_name_save = plot_velocity_helper(record,self.color_code,opt_params,
-             list_inc, list_process, list_filters)
+            fig, message, f_name_save = plot_velocity_helper(record,
+             self.color_code,opt_params, list_inc, list_process, list_filters)
                 
             if query_opt_params(opt_params, 'save_figure'):
                 
-                temp_record = None
-                for tmp_rc in record:
-                    if tmp_rc:
-                        temp_record = tmp_rc
-                        break
+                # temp_record = None
+                # for tmp_rc in record:
+                #     if tmp_rc:
+                #         temp_record = tmp_rc
+                #         break
 
-                if not temp_record:
-                    LOGGER.warning('All records at this station are None. Ignored.')
+                # if not temp_record:
+                #     LOGGER.warning(
+                #         'All records at this station are None. Ignored.')
 
                 message = message + "\n----------------------------\n"
-                write_into_file(os.path.join(self.path_to_output_dir,"output_item_description.txt"),message)
+                write_into_file(os.path.join(self.path_to_output_dir,
+                "output_item_description.txt"),message)
 
                 # save item.
-                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save), format='pdf',transparent=False, dpi=300)  
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+                 format='pdf',transparent=False, dpi=300)  
 
-    def plot_acceleration_records(self, list_inc,list_process,list_filters, opt_params):
+
+    def plot_acceleration_records(self, list_inc,list_process,list_filters,
+     opt_params):
+
         """ Plots 3 acceleration timeseries one page per station and their 
         response spectra plots
         
@@ -427,79 +433,36 @@ class Project:
         """
         
         if not self._is_incident_valid(list_inc):
+            LOGGER.warning("At least one incident is not valid.")
             return
 
         if not self._is_processing_label_valid(list_process):
+            LOGGER.warning("At least one processing label is not valid.")
             return
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
-         # Check number of input timeseries
+        # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
 
-        plt.figure()
-        
         for record in records:
-                             
-            fig, axarr = plt.subplots(nrows=3, ncols=3, figsize=(14, 9))
-            
-            # h1, h2, ver
-            for i in range(3):
-                axarr[i][0] = plt.subplot2grid((3,3),(i,0),rowspan=1, colspan=2)
-                axarr[i][1] = plt.subplot2grid((3,3),(i,2),rowspan=1, colspan=1)
-                axarr[i][0].grid(True)
-
-            x_lim_t = check_opt_param_minmax(opt_params, 'zoom_in_time')
-            x_lim_rsp = check_opt_param_minmax(opt_params, 'zoom_in_rsp')
-               
-            station_name = None
-            epicentral_dist = None   
-            for i,item in enumerate(record):
-                if not item:
-                    continue
-                axarr[0][0].plot(item.time_vec,item.acc_h1.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[0][1].plot(item.acc_h1.response_spectra[0],
-                 item.acc_h1.response_spectra[1], self.color_code[i],
-                 label=list_inc[i])   
-
-                axarr[1][0].plot(item.time_vec,item.acc_h2.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[1][1].plot(item.acc_h2.response_spectra[0],
-                 item.acc_h2.response_spectra[1], self.color_code[i],
-                 label=list_inc[i])   
-
-                axarr[2][0].plot(item.time_vec,item.acc_ver.value,
-                 self.color_code[i], label=list_inc[i])
-                axarr[2][1].plot(item.acc_ver.response_spectra[0],
-                 item.acc_ver.response_spectra[1], self.color_code[i],
-                 label=list_inc[i])   
-
-                # station name
-                if not station_name:
-                    station_name = item.station.inc_st_name[list_inc[i]]
+            fig, message, f_name_save = plot_acceleration_helper(record,
+            self.color_code,opt_params,
+             list_inc, list_process, list_filters)
                 
-                # epicentral distance
-                if not epicentral_dist:
-                    epicentral_dist = f"{item.epicentral_distance: 0.2f}"
+            if query_opt_params(opt_params, 'save_figure'):
+                
+                message = message + "\n----------------------------\n"
+                write_into_file(os.path.join(self.path_to_output_dir,
+                "output_item_description.txt"),message)
 
-            for i in range(3):
-                axarr[i][0].set_xlim(x_lim_t)
-                axarr[i][1].set_xlim(x_lim_rsp)
-
-            axarr[0][0].legend()
-            axarr[0][0].set_title(
-             f'Station at incident {list_inc[0]}:'
-             f'{station_name} - epicenteral dist:'
-             f'{epicentral_dist} km'
-            )    
-            fig.tight_layout()     
-           
-            # plt.savefig("output_plot.pdf", format='pdf',
-            # transparent=False, dpi=300)  
+                # save item.
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+                 format='pdf',transparent=False, dpi=300)  
+          
     
     def plot_record_section(self, list_inc,list_process,list_filters,
      opt_params):
