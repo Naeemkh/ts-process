@@ -421,7 +421,7 @@ def haversine(lat1, lon1, lat2, lon2):
     
      """
     # convert decimal degrees to radians 
-    # this method is also defined in station module.
+    # this method is also defined in station module which returns meters.
    
     try:
         lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])

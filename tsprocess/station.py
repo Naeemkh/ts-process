@@ -6,6 +6,9 @@ The core module for the Station class.
 
 from math import radians, cos, sin, asin, sqrt
 
+from .ts_utils import compute_azimuth
+from .log import LOGGER
+
 # this should follow object pool design pattern 
 # we need to take a look at stations, if we find it, we should return it. 
 
@@ -19,8 +22,7 @@ class Station:
         "epi_dist_gt",
         "epi_dist_lte",
         "epi_dist_gte",
-        "azimuth_lt",
-        "azimuth_gt",
+        "azimuth_bt",
         "include_stlist_by_incident",
         "exclude_stlist_by_incident"
     ]
@@ -87,6 +89,29 @@ class Station:
             return True
         else:
             return False
+
+    def _azimuth_bt(self, azmth):
+        
+        if azmth[0] < 0 or azmth[1] < 0:
+            LOGGER.error("Azimuth domain cannot be negative number (0-360).")
+            return
+        
+        source_lat, source_lon, source_depth = self.pr_source_loc
+        tmp_azimuth = compute_azimuth(source_lat,source_lon,self.lat, self.lon)
+
+        if azmth[0] == azmth[1]:
+            return True
+
+        if azmth[0] < azmth[1]:
+            if tmp_azimuth >= azmth[0] and tmp_azimuth <= azmth[1]:
+                return True
+            else:
+                return False
+        else:
+            if tmp_azimuth >= azmth[1] or tmp_azimuth <= azmth[0]:
+                return True
+            else:
+                return False
   
     def _include_stlist_by_incident(self, incident_name, stations):
 
@@ -116,6 +141,21 @@ class Station:
 
         if filter_type == 'epi_dist_lte':
             return not self._epi_dist_gt(**filter_kwargs)
+
+        if filter_type == 'azimuth_lt':
+            return self._azimuth_lt(**filter_kwargs)
+
+        if filter_type == 'azimuth_gte':
+            return not self._azimuth_lt(**filter_kwargs)
+
+        if filter_type == 'azimuth_gt':
+            return self._azimuth_gt(**filter_kwargs)
+
+        if filter_type == 'azimuth_lte':
+            return not self._azimuth_gt(**filter_kwargs)
+        
+        if filter_type == 'azimuth_bt':
+            return self._azimuth_bt(**filter_kwargs)
 
         if filter_type == 'include_stlist_by_incident':
             return self._include_stlist_by_incident(**filter_kwargs)
