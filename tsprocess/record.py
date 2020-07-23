@@ -15,6 +15,7 @@ from .log import LOGGER
 from .station import Station
 from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
+from .ts_utils import haversine, compute_azimuth
 
 
 class Record:
@@ -69,7 +70,9 @@ class Record:
         # compute distance and azimuth
         # extract source hyper parameters and record to source distance. 
         source_lat, source_lon, source_depth = self.source_params
-        self.epicentral_distance = self._haversine(source_lat, source_lon,
+        self.epicentral_distance = haversine(source_lat, source_lon,
+         self.station.lat, self.station.lon)
+        self.azimuth = compute_azimuth(source_lat, source_lon,
          self.station.lat, self.station.lon)
     
     @staticmethod
@@ -275,31 +278,31 @@ class Record:
                                        tmp_acc_h1, tmp_acc_h2, tmp_acc_ver,
                                        record.station, record.source_params)
 
-    @staticmethod
-    def _haversine(lat1, lon1, lat2, lon2):
-        """ Computes distance of two geographical points.
+    # @staticmethod
+    # def haversine(lat1, lon1, lat2, lon2):
+    #     """ Computes distance of two geographical points.
         
-        Inputs:
-            | lat and lon for point 1 and point 2
+    #     Inputs:
+    #         | lat and lon for point 1 and point 2
 
-        Outputs:
-            | distance betwee two points in km.
+    #     Outputs:
+    #         | distance betwee two points in km.
         
-         """
-        # convert decimal degrees to radians 
-        # this method is also defined in station module.
-        # TODO: move them to a util module. 
-        try:
-            lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-        except Exception:
-            return None
-        # haversine formula 
-        dlon = lon2 - lon1 
-        dlat = lat2 - lat1 
-        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-        c = 2 * asin(sqrt(a)) 
-        r = 6371 # in kilometers
-        return c * r
+    #      """
+    #     # convert decimal degrees to radians 
+    #     # this method is also defined in station module.
+    #     # TODO: move them to a util module. 
+    #     try:
+    #         lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    #     except Exception:
+    #         return None
+    #     # haversine formula 
+    #     dlon = lon2 - lon1 
+    #     dlat = lat2 - lat1 
+    #     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    #     c = 2 * asin(sqrt(a)) 
+    #     r = 6371 # in kilometers
+    #     return c * r
 
     @staticmethod
     def _from_hercules(filename,station_obj,source_hypocenter):

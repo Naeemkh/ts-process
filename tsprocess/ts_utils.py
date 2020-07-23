@@ -6,6 +6,7 @@ The core module for timeseries helper functions.
 
 import math
 import inspect
+from math import radians, cos, sin, asin, sqrt, atan2
 
 import numpy as np
 from scipy.signal import kaiser
@@ -409,7 +410,59 @@ def list2message(lst):
     
     return st
 
+   
+def haversine(lat1, lon1, lat2, lon2):
+    """ Computes distance of two geographical points.
+    
+    Inputs:
+        | lat and lon for point 1 and point 2
+    Outputs:
+        | distance betwee two points in km.
+    
+     """
+    # convert decimal degrees to radians 
+    # this method is also defined in station module.
+   
+    try:
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    except Exception:
+        return None
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 6371 # in kilometers
+    return c * r
 
+def compute_azimuth(lat1, lon1, lat2, lon2):
+    """ Computes azimuth from point one to point2.
+    
+    Inputs:
+        | lat and lon for point 1 and point 2
+    Outputs:
+        | azimuth from point1 to point2.
+    
+    Examples:
+
+    >>> p1 = [37.577019, -112.561856]
+    >>> p2 = [37.214750, -117.545706]
+    >>> az = compute_azimuth(p1[0], p1[1], p2[0], p2[1])
+    >>> print(f"{az :0.5f}")
+    266.28959
+    """
+
+    try:
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    except Exception:
+        return None
+
+    y = sin(lon2 - lon1) * cos(lat2)
+    x = cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(lon2-lon1)
+    t1 = atan2(y, x)
+    deg = (t1*180/math.pi + 360) % 360
+    
+    return deg
 
 
 
