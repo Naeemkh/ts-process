@@ -6,6 +6,7 @@ The core module for timeseries helper functions.
 
 import math
 import inspect
+from math import radians, cos, sin, asin, sqrt, atan2
 
 import numpy as np
 from scipy.signal import kaiser
@@ -409,8 +410,170 @@ def list2message(lst):
     
     return st
 
+   
+def haversine(lat1, lon1, lat2, lon2):
+    """ Computes distance of two geographical points.
+    
+    Inputs:
+        | lat and lon for point 1 and point 2
+    Outputs:
+        | distance betwee two points in km.
+    
+     """
+    # convert decimal degrees to radians 
+    # this method is also defined in station module which returns meters.
+   
+    try:
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    except Exception:
+        return None
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 6371 # in kilometers
+    return c * r
+
+def compute_azimuth(lat1, lon1, lat2, lon2):
+    """ Computes azimuth from point one to point2.
+    
+    Inputs:
+        | lat and lon for point 1 and point 2
+    Outputs:
+        | azimuth from point1 to point2.
+    
+    Examples:
+
+    >>> p1 = [37.577019, -112.561856]
+    >>> p2 = [37.214750, -117.545706]
+    >>> az = compute_azimuth(p1[0], p1[1], p2[0], p2[1])
+    >>> print(f"{az :0.5f}")
+    266.28959
+    """
+
+    try:
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    except Exception:
+        return None
+
+    y = sin(lon2 - lon1) * cos(lat2)
+    x = cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(lon2-lon1)
+    t1 = atan2(y, x)
+    deg = (t1*180/math.pi + 360) % 360
+    
+    return deg
 
 
+def rotate_record(record, rotation_angle):
+    """ Rotates a given record instance by rotation angle
+    
+    Input:
+        record: instance of Record class
+        rotation_angle: rotation angle in degrees
+
+    Output:
+        rotated record instane        
+    """
 
 
+    # Check rotation angle
+    if rotation_angle is None:
+        # Nothing to do!
+        return record
 
+    
+    # check if rotateion angle is valid.
+    if rotation_angle < 0 or rotation_angle > 360:
+        LOGGER.error(f"Rotation angle is not valid {rotation_angle:f}."
+         "Command ignored.")
+        return record
+
+    # these info should be read from records:
+    x = record.hc_or1
+    y = record.hc_or2
+
+    # Make sure channels are ordered properly
+    if x > y:
+        # This should never happen.
+        LOGGER.error("there is a problem with orientaiton ordering."
+         "Command ignored.")
+        return record
+
+        # Swap channels
+        # I think swaping channels may cause unknown bugs in the longrun
+        # temp = station[0]
+        # station[0] = station[1]
+        # station[1] = temp
+
+    # Calculate angle between two components
+    angle = round(y - x,2)
+
+
+    # We need two orthogonal channels
+    if abs(angle) != 90 and abs(angle) != 270:
+        LOGGER.error("Rotation needs two orthogonal channels!"
+         "Command ignored.")
+        return record
+    
+        # Create rotation matrix
+    if angle == 90:
+        matrix = np.array([(math.cos(math.radians(rotation_angle)),
+                            -math.sin(math.radians(rotation_angle))),
+                           (math.sin(math.radians(rotation_angle)),
+                            math.cos(math.radians(rotation_angle)))])
+    else:
+        # Angle is 270!
+        matrix = np.array([(math.cos(math.radians(rotation_angle)),
+                            +math.sin(math.radians(rotation_angle))),
+                           (math.sin(math.radians(rotation_angle)),
+                            -math.cos(math.radians(rotation_angle)))])
+    
+    rc_dis_1 = record.disp_h1.value.copy()
+    rc_dis_2 = record.disp_h2.value.copy()
+    rc_dis_v = record.disp_ver.value.copy()
+    
+    rc_vel_1 = record.vel_h1.value.copy()
+    rc_vel_2 = record.vel_h2.value.copy()
+    rc_vel_v = record.vel_ver.value.copy()
+    
+    rc_acc_1 = record.acc_h1.value.copy()
+    rc_acc_2 = record.acc_h2.value.copy()
+    rc_acc_v = record.acc_ver.value.copy()
+
+    # Make sure they all have the same number of points
+   
+    # find the shortest timeseries and cut others based on that. 
+
+    n_points = min(len(rc_dis_1), len(rc_dis_2), len(rc_dis_v),
+                   len(rc_vel_1), len(rc_vel_2), len(rc_vel_v),
+                   len(rc_acc_1), len(rc_acc_2), len(rc_acc_v),
+                   len(record.time_vec))
+
+    rcs_tmp = np.array([rc_dis_1,rc_dis_2,rc_dis_v,
+                   rc_vel_1,rc_vel_2,rc_vel_v,
+                   rc_acc_1,rc_acc_2,rc_acc_v, record.time_vec])
+    
+    rcs = rcs_tmp[:,0:n_points]
+   
+    # Rotate
+    [rcs_dis_1, rcs_dis_2] = matrix.dot([rcs[0], rcs[1]])
+    [rcs_vel_1, rcs_vel_2] = matrix.dot([rcs[3], rcs[4]])
+    [rcs_acc_1, rcs_acc_2] = matrix.dot([rcs[6], rcs[7]])
+
+    # Compute the record orientation        
+    n_hc_or1 = record.hc_or1 - rotation_angle
+    n_hc_or2 = record.hc_or2 - rotation_angle
+    
+    if n_hc_or1 < 0:
+        n_hc_or1 = 360 + n_hc_or1
+
+    if n_hc_or2 < 0:
+        n_hc_or2 = 360 + n_hc_or2
+
+    
+    return  (rcs[9],  rcs_dis_1, rcs_dis_2, rcs[2],
+                        rcs_vel_1, rcs_vel_2, rcs[5],
+                        rcs_acc_1, rcs_acc_2, rcs[8],
+                        record.station, record.source_params,
+                        n_hc_or1, n_hc_or2)

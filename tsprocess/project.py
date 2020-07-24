@@ -299,8 +299,14 @@ class Project:
     # processing labels
     def add_processing_label(self, label_name, label_type, hyper_parameters):
         """ Creates a processing label """
+        if label_type == "rotate":
+            Record._add_processing_label(label_name, label_type,
+            hyper_parameters)
+            return            
+        
         TimeSeries._add_processing_label(label_name, label_type,
          hyper_parameters)
+
         
     def list_of_processing_labels(self):
         """ Returns a list of available processing labels"""
@@ -318,7 +324,8 @@ class Project:
         """
         for group in list_process:
             for pr_l in group:
-                if pr_l not in TimeSeries.processing_labels:
+                if ((pr_l not in TimeSeries.processing_labels) and 
+                    (pr_l not in Record.processing_labels)):
                     LOGGER.error(
                         f"{pr_l} is not a valid processing label. Command"
                             "ignored."
