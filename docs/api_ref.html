@@ -38,7 +38,7 @@
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Concepts" href="concepts.html" />
+    <link rel="next" title="Examples" href="examples.html" />
     <link rel="prev" title="Incidents" href="incidents.html" /> 
 </head>
 
@@ -90,8 +90,8 @@
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidents.html">Incidents</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#adding-incidents">Adding incidents</a></li>
@@ -105,6 +105,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#show-stations-on-the-map">Show stations on the map</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -207,12 +210,22 @@
 </style>
 <div class="section" id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
-<p>In this section, a list of commands for common tasks is presented. In tsprocess, all commands are based on a project. One needs to add a project at the beggining of each processing session.</p>
+<dl class="simple">
+<dt>In this section, a list of commands for common tasks is presented. In tsprocess,</dt><dd><p>all commands are based on a project. One needs to add a project at the
+beggining of each processing session.</p>
+</dd>
+</dl>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> from tsprocess import project as pr
 <span class="gp">$</span> <span class="nv">p1</span> <span class="o">=</span> pr.Project<span class="o">(</span><span class="s2">&quot;Highf&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>In this example, <cite>Highf</cite> is the project name, and <cite>p1</cite> is the project handle. A database with the project name with “_db.sqlite” suffix will be generated. If a database with that name already exists, it will be used to retrieve records or add new records. In the following tasks, we assume that you have <cite>p1</cite> project handle.</p>
+<dl class="simple">
+<dt>In this example, <cite>Highf</cite> is the project name, and <cite>p1</cite> is the project handle.</dt><dd><p>A database with the project name with “_db.sqlite” suffix will be generated.
+If a database with that name already exists, it will be used to retrieve
+records or add new records. In the following tasks, we assume that you have
+<cite>p1</cite> project handle.</p>
+</dd>
+</dl>
 <div class="section" id="adding-incidents">
 <h2>Adding incidents<a class="headerlink" href="#adding-incidents" title="Permalink to this headline">¶</a></h2>
 <p>For more details about incidents, please see <a class="reference internal" href="incidents.html"><span class="doc">Incidents</span></a> section.</p>
@@ -353,7 +366,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="concepts.html" class="btn btn-neutral float-right" title="Concepts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="incidents.html" class="btn btn-neutral float-left" title="Incidents" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -1,14 +1,20 @@
 API Reference
 =============
 
-In this section, a list of commands for common tasks is presented. In tsprocess, all commands are based on a project. One needs to add a project at the beggining of each processing session. 
+In this section, a list of commands for common tasks is presented. In tsprocess,
+ all commands are based on a project. One needs to add a project at the 
+ beggining of each processing session. 
 
 .. code-block:: console
 
     $ from tsprocess import project as pr
     $ p1 = pr.Project("Highf")
 
-In this example, `Highf` is the project name, and `p1` is the project handle. A database with the project name with “_db.sqlite” suffix will be generated. If a database with that name already exists, it will be used to retrieve records or add new records. In the following tasks, we assume that you have `p1` project handle. 
+In this example, `Highf` is the project name, and `p1` is the project handle.
+ A database with the project name with “_db.sqlite” suffix will be generated.
+ If a database with that name already exists, it will be used to retrieve
+ records or add new records. In the following tasks, we assume that you have
+ `p1` project handle. 
 
 
 Adding incidents

@@ -38,7 +38,7 @@
     <link rel="author" title="About these documents" href="#" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Quickstart" href="quickstart.html" />
+    <link rel="next" title="Setting up Environment" href="setup_env.html" />
     <link rel="prev" title="tsprocess" href="index.html" /> 
 </head>
 
@@ -90,10 +90,13 @@
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidents.html">Incidents</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_ref.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -196,7 +199,18 @@
 </style>
 <div class="section" id="about">
 <h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
-<p><strong>tsprocess</strong> is a  Python3-based software program that facilitates processing 3D ground-motion simulation results. It provides a convenient interface for conducting different analyses on a series of simulated and observed earthquakes time series requiring the least effort from the researchers. By generating a unique hash value for data and actions on the data, it guarantees that each process is carried out once and stored once. As a result, it eliminates redundant processes and also redundant versions of processed data. Processed data are stored in a NoSQL key-value database, and an in-memory dictionary is used to reduce the amount of query to the database. The tsprocess library also provides codes for calculating ROTD50 so that a common implementation is used to process both 3D simulation seismograms and 1D broadband platform seismograms.</p>
+<p><strong>tsprocess</strong> is a  Python3-based software program that facilitates processing
+3D ground-motion simulation results. It provides a convenient interface for
+conducting different analyses on a series of simulated and observed earthquakes
+time series requiring the least effort from the researchers. By generating
+a unique hash value for data and actions on the data, it guarantees that each
+process is carried out once and stored once. As a result, it eliminates
+redundant processes and also redundant versions of processed data. Processed
+data are stored in a NoSQL key-value database, and an in-memory dictionary
+is used to reduce the amount of query to the database. The tsprocess library
+also provides codes for calculating ROTD50 so that a common implementation
+is used to process both 3D simulation seismograms and 1D broadband platform
+seismograms.</p>
 </div>
 
 
@@ -207,7 +221,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="setup_env.html" class="btn btn-neutral float-right" title="Setting up Environment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="tsprocess" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
