@@ -15,18 +15,23 @@ from .log import LOGGER
 from .station import Station
 from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
-from .ts_utils import haversine, compute_azimuth
+from .ts_utils import haversine, compute_azimuth, rotate_record
 
 
 class Record:
     """ Record Class """
 
     pr_db = None
+    processing_labels = {}
+    label_types = {
+        'rotate': 'angle: rotation angle'
+    }
 
     def __init__(self, time_vec, disp_h1, disp_h2, disp_ver,
                 vel_h1, vel_h2, vel_ver,
                 acc_h1, acc_h2, acc_ver,
-                station, source_params):
+                station, source_params,
+                hc_or1, hc_or2):
 
         self.station = station
         self.time_vec = time_vec
@@ -41,6 +46,8 @@ class Record:
         self.acc_h2 = acc_h2
         self.acc_ver = acc_ver
         self.source_params = source_params
+        self.hc_or1 = hc_or1
+        self.hc_or2 = hc_or2
         self.unique_id_1 = None 
         self.unique_id_2 = None
         self.notes = []
@@ -65,6 +72,29 @@ class Record:
                f"{self.acc_h1},{self.acc_h2},{self.acc_ver}"\
                f"{self.station}.{self.source_params})"
                         
+    @classmethod
+    def _add_processing_label(cls, label_name, label_type, argument_dict):
+        """ Adds new processing label to the Record class. 
+
+        Inputs:
+            | label_name: optional processing label name
+            | label_type: should be one of the valid label types
+            | argument_dict: dictionary of arguments that is required for that 
+              processing label type.
+
+        """
+
+        if label_name in cls.processing_labels:
+            LOGGER.warning(f"label name: '{label_name}' has been already used. "
+            "Try another name.")
+            return
+
+        if label_type not in cls.label_types:
+            LOGGER.warning("Label type is not supported. Command is ignored.")
+            return
+        
+        cls.processing_labels[label_name] = [label_type, argument_dict]
+
 
     def _compute_source_dependent_params(self):
         # compute distance and azimuth
@@ -155,11 +185,13 @@ class Record:
             # we need to load the data 
             if incident_type == "hercules":
                 station_folder = incident_metadata["output_stations_directory"]
+                hr_or1 = float(incident_metadata["hr_comp_orientation_1"])
+                hr_or2 = float(incident_metadata["hr_comp_orientation_2"])
                 station_file = os.path.join(incident_metadata["incident_folder"]\
                     ,station_folder,st_name)
                 try:
                     record_org = Record._from_hercules(station_file,station_obj,\
-                        Station.pr_source_loc)
+                        Station.pr_source_loc, hr_or1, hr_or2)
                     record_org.this_record_hash = hash_val
     
                     # put the record in the database.
@@ -251,61 +283,74 @@ class Record:
         # this hash value is already in the tracker. No need to add agian. 
 
     @staticmethod    
-    def _apply(record, processing_label):
+    def _apply(record, label_name):
         """ Applies the requested processing label on the record. Returns a 
         new Record object representing the processed record. """
+        
+        if label_name in Record.processing_labels:
+            if  Record.processing_labels[label_name][0] == "rotate":
+                def extract_params(angle):
+                    return angle
+    
+                if label_name not in Record.processing_labels.keys():
+                    # this should never be invoked. 
+                    # I have checked the labels before. 
+                    LOGGER.warning("Label is not supported, ignored.")
+                    return
+    
+                
+                label_kwargs = Record.processing_labels[label_name][1]
+    
+                p = extract_params(**label_kwargs)
+                proc_record = rotate_record(record, p)
+                tmp_time_vector = proc_record[0]
+                tmp_disp_h1 = Disp(proc_record[1],record.disp_h1.delta_t, record.disp_h1.t_init_point)
+                tmp_disp_h2 = Disp(proc_record[2],record.disp_h2.delta_t, record.disp_h2.t_init_point)
+                tmp_disp_ver = Disp(proc_record[3],record.disp_ver.delta_t, record.disp_ver.t_init_point)
+                tmp_vel_h1 = Vel(proc_record[4],record.vel_h1.delta_t, record.vel_h1.t_init_point)
+                tmp_vel_h2 = Vel(proc_record[5],record.vel_h2.delta_t, record.vel_h2.t_init_point)
+                tmp_vel_ver = Vel(proc_record[6],record.vel_ver.delta_t, record.vel_ver.t_init_point)
+                tmp_acc_h1 = Acc(proc_record[7],record.acc_h1.delta_t, record.acc_h1.t_init_point)
+                tmp_acc_h2 = Acc(proc_record[8],record.acc_h2.delta_t, record.acc_h2.t_init_point)
+                tmp_acc_ver = Acc(proc_record[9],record.acc_ver.delta_t, record.acc_ver.t_init_point)
+                n_hc_or1 = proc_record[12]
+                n_hc_or2 = proc_record[13]
+            
+                       
+            else:
+                LOGGER.warning("The processing lable is not defined.")
+                return record
 
+        else: 
+        
         # you are repeating yourself. Refactor it at the earliest
         # convenient.
-        tmp_disp_h1 = record.disp_h1._apply(processing_label)
-        tmp_disp_h2 = record.disp_h2._apply(processing_label)
-        tmp_disp_ver = record.disp_ver._apply(processing_label)
-        tmp_vel_h1 = record.vel_h1._apply(processing_label)
-        tmp_vel_h2 = record.vel_h2._apply(processing_label)
-        tmp_vel_ver = record.vel_ver._apply(processing_label)
-        tmp_acc_h1 = record.acc_h1._apply(processing_label)
-        tmp_acc_h2 = record.acc_h2._apply(processing_label)
-        tmp_acc_ver = record.acc_ver._apply(processing_label)
-
-        
-        # TODO: check time vector
-        tmp_time_vector = range(len(tmp_disp_h1.value))*\
-                record.acc_h1.delta_t + record.acc_h1.t_init_point
-
+            tmp_disp_h1 = record.disp_h1._apply(label_name)
+            tmp_disp_h2 = record.disp_h2._apply(label_name)
+            tmp_disp_ver = record.disp_ver._apply(label_name)
+            tmp_vel_h1 = record.vel_h1._apply(label_name)
+            tmp_vel_h2 = record.vel_h2._apply(label_name)
+            tmp_vel_ver = record.vel_ver._apply(label_name)
+            tmp_acc_h1 = record.acc_h1._apply(label_name)
+            tmp_acc_h2 = record.acc_h2._apply(label_name)
+            tmp_acc_ver = record.acc_ver._apply(label_name)
+            n_hc_or1 = record.hc_or1
+            n_hc_or2 = record.hc_or2
+    
+            
+            # TODO: check time vector
+            tmp_time_vector = range(len(tmp_disp_h1.value))*\
+                    record.acc_h1.delta_t + record.acc_h1.t_init_point
+    
 
         return Record(tmp_time_vector, tmp_disp_h1, tmp_disp_h2, tmp_disp_ver,
                                        tmp_vel_h1, tmp_vel_h2, tmp_vel_ver,
                                        tmp_acc_h1, tmp_acc_h2, tmp_acc_ver,
-                                       record.station, record.source_params)
-
-    # @staticmethod
-    # def haversine(lat1, lon1, lat2, lon2):
-    #     """ Computes distance of two geographical points.
-        
-    #     Inputs:
-    #         | lat and lon for point 1 and point 2
-
-    #     Outputs:
-    #         | distance betwee two points in km.
-        
-    #      """
-    #     # convert decimal degrees to radians 
-    #     # this method is also defined in station module.
-    #     # TODO: move them to a util module. 
-    #     try:
-    #         lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-    #     except Exception:
-    #         return None
-    #     # haversine formula 
-    #     dlon = lon2 - lon1 
-    #     dlat = lat2 - lat1 
-    #     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    #     c = 2 * asin(sqrt(a)) 
-    #     r = 6371 # in kilometers
-    #     return c * r
+                                       record.station, record.source_params,
+                                       n_hc_or1, n_hc_or2)
 
     @staticmethod
-    def _from_hercules(filename,station_obj,source_hypocenter):
+    def _from_hercules(filename,station_obj,source_hypocenter, hr_or1, hr_or2):
         """ Loads an instance of Hercules simulation results at one station.
         Returns a Record object.
         
@@ -409,4 +454,5 @@ class Record:
         return Record(times, disp_h1, disp_h2, disp_ver,
                     vel_h1, vel_h2, vel_ver,
                     acc_h1, acc_h2, acc_ver,
-                    station_obj, source_hypocenter)
+                    station_obj, source_hypocenter,
+                    hr_or1, hr_or2)

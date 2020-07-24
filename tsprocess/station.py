@@ -93,8 +93,9 @@ class Station:
     def _azimuth_bt(self, azmth):
         
         if azmth[0] < 0 or azmth[1] < 0:
-            LOGGER.error("Azimuth domain cannot be negative number (0-360).")
-            return
+            LOGGER.error("Azimuth domain cannot be negative number (0-360)."
+            "Azimuth filter ignored.")
+            return True
         
         source_lat, source_lon, source_depth = self.pr_source_loc
         tmp_azimuth = compute_azimuth(source_lat,source_lon,self.lat, self.lon)
