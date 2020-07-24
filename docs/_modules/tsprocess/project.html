@@ -468,8 +468,14 @@
     <span class="c1"># processing labels</span>
 <div class="viewcode-block" id="Project.add_processing_label"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_processing_label">[docs]</a>    <span class="k">def</span> <span class="nf">add_processing_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">hyper_parameters</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Creates a processing label &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s2">&quot;rotate&quot;</span><span class="p">:</span>
+            <span class="n">Record</span><span class="o">.</span><span class="n">_add_processing_label</span><span class="p">(</span><span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span>
+            <span class="n">hyper_parameters</span><span class="p">)</span>
+            <span class="k">return</span>            
+        
         <span class="n">TimeSeries</span><span class="o">.</span><span class="n">_add_processing_label</span><span class="p">(</span><span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span>
          <span class="n">hyper_parameters</span><span class="p">)</span></div>
+
         
 <div class="viewcode-block" id="Project.list_of_processing_labels"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_processing_labels">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_processing_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of available processing labels&quot;&quot;&quot;</span>
@@ -487,7 +493,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">list_process</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">pr_l</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">pr_l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">((</span><span class="n">pr_l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">)</span> <span class="ow">and</span> 
+                    <span class="p">(</span><span class="n">pr_l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">)):</span>
                     <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pr_l</span><span class="si">}</span><span class="s2"> is not a valid processing label. Command&quot;</span>
                             <span class="s2">&quot;ignored.&quot;</span>

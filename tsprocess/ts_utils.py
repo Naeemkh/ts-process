@@ -466,6 +466,15 @@ def compute_azimuth(lat1, lon1, lat2, lon2):
 
 
 def rotate_record(record, rotation_angle):
+    """ Rotates a given record instance by rotation angle
+    
+    Input:
+        record: instance of Record class
+        rotation_angle: rotation angle in degrees
+
+    Output:
+        rotated record instane        
+    """
 
 
     # Check rotation angle
@@ -562,16 +571,9 @@ def rotate_record(record, rotation_angle):
     if n_hc_or2 < 0:
         n_hc_or2 = 360 + n_hc_or2
 
-    # Return
+    
     return  (rcs[9],  rcs_dis_1, rcs_dis_2, rcs[2],
                         rcs_vel_1, rcs_vel_2, rcs[5],
                         rcs_acc_1, rcs_acc_2, rcs[8],
                         record.station, record.source_params,
                         n_hc_or1, n_hc_or2)
-
-
-
-
-
-
-

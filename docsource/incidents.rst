@@ -8,7 +8,7 @@ Hercules
 
 `Hercules <https://github.com/CMU-Quake/hercules/wiki/Hercules>`_ is a simulation software for anelastic wave propagation in highly heterogeneous media due to kinematic faulting. The following figure shows the required files and folders and their arrangements.
 
-.. image:: images/svg/hercules_folder_arrangment.svg 
+.. image:: images/png/hercules_folder_arrangment.png 
    :alt: hercules folder arrangement
    :width: 600px
    :align: center 

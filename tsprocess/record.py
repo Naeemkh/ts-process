@@ -55,7 +55,6 @@ class Record:
         self.epicentral_distance = None
         self.jb_distance = None
         self.azimuth = None
-        self.back_azimuth = None
         self._compute_source_dependent_params()
         self._compute_record_unique_ids()
         self._compute_freq_vector()
@@ -97,6 +96,9 @@ class Record:
 
 
     def _compute_source_dependent_params(self):
+        """ Computes parameters that are dependent to the distance and azimuth
+        between source and the station. 
+        """
         # compute distance and azimuth
         # extract source hyper parameters and record to source distance. 
         source_lat, source_lon, source_depth = self.source_params
@@ -187,11 +189,11 @@ class Record:
                 station_folder = incident_metadata["output_stations_directory"]
                 hr_or1 = float(incident_metadata["hr_comp_orientation_1"])
                 hr_or2 = float(incident_metadata["hr_comp_orientation_2"])
-                station_file = os.path.join(incident_metadata["incident_folder"]\
-                    ,station_folder,st_name)
+                station_file = os.path.join(incident_metadata[
+                    "incident_folder"],station_folder,st_name)
                 try:
-                    record_org = Record._from_hercules(station_file,station_obj,\
-                        Station.pr_source_loc, hr_or1, hr_or2)
+                    record_org = Record._from_hercules(station_file,
+                        station_obj, Station.pr_source_loc, hr_or1, hr_or2)
                     record_org.this_record_hash = hash_val
     
                     # put the record in the database.
@@ -201,7 +203,8 @@ class Record:
                 
                 except Exception as e:
                     record_org = None
-                    LOGGER.warning(f"{st_name} from {incident_name} could not load. " + str(e))
+                    LOGGER.warning(f"{st_name} from {incident_name} could not"
+                     " load. " + str(e))
                
             if incident_type == "awp":
                 print("AWP method is not implemented.")
@@ -269,7 +272,8 @@ class Record:
         # and update it on the data base.
         Record._add_proc_key(record, proc_hash_val)
         
-        return Record._get_processed_record(incident_name, proc_record, list_process)
+        return Record._get_processed_record(incident_name, proc_record,
+         list_process)
  
     @staticmethod
     def _add_proc_key(record, hash_val):
@@ -304,15 +308,24 @@ class Record:
                 p = extract_params(**label_kwargs)
                 proc_record = rotate_record(record, p)
                 tmp_time_vector = proc_record[0]
-                tmp_disp_h1 = Disp(proc_record[1],record.disp_h1.delta_t, record.disp_h1.t_init_point)
-                tmp_disp_h2 = Disp(proc_record[2],record.disp_h2.delta_t, record.disp_h2.t_init_point)
-                tmp_disp_ver = Disp(proc_record[3],record.disp_ver.delta_t, record.disp_ver.t_init_point)
-                tmp_vel_h1 = Vel(proc_record[4],record.vel_h1.delta_t, record.vel_h1.t_init_point)
-                tmp_vel_h2 = Vel(proc_record[5],record.vel_h2.delta_t, record.vel_h2.t_init_point)
-                tmp_vel_ver = Vel(proc_record[6],record.vel_ver.delta_t, record.vel_ver.t_init_point)
-                tmp_acc_h1 = Acc(proc_record[7],record.acc_h1.delta_t, record.acc_h1.t_init_point)
-                tmp_acc_h2 = Acc(proc_record[8],record.acc_h2.delta_t, record.acc_h2.t_init_point)
-                tmp_acc_ver = Acc(proc_record[9],record.acc_ver.delta_t, record.acc_ver.t_init_point)
+                tmp_disp_h1 = Disp(proc_record[1],record.disp_h1.delta_t,
+                 record.disp_h1.t_init_point)
+                tmp_disp_h2 = Disp(proc_record[2],record.disp_h2.delta_t,
+                 record.disp_h2.t_init_point)
+                tmp_disp_ver = Disp(proc_record[3],record.disp_ver.delta_t,
+                 record.disp_ver.t_init_point)
+                tmp_vel_h1 = Vel(proc_record[4],record.vel_h1.delta_t,
+                 record.vel_h1.t_init_point)
+                tmp_vel_h2 = Vel(proc_record[5],record.vel_h2.delta_t,
+                 record.vel_h2.t_init_point)
+                tmp_vel_ver = Vel(proc_record[6],record.vel_ver.delta_t,
+                 record.vel_ver.t_init_point)
+                tmp_acc_h1 = Acc(proc_record[7],record.acc_h1.delta_t,
+                 record.acc_h1.t_init_point)
+                tmp_acc_h2 = Acc(proc_record[8],record.acc_h2.delta_t,
+                 record.acc_h2.t_init_point)
+                tmp_acc_ver = Acc(proc_record[9],record.acc_ver.delta_t,
+                 record.acc_ver.t_init_point)
                 n_hc_or1 = proc_record[12]
                 n_hc_or2 = proc_record[13]
             
@@ -340,7 +353,7 @@ class Record:
             
             # TODO: check time vector
             tmp_time_vector = range(len(tmp_disp_h1.value))*\
-                    record.acc_h1.delta_t + record.acc_h1.t_init_point
+                    record.acc_h1.delta_t + record.acc_h1.t_init_point   
     
 
         return Record(tmp_time_vector, tmp_disp_h1, tmp_disp_h2, tmp_disp_ver,

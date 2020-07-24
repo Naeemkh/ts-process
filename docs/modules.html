@@ -825,7 +825,7 @@ processing label type.</div>
 <p>The core module for the Record class.</p>
 <dl class="py class">
 <dt id="tsprocess.record.Record">
-<em class="property">class </em><code class="sig-prename descclassname">tsprocess.record.</code><code class="sig-name descname">Record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_vec</span></em>, <em class="sig-param"><span class="n">disp_h1</span></em>, <em class="sig-param"><span class="n">disp_h2</span></em>, <em class="sig-param"><span class="n">disp_ver</span></em>, <em class="sig-param"><span class="n">vel_h1</span></em>, <em class="sig-param"><span class="n">vel_h2</span></em>, <em class="sig-param"><span class="n">vel_ver</span></em>, <em class="sig-param"><span class="n">acc_h1</span></em>, <em class="sig-param"><span class="n">acc_h2</span></em>, <em class="sig-param"><span class="n">acc_ver</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">source_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tsprocess.record.</code><code class="sig-name descname">Record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_vec</span></em>, <em class="sig-param"><span class="n">disp_h1</span></em>, <em class="sig-param"><span class="n">disp_h2</span></em>, <em class="sig-param"><span class="n">disp_ver</span></em>, <em class="sig-param"><span class="n">vel_h1</span></em>, <em class="sig-param"><span class="n">vel_h2</span></em>, <em class="sig-param"><span class="n">vel_ver</span></em>, <em class="sig-param"><span class="n">acc_h1</span></em>, <em class="sig-param"><span class="n">acc_h2</span></em>, <em class="sig-param"><span class="n">acc_ver</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">source_params</span></em>, <em class="sig-param"><span class="n">hc_or1</span></em>, <em class="sig-param"><span class="n">hc_or2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record" title="Permalink to this definition">¶</a></dt>
 <dd><p>Record Class</p>
 <dl class="py method">
 <dt id="tsprocess.record.Record._add_proc_key">
@@ -836,8 +836,23 @@ database.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.record.Record._add_processing_label">
+<em class="property">classmethod </em><code class="sig-name descname">_add_processing_label</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label_name</span></em>, <em class="sig-param"><span class="n">label_type</span></em>, <em class="sig-param"><span class="n">argument_dict</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._add_processing_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._add_processing_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds new processing label to the Record class.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">label_name: optional processing label name</div>
+<div class="line">label_type: should be one of the valid label types</div>
+<div class="line">argument_dict: dictionary of arguments that is required for that
+processing label type.</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.record.Record._apply">
-<em class="property">static </em><code class="sig-name descname">_apply</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">processing_label</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._apply" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">_apply</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">label_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._apply" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the requested processing label on the record. Returns a
 new Record object representing the processed record.</p>
 </dd></dl>
@@ -849,8 +864,15 @@ new Record object representing the processed record.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.record.Record._compute_source_dependent_params">
+<code class="sig-name descname">_compute_source_dependent_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._compute_source_dependent_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._compute_source_dependent_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes parameters that are dependent to the distance and azimuth
+between source and the station.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.record.Record._from_hercules">
-<em class="property">static </em><code class="sig-name descname">_from_hercules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">source_hypocenter</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._from_hercules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._from_hercules" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">_from_hercules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">source_hypocenter</span></em>, <em class="sig-param"><span class="n">hr_or1</span></em>, <em class="sig-param"><span class="n">hr_or2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._from_hercules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._from_hercules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads an instance of Hercules simulation results at one station.
 Returns a Record object.</p>
 <dl>
@@ -873,22 +895,6 @@ Returns a Record object.</p>
 <dd><p>Returns the processed records based on hash value of the
 record and the processing label. Developers should call this
 function only by original record.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="tsprocess.record.Record._haversine">
-<em class="property">static </em><code class="sig-name descname">_haversine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat1</span></em>, <em class="sig-param"><span class="n">lon1</span></em>, <em class="sig-param"><span class="n">lat2</span></em>, <em class="sig-param"><span class="n">lon2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._haversine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._haversine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes distance of two geographical points.</p>
-<dl>
-<dt>Inputs:</dt><dd><div class="line-block">
-<div class="line">lat and lon for point 1 and point 2</div>
-</div>
-</dd>
-<dt>Outputs:</dt><dd><div class="line-block">
-<div class="line">distance betwee two points in km.</div>
-</div>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -981,6 +987,30 @@ processed record will be stored in the database for future use.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="tsprocess.ts_utils.compute_azimuth">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">compute_azimuth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat1</span></em>, <em class="sig-param"><span class="n">lon1</span></em>, <em class="sig-param"><span class="n">lat2</span></em>, <em class="sig-param"><span class="n">lon2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#compute_azimuth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.compute_azimuth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes azimuth from point one to point2.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">lat and lon for point 1 and point 2</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">azimuth from point1 to point2.</div>
+</div>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">37.577019</span><span class="p">,</span> <span class="o">-</span><span class="mf">112.561856</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p2</span> <span class="o">=</span> <span class="p">[</span><span class="mf">37.214750</span><span class="p">,</span> <span class="o">-</span><span class="mf">117.545706</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">az</span> <span class="o">=</span> <span class="n">compute_azimuth</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">az</span> <span class="si">:</span><span class="s2">0.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">266.28959</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt id="tsprocess.ts_utils.get_period">
 <code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">get_period</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tmin</span></em>, <em class="sig-param"><span class="n">tmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#get_period"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.get_period" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return an array of period T</p>
@@ -989,6 +1019,22 @@ processed record will be stored in the database for future use.</p>
 <span class="go">0.16237767</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.haversine">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">haversine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat1</span></em>, <em class="sig-param"><span class="n">lon1</span></em>, <em class="sig-param"><span class="n">lat2</span></em>, <em class="sig-param"><span class="n">lon2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#haversine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.haversine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes distance of two geographical points.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">lat and lon for point 1 and point 2</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">distance betwee two points in km.</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1090,6 +1136,19 @@ station_incident dictionary</p>
 <code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">query_opt_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">opt_params</span></em>, <em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#query_opt_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.query_opt_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the provided key in optional parameters dictionayr.
 Returns None if not found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.rotate_record">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">rotate_record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em>, <em class="sig-param"><span class="n">rotation_angle</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#rotate_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.rotate_record" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotates a given record instance by rotation angle</p>
+<dl class="simple">
+<dt>Input:</dt><dd><p>record: instance of Record class
+rotation_angle: rotation angle in degrees</p>
+</dd>
+<dt>Output:</dt><dd><p>rotated record instane</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

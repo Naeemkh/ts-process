@@ -3,7 +3,7 @@ tsprocess
 *Ground motion time series processing tools*
 
 
-.. figure:: images/svg/overview.svg 
+.. figure:: images/png/overview.png
    :alt: overview
    :width: 600px
    :align: center 
