@@ -19,11 +19,10 @@ setuptools.setup(
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: BSD 3-Clause License",
+        "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Topic :: Scientific/Engineering :: Computational Seismology",
-        "Programming Language :: Python :: 3 :: only",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
