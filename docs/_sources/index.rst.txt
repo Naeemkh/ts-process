@@ -2,14 +2,13 @@ tsprocess
 ==========
 *Ground motion time series processing tools*
 
+
 .. figure:: images/png/overview.png
    :alt: overview
    :width: 600px
    :align: center 
 
-   By generating a unique hash value for data and actions on the data,
-   **tsprocess** guarantees that each process is carried out once and the 
-   results are stored once.
+   By generating a unique hash value for data and actions on the data, **tsprocess** guarantees that each process is carried out once and the results are stored once.
 
 .. toctree::
    :glob:
@@ -38,7 +37,9 @@ tsprocess
 
    concepts
    documentation
+   git_branching
    modules
+
 
 .. toctree::
    :glob:
@@ -47,6 +48,9 @@ tsprocess
    
    contact
    CHANGELOG
+
+
+
 
 Indices and tables
 ==================
