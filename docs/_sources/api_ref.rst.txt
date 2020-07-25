@@ -12,6 +12,7 @@ section.
 :ref:`add_incidents_label` 
 :ref:`remove_incidents_label` 
 :ref:`list_incidents_label` 
+:ref:`compare_incidents_label`
 :ref:`add_filter_st_label` 
 :ref:`add_processing_label` 
 :ref:`plot_displacement_label`
@@ -90,6 +91,19 @@ using the following command:
 .. code-block:: console
 
     $ p.list_of_incidents()
+
+
+.. _compare_incidents_label:
+
+Compare incidents
+-----------------
+Compares different keys in the incidents' metadata and return them in a tablulated
+format. 
+
+.. code-block:: console
+
+    $ p.compare_incidents(['compare_incidents(['hercules101','hercules102'],\
+      only_differences=False)'])
 
 
 .. _add_filter_st_label:

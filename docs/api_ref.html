@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#add-incidents">Add incidents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#remove-incidents">Remove incidents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#list-of-available-incidents">List of available incidents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compare-incidents">Compare incidents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-filter-for-selecting-stations">Add filter for selecting stations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-processing-label">Add processing label</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#processing-records">Processing records</a><ul>
@@ -240,22 +241,25 @@ section.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#list-incidents-label"><span class="std std-ref">List of available incidents</span></a></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#add-filter-st-label"><span class="std std-ref">Add filter for selecting stations</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#compare-incidents-label"><span class="std std-ref">Compare incidents</span></a></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#add-processing-label"><span class="std std-ref">Add processing label</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#add-filter-st-label"><span class="std std-ref">Add filter for selecting stations</span></a></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#plot-displacement-label"><span class="std std-ref">Plot displacement timeseries</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#add-processing-label"><span class="std std-ref">Add processing label</span></a></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#plot-velocity-label"><span class="std std-ref">Plot velocity timeseries</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#plot-displacement-label"><span class="std std-ref">Plot displacement timeseries</span></a></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#plot-acceleration-label"><span class="std std-ref">Plot acceleration timeseries</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#plot-velocity-label"><span class="std std-ref">Plot velocity timeseries</span></a></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#show-stations-on-map-label"><span class="std std-ref">Show stations on the map</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#plot-acceleration-label"><span class="std std-ref">Plot acceleration timeseries</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#show-stations-on-map-label"><span class="std std-ref">Show stations on the map</span></a></p></td>
 <td></td>
 </tr>
 </tbody>
@@ -305,6 +309,15 @@ in-memory cache or on the database will be removed.</p>
 (see <a class="reference internal" href="incidents.html"><span class="doc">here</span></a> ). You can see a list of available incidents by
 using the following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.list_of_incidents<span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="compare-incidents">
+<span id="compare-incidents-label"></span><h2>Compare incidents<a class="headerlink" href="#compare-incidents" title="Permalink to this headline">¶</a></h2>
+<p>Compares different keys in the incidents’ metadata and return them in a tablulated
+format.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.compare_incidents<span class="o">([</span><span class="s1">&#39;compare_incidents([&#39;</span>hercules101<span class="s1">&#39;,&#39;</span>hercules102<span class="s1">&#39;],\</span>
+<span class="s1">  only_differences=False)&#39;</span><span class="o">])</span>
 </pre></div>
 </div>
 </div>
