@@ -90,18 +90,24 @@
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting Up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidents.html">Incidents</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#adding-incidents">Adding incidents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#initiate-a-project">Initiate a project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#close-database">Close database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-incidents">Add incidents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#remove-incidents">Remove incidents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#list-of-available-incidents">List of available incidents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#adding-filter-for-selecting-stations">Adding filter for selecting stations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#adding-processing-label">Adding processing label</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-filter-for-selecting-stations">Add filter for selecting stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-processing-label">Add processing label</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#processing-records">Processing records</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#optional-parameters">Optional parameters</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#plot-displacement-timeseries">Plot displacement timeseries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plot-velocity-timeseries">Plot velocity timeseries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plot-acceleration-timeseries">Plot acceleration timeseries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#show-stations-on-the-map">Show stations on the map</a></li>
 </ul>
 </li>
@@ -210,47 +216,188 @@
 </style>
 <div class="section" id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
-<dl class="simple">
-<dt>In this section, a list of commands for common tasks is presented. In tsprocess,</dt><dd><p>all commands are based on a project. One needs to add a project at the
-beggining of each processing session.</p>
-</dd>
-</dl>
+<p>In all of these commands, <code class="docutils literal notranslate"><span class="pre">p</span></code> is a <code class="docutils literal notranslate"><span class="pre">Project</span></code> class instance. For more
+details see <a class="reference internal" href="modules.html"><span class="doc">Modules</span></a>
+section.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 97%" />
+<col style="width: 3%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#create-project-label"><span class="std std-ref">Initiate a project</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#close-db-label"><span class="std std-ref">Close database</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#add-incidents-label"><span class="std std-ref">Add incidents</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#remove-incidents-label"><span class="std std-ref">Remove incidents</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#list-incidents-label"><span class="std std-ref">List of available incidents</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#add-filter-st-label"><span class="std std-ref">Add filter for selecting stations</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#add-processing-label"><span class="std std-ref">Add processing label</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#plot-displacement-label"><span class="std std-ref">Plot displacement timeseries</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#plot-velocity-label"><span class="std std-ref">Plot velocity timeseries</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#plot-acceleration-label"><span class="std std-ref">Plot acceleration timeseries</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#show-stations-on-map-label"><span class="std std-ref">Show stations on the map</span></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="initiate-a-project">
+<span id="create-project-label"></span><h2>Initiate a project<a class="headerlink" href="#initiate-a-project" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> from tsprocess import project as pr
-<span class="gp">$</span> <span class="nv">p1</span> <span class="o">=</span> pr.Project<span class="o">(</span><span class="s2">&quot;Highf&quot;</span><span class="o">)</span>
+<span class="gp">$</span> <span class="nv">p</span> <span class="o">=</span> pr.Project<span class="o">(</span><span class="s2">&quot;Highf&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<dl class="simple">
-<dt>In this example, <cite>Highf</cite> is the project name, and <cite>p1</cite> is the project handle.</dt><dd><p>A database with the project name with “_db.sqlite” suffix will be generated.
+<p>In this example, <cite>Highf</cite> is the project name, and <cite>p</cite> is the project instance.
+A database with the project name with “_db.sqlite” suffix will be generated.
 If a database with that name already exists, it will be used to retrieve
-records or add new records. In the following tasks, we assume that you have
-<cite>p1</cite> project handle.</p>
-</dd>
-</dl>
-<div class="section" id="adding-incidents">
-<h2>Adding incidents<a class="headerlink" href="#adding-incidents" title="Permalink to this headline">¶</a></h2>
-<p>For more details about incidents, please see <a class="reference internal" href="incidents.html"><span class="doc">Incidents</span></a> section.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p1.add_incident<span class="o">(</span>path_to_incident_folder<span class="o">)</span>
+records or add new records.</p>
+</div>
+<div class="section" id="close-database">
+<span id="close-db-label"></span><h2>Close database<a class="headerlink" href="#close-database" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.close_database<span class="o">()</span>
+</pre></div>
+</div>
+<p>Before closing the processing session, make sure to close the database
+connection. Closing database makes sure to store any data in the buffer in the
+database.</p>
+</div>
+<div class="section" id="add-incidents">
+<span id="add-incidents-label"></span><h2>Add incidents<a class="headerlink" href="#add-incidents" title="Permalink to this headline">¶</a></h2>
+<p>Registers incident folder with the current project. Loads projects
+<em>description.txt</em> and detects the project type. However, does not load any data.
+For more details about incidents, please see <a class="reference internal" href="incidents.html"><span class="doc">Incidents</span></a>
+section.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.add_incident<span class="o">(</span>path_to_incident_folder<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-incidents">
+<span id="remove-incidents-label"></span><h2>Remove incidents<a class="headerlink" href="#remove-incidents" title="Permalink to this headline">¶</a></h2>
+<p>Removes registered incident from the project. The original data is not modified,
+however, all records that are related to the incident and are strored in
+in-memory cache or on the database will be removed.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.remove_incident<span class="o">(</span>incident_name<span class="o">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="list-of-available-incidents">
-<h2>List of available incidents<a class="headerlink" href="#list-of-available-incidents" title="Permalink to this headline">¶</a></h2>
-<p>Each incident has a unique name, which is provided in the description.txt file (see <a class="reference internal" href="incidents.html"><span class="doc">here</span></a> ). You can see a list of available incidents by using the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p1.list_of_incidents<span class="o">()</span>
+<span id="list-incidents-label"></span><h2>List of available incidents<a class="headerlink" href="#list-of-available-incidents" title="Permalink to this headline">¶</a></h2>
+<p>Each incident has a unique name, which is provided in the <em>description.txt</em> file
+(see <a class="reference internal" href="incidents.html"><span class="doc">here</span></a> ). You can see a list of available incidents by
+using the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.list_of_incidents<span class="o">()</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="adding-filter-for-selecting-stations">
-<h2>Adding filter for selecting stations<a class="headerlink" href="#adding-filter-for-selecting-stations" title="Permalink to this headline">¶</a></h2>
-<p>Processing the results are based on selected stations. Users can define different filters for selecting stations, the filters can be used together. In that those stations that satisfy all filters will be returned. Still working on this ….</p>
-</div>
-<div class="section" id="adding-processing-label">
-<h2>Adding processing label<a class="headerlink" href="#adding-processing-label" title="Permalink to this headline">¶</a></h2>
-<p>In <em>tsprocess</em> we assign a unique Id for each seismic record. Any processing action is also has a unique Id. Through these unique ids (hash values) we can track any record that has been gone throught different processes. Users are not allowed to directly process any records, however, they can define processing labels and apply those labels on the records. The following command shows how to add a new processing labels. There is no limitation on the number a processing labels and it can be defined any place before it is called.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="c1">#p1.add_processing_label(label_name,label_type, dictionary of arguments)</span>
-<span class="gp">$</span> p1.add_processing_label<span class="o">(</span><span class="s1">&#39;lpf2&#39;</span>,<span class="s1">&#39;lowpass_filter&#39;</span>,<span class="o">{</span><span class="s2">&quot;N&quot;</span>:4, <span class="s2">&quot;fc&quot;</span>:2.0<span class="o">})</span>
+<div class="section" id="add-filter-for-selecting-stations">
+<span id="add-filter-st-label"></span><h2>Add filter for selecting stations<a class="headerlink" href="#add-filter-for-selecting-stations" title="Permalink to this headline">¶</a></h2>
+<p>Processing the results are based on selected stations. Users can define
+different filters for selecting stations, the filters can be used together. In
+that case those stations that satisfy all filters will be returned. This
+<strong>should not</strong> to be confused with timeseries filtering.</p>
+<p>The following table shows different station filter type and their required arguments.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Filter Type</p></th>
+<th class="head"><p>Required Arguments</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>epi_dist_lt</p></td>
+<td><p>“distance”: float, distance in km</p></td>
+</tr>
+<tr class="row-odd"><td><p>epi_dst_lte</p></td>
+<td><p>“distance”: float, distance in km</p></td>
+</tr>
+<tr class="row-even"><td><p>epi_dist_gt</p></td>
+<td><p>“distance”: float, distance in km</p></td>
+</tr>
+<tr class="row-odd"><td><p>epi_dist_gte</p></td>
+<td><p>“distance”: float, distance in km</p></td>
+</tr>
+<tr class="row-even"><td><p>azimuth_bt</p></td>
+<td><p>“azmth”: [float, float], in [0, 360]</p></td>
+</tr>
+<tr class="row-odd"><td><p>include_stlist_by_incident</p></td>
+<td><p>“incident_name”, “stations”</p></td>
+</tr>
+<tr class="row-even"><td><p>exclude_stlist_by_incident</p></td>
+<td><p>“incident_name”, “stations”</p></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.add_station_filter<span class="o">(</span>station_filter_name, filter_type , <span class="o">{</span>arguments<span class="o">})</span>
 </pre></div>
 </div>
+</div></blockquote>
+<p>The station filter name is optional, however, it should be a unique name.</p>
+<ul class="simple">
+<li><p>Based on epicentral distance</p></li>
+</ul>
+<blockquote>
+<div><p>These filters only takes epicentral distance as argument.
+Here is an example of adding station filter to include all stations with
+epicentral distance less than 10 km.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.add_station_filter<span class="o">(</span><span class="s2">&quot;lesst10&quot;</span>, <span class="s2">&quot;epi_dist_lt&quot;</span>, <span class="o">{</span><span class="s2">&quot;distance&quot;</span>:10<span class="o">})</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ul>
+<li><p>Based on azimuth</p>
+<p>Selects stations from the start azimuth to the end azimuth. Assuming az2 &gt; az1:</p>
+<ul class="simple">
+<li><p>[az1, az2]: includes all stations with  az1 &lt; az &lt; az2</p></li>
+<li><p>[az2, az1]: includes all stations with  az2 &lt; az &lt; 360 and  0 &lt; az &lt; az1</p></li>
+</ul>
+</li>
+<li><p>Based on station name</p></li>
+</ul>
+<blockquote>
+<div><p>Selects stations based on their name. Since one station has different name in
+different incidents, one should select an incident as a reference.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.add_station_filter<span class="o">(</span><span class="s2">&quot;select_stations&quot;</span>, <span class="s2">&quot;include_stlist_by_incident&quot;</span>,<span class="se">\</span>
+ <span class="o">{</span><span class="s2">&quot;incident_name&quot;</span>:<span class="s2">&quot;hercules101&quot;</span>, <span class="s2">&quot;stations&quot;</span>:<span class="o">[</span><span class="s1">&#39;station.5&#39;</span>,<span class="s1">&#39;station.206&#39;</span><span class="o">]})</span>
+</pre></div>
+</div>
+<p>Defines a filter to select those stations that in <em>hercules101</em> incident they
+named as <em>station.5</em> and <em>station.206</em>. Please note that this filter inlcudes
+stations regardless of their incident. Incident and station name are just used
+to detect the station location based on known parameters.</p>
+</div></blockquote>
+</div>
+<div class="section" id="add-processing-label">
+<span id="id1"></span><h2>Add processing label<a class="headerlink" href="#add-processing-label" title="Permalink to this headline">¶</a></h2>
+<p>In <em>tsprocess</em> we assign a unique Id for each seismic record. Any processing
+action is also has a unique Id. Through these unique ids (hash values) we can
+track any record that has been gone throught different processes. Users are not
+allowed to directly process any records, however, they can define processing
+labels and apply those labels on the records. The following command shows how
+to add a new processing labels. There is no limitation on the number a processing
+labels and it can be defined at any place before it is called.</p>
 <p>The following table shows different label types and their required arguments.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -278,43 +425,74 @@ records or add new records. In the following tasks, we assume that you have
 <tr class="row-even"><td><p>scale</p></td>
 <td><p>“factor”: scaling factor</p></td>
 </tr>
-<tr class="row-odd"><td><p>shift</p></td>
-<td><p>“amount”: shifting amount in seconds</p></td>
-</tr>
-<tr class="row-even"><td><p>taper</p></td>
+<tr class="row-odd"><td><p>taper</p></td>
 <td><p>“m”: number of points, “flag”: “front”,”end”,”all”</p></td>
 </tr>
-<tr class="row-odd"><td><p>cut</p></td>
+<tr class="row-even"><td><p>cut</p></td>
 <td><p>“m”: number of points, “flag”: “front”,”end”, “t_diff”:cut time (s)</p></td>
 </tr>
-<tr class="row-even"><td><p>zero_pad</p></td>
+<tr class="row-odd"><td><p>zero_pad</p></td>
 <td><p>“m”: number of points, “flag”: “front”,”end”, “t_diff”:added time (s)</p></td>
 </tr>
 </tbody>
 </table>
 <ul class="simple">
-<li><p>details about each label ….</p></li>
+<li><p>filters</p></li>
+</ul>
+<blockquote>
+<div><p>Timeseries filters are created based on forward-backward digital filter using
+cascaded second-order sections. In this package we only use <em>Nth</em> order
+Butterworth digital filters. All filters require filter order as an input
+argument, the default value is 4.</p>
+<p>Here is an example of adding lowpass filter with corner frequency at 2 Hz.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p1.add_processing_label<span class="o">(</span><span class="s1">&#39;lpf2&#39;</span>,<span class="s1">&#39;lowpass_filter&#39;</span>,<span class="o">{</span><span class="s2">&quot;N&quot;</span>:4, <span class="s2">&quot;fc&quot;</span>:2.0<span class="o">})</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ul>
+<li><p>rotation</p>
+<p>Rotating timeseries are done at the record level. The orientation of the
+records are provided by the user in the <strong>description.txt</strong> file. However,
+the command is applying a relative rotation. Records orientation will be
+adjusted.</p>
+</li>
 </ul>
 </div>
 <div class="section" id="processing-records">
 <h2>Processing records<a class="headerlink" href="#processing-records" title="Permalink to this headline">¶</a></h2>
-<p>There are numerous packages for processing seismic timeseries. <em>tsprocess</em> is a platform to manage large number of stations and incidents. Therefore, one can plot a timeseries, however, with the processing labels and stations filters she can define which incidents, which stations, and what processing should be done on them before plotting the timeseries. Users never manually store any processed data. The function prototype is according to the following:</p>
+<p>There are numerous packages for processing seismic timeseries. <em>tsprocess</em> is a
+platform to manage large number of stations and incidents. Therefore, one can
+plot a timeseries, however, with the processing labels and stations filters
+he/she can define which incidents, which stations, and what processing should be
+applied on them before plotting the timeseries. Users never manually store any
+processed data. The function prototype is according to the following:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">command(list of incidents,</span>
 <span class="go">         nested list of processing labels for each incident,</span>
 <span class="go">         list of station filters,</span>
 <span class="go">         dictionary of optional parameters)</span>
 </pre></div>
 </div>
-<p>Depending on the command and optional parameters, The output will be in a different format; however, in almost all commands in this format, a list of records will be extracted from the database or will be generated.</p>
+<p>Depending on the command and optional parameters, The output will be in a
+different format; however, in almost all commands in this format, a list of
+records will be extracted from the database or will be generated.</p>
 <ul class="simple">
-<li><p>We track incidents with their <em>incident_name</em> attribute, which is defined by the author of the incident folder inside the <em>description.txt</em> file.</p></li>
-<li><p>Each incident goes through different processing steps. For each incident, we have a list of processing labels. If it passed as an empty list, it would return the original data. Processing steps will be applied by their order in the list. The first label will be applied first.</p></li>
-<li><p>The intersection of different station filters will determine which station should be included in the final results.</p></li>
-<li><p>Optional parameters are a dictionary container that provides control over the final results.</p></li>
+<li><p>We track incidents based on their <em>incident_name</em> attribute, which is defined
+by the author of the incident folder inside the <em>description.txt</em> file.</p></li>
+<li><p>Each incident goes through different processing steps. For each incident,
+we have a list of processing labels. If it passed as an empty list,
+it would return the original data. Processing steps will be applied by their
+order in the list. The first label will be applied first.</p></li>
+<li><p>The intersection of different station filters will determine which station
+should be included in the final results.</p></li>
+<li><p>Optional parameters are a dictionary container that provides control over
+the final results.</p></li>
 </ul>
 <div class="section" id="optional-parameters">
 <h3>Optional parameters<a class="headerlink" href="#optional-parameters" title="Permalink to this headline">¶</a></h3>
-<p>Fine tuning the final results and storing the final results in the disk can be controlled by optional parameters. In the following a list of optional parameters and their functionality are presented. Optional parameters that are not suppported with the commands will be ignored.</p>
+<p>Fine tuning the final results and storing the final results on the disk
+(as a product) can be controlled by optional parameters. In the following a list
+of optional parameters and their functionality are presented. Optional
+parameters that are not suppported with the commands will be ignored.</p>
 <blockquote>
 <div><ul>
 <li><p><strong>zoom_in_freq</strong></p>
@@ -344,13 +522,86 @@ records or add new records. In the following tasks, we assume that you have
 </ul>
 </div></blockquote>
 </li>
+<li><p><strong>save_figure</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>parameter: True or False, default value is False.</p></li>
+</ul>
+</div></blockquote>
+</li>
 </ul>
 </div></blockquote>
 </div>
 </div>
+<div class="section" id="plot-displacement-timeseries">
+<span id="plot-displacement-label"></span><h2>Plot displacement timeseries<a class="headerlink" href="#plot-displacement-timeseries" title="Permalink to this headline">¶</a></h2>
+<p>Plots displacement timeseries with their Fourier transfer amplitude (fft) for
+all three components. One figure per station.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Optional parameters:</dt><dd><ul>
+<li><p>zoom_in_time</p></li>
+<li><p>zoom_in_freq</p></li>
+<li><p>save_figure</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The following example plots all orignal records provided by <em>hercules101</em>
+incident.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.plot_displacement_records<span class="o">([</span><span class="s1">&#39;hercules101&#39;</span><span class="o">]</span>,<span class="o">[[]]</span>,<span class="o">[]</span>,<span class="o">{})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plot-velocity-timeseries">
+<span id="plot-velocity-label"></span><h2>Plot velocity timeseries<a class="headerlink" href="#plot-velocity-timeseries" title="Permalink to this headline">¶</a></h2>
+<p>Plots velocity timeseries with their Fourier transfer amplitude (fft) for
+all three components. One figure per station.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Optional parameters:</dt><dd><ul>
+<li><p>zoom_in_time</p></li>
+<li><p>zoom_in_freq</p></li>
+<li><p>save_figure</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The following example plots all orignal records provided by <em>hercules101</em>
+incident.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.plot_velocity_records<span class="o">([</span><span class="s1">&#39;hercules101&#39;</span><span class="o">]</span>,<span class="o">[[]]</span>,<span class="o">[]</span>,<span class="o">{})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plot-acceleration-timeseries">
+<span id="plot-acceleration-label"></span><h2>Plot acceleration timeseries<a class="headerlink" href="#plot-acceleration-timeseries" title="Permalink to this headline">¶</a></h2>
+<p>Plots acceleration timeseries with their response spectra (rsp) for
+all three components. One figure per station.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Optional parameters:</dt><dd><ul>
+<li><p>zoom_in_time</p></li>
+<li><p>zoom_in_rsp</p></li>
+<li><p>save_figure</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The following example plots all orignal records provided by <em>hercules101</em>
+incident.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p.plot_acceleration_records<span class="o">([</span><span class="s1">&#39;hercules101&#39;</span><span class="o">]</span>,<span class="o">[[]]</span>,<span class="o">[]</span>,<span class="o">{})</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="show-stations-on-the-map">
-<h2>Show stations on the map<a class="headerlink" href="#show-stations-on-the-map" title="Permalink to this headline">¶</a></h2>
-<p>Using leaflet API, users can take a look at stations on the map. It follows the same function signature. The following command shows the stations in distance between 25 and 30 Km from 2014 5.1 La Habra, CA, earthquake. Stations’ popups shows station names.</p>
+<span id="show-stations-on-map-label"></span><h2>Show stations on the map<a class="headerlink" href="#show-stations-on-the-map" title="Permalink to this headline">¶</a></h2>
+<p>Using leaflet API, users can take a look at stations on the map. It follows
+the same function signature. The following command shows the stations in
+distance between 25 and 30 Km from 2014 5.1 La Habra, CA, earthquake. Stations’
+popups shows station names.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p1.show_stations_on_map<span class="o">([</span><span class="s1">&#39;hercules101&#39;</span><span class="o">]</span>,<span class="o">[[]]</span>,<span class="o">[</span><span class="s1">&#39;lesst30&#39;</span>,<span class="s1">&#39;moret25&#39;</span><span class="o">])</span>
 </pre></div>
 </div>
