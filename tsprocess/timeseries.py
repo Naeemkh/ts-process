@@ -20,9 +20,7 @@ class TimeSeries:
         'lowpass_filter':'fc: corner freq (Hz); N: order (default:4)',
         'highpass_filter':'fc: corner freq (Hz); N: order (default:4)',
         'bandpass_filter':'fcs: corner freqs (Hz); N: order (default:4)',
-        'rotate':'',
         'scale':'factor',
-        'shift':'',
         'taper':'flag: front, end, all; m: number of samples for tapering',
         'cut':'flag: front, end; m: number of samples for tapering,\
         t_diff: time to cut',
@@ -157,16 +155,8 @@ class TimeSeries:
         if label_type == 'bandpass_filter':
             proc_data = self._bandpass_filter(**label_kwargs)
  
-        if label_type == 'rotate':
-            LOGGER.debug(f"{label_type} is not implemented.")
-            proc_data = self.value
- 
         if label_type == 'scale':
             proc_data =  self._scale(**label_kwargs)
-
-        if label_type == 'shift':
-            LOGGER.debug(f"{label_type} is not implemented.")
-            proc_data = self.value
 
         if label_type == 'taper':
             def extract_params(flag, m):

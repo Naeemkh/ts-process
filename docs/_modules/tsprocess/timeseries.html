@@ -88,10 +88,13 @@
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../setup_env.html">Setting Up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../setup_env.html">Setting up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../incidents.html">Incidents</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api_ref.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">Frequently Asked Questions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -189,9 +192,7 @@
         <span class="s1">&#39;lowpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fc: corner freq (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
         <span class="s1">&#39;highpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fc: corner freq (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
         <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fcs: corner freqs (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;rotate&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="s1">&#39;scale&#39;</span><span class="p">:</span><span class="s1">&#39;factor&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;shift&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="s1">&#39;taper&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end, all; m: number of samples for tapering&#39;</span><span class="p">,</span>
         <span class="s1">&#39;cut&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end; m: number of samples for tapering,</span><span class="se">\</span>
 <span class="s1">        t_diff: time to cut&#39;</span><span class="p">,</span>
@@ -326,16 +327,8 @@
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">:</span>
             <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bandpass_filter</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
  
-        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;rotate&#39;</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
-            <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
- 
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span>
             <span class="n">proc_data</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;shift&#39;</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2"> is not implemented.&quot;</span><span class="p">)</span>
-            <span class="n">proc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
 
         <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s1">&#39;taper&#39;</span><span class="p">:</span>
             <span class="k">def</span> <span class="nf">extract_params</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>

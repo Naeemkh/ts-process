@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Setting up Environment &mdash; tsprocess 0.0.1 documentation</title>
+  <title>Setting Up Environment &mdash; tsprocess 0.0.1 documentation</title>
   
 
   
@@ -38,8 +38,8 @@
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Incidents" href="incidents.html" />
-    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
+    <link rel="next" title="Quickstart" href="quickstart.html" />
+    <link rel="prev" title="About" href="about.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,13 +90,16 @@
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Setting up Environment</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setting Up Environment</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#conda">Conda</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidents.html">Incidents</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_ref.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -154,7 +157,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Setting up Environment</li>
+      <li>Setting Up Environment</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -198,11 +201,21 @@
 }
 </style>
 <div class="section" id="setting-up-environment">
-<h1>Setting up Environment<a class="headerlink" href="#setting-up-environment" title="Permalink to this headline">¶</a></h1>
-<p>It is a better idea to install/use the package in a virtual environment. We recommend Python 3.7 or 3.8 versions. Here are the steps to set up a virtual environment and install the package. In order to install the package, please download the package from <a class="reference external" href="https://github.com/Naeemkh/tsprocess">Github repository</a>. The package name is <code class="docutils literal notranslate"><span class="pre">tsprocess</span></code>.</p>
+<h1>Setting Up Environment<a class="headerlink" href="#setting-up-environment" title="Permalink to this headline">¶</a></h1>
+<p>It is a better idea to install/use the package in a virtual environment. We
+recommend Python 3.7 or 3.8 versions. Here are the steps to set up a virtual
+environment and install the package. In order to install the package, please
+download the package from
+<a class="reference external" href="https://github.com/Naeemkh/tsprocess">Github repository</a>. The package name
+is <code class="docutils literal notranslate"><span class="pre">tsprocess</span></code>.</p>
 <div class="section" id="conda">
 <h2>Conda<a class="headerlink" href="#conda" title="Permalink to this headline">¶</a></h2>
-<p>Here are the steps for running the code with anaconda virtual environment. Please make sure that you have <a class="reference external" href="https://www.anaconda.com/products/individual">anaconda</a> installed on your system. You can also install <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">miniconda</a> which is the lightweight version of anaconda.</p>
+<p>Here are the steps for running the code with anaconda virtual environment.
+Please make sure that you have
+<a class="reference external" href="https://www.anaconda.com/products/individual">anaconda</a> installed on your
+system. You can also install
+<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">miniconda</a> which is the
+lightweight version of anaconda.</p>
 <ul class="simple">
 <li><p>Step 1: Create a virtual environment</p></li>
 </ul>
@@ -228,11 +241,14 @@
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip3 install -e tsprocess
 </pre></div>
 </div>
-<p>That’s it. You should be able to <em>import tsprocess</em> and use it. However, if you want to use the code inside <a class="reference external" href="https://jupyter.org">Jupyter Notebook</a> please follow the next steps.</p>
+<p>That’s it. You should be able to <em>import tsprocess</em> and use it. However, if you
+want to use the code inside <a class="reference external" href="https://jupyter.org">Jupyter Notebook</a>
+please follow the next steps.</p>
 <ul class="simple">
 <li><p>Step 5: Register the kernel on Jupyter Notebook:</p></li>
 </ul>
-<p>Make sure that you have activated the virtual environment (Please see Step 2). Next, install <em>ipykernel</em>:</p>
+<p>Make sure that you have activated the virtual environment (Please see Step 2).
+Next, install <em>ipykernel</em>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> conda install -c anaconda ipykernel
 </pre></div>
 </div>
@@ -244,11 +260,14 @@ The last step is adding the kernel into Jupyter Notebook.</p>
 <ul class="simple">
 <li><p>Step 6: Open your notebook and start processing</p></li>
 </ul>
-<p>In your working directory (any arbitrary directory that you work on your data), open terminal and fire up notebook:</p>
+<p>In your working directory (any arbitrary directory that you work on your data),
+open terminal and fire up notebook:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> jupyter notebook
 </pre></div>
 </div>
-<p>At the top right corner, there is a button labeled <cite>New</cite> key. Choose your recently created kernel (in this example: your_venv_name). Choosing a kernel will open a new tab that you can work on.</p>
+<p>At the top right corner, there is a button labeled <cite>New</cite> key. Choose your
+recently created kernel (in this example: your_venv_name). Choosing a kernel
+will open a new tab that you can work on.</p>
 </div>
 </div>
 
@@ -260,10 +279,10 @@ The last step is adding the kernel into Jupyter Notebook.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="incidents.html" class="btn btn-neutral float-right" title="Incidents" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="about.html" class="btn btn-neutral float-left" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -38,8 +38,8 @@
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Setting up Environment" href="setup_env.html" />
-    <link rel="prev" title="About" href="about.html" /> 
+    <link rel="next" title="Incidents" href="incidents.html" />
+    <link rel="prev" title="Setting Up Environment" href="setup_env.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,10 +90,13 @@
 </ul>
 <p class="caption"><span class="caption-text">Researchers</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting Up Environment</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="setup_env.html">Setting up Environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidents.html">Incidents</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_ref.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developers</span></p>
 <ul>
@@ -196,7 +199,36 @@
 </style>
 <div class="section" id="quickstart">
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
-<p>The project is at the Pre-Alpha development state. It is not ready to be used by the end-users. If you have any suggestions or want to see some features in the upcoming release, please <a class="reference internal" href="contact.html"><span class="doc">contact us.</span></a></p>
+<p><a class="reference internal" href="setup_env.html"><span class="doc">Set up</span></a> the environment and import the package. Working with
+Jupyter Notebook is strongly recommended.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> from tsprocess import project as pr
+<span class="gp">$</span> <span class="nv">p1</span> <span class="o">=</span> pr.Project<span class="o">(</span><span class="s1">&#39;myproject1&#39;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Create an <a class="reference internal" href="incidents.html"><span class="doc">incident folder</span></a> and add the incident to the project.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="c1"># assuming incident is located at incident_folder</span>
+<span class="gp">$</span> <span class="c1"># and incident name is inc_1</span>
+<span class="gp">$</span> p1.add_incident<span class="o">(</span>incident_folder<span class="o">)</span>
+</pre></div>
+</div>
+<p>Define a taper processing label.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="c1"># example for tapering 100 sample points at the beggining and end of the</span>
+<span class="gp">$</span> <span class="c1"># timeseries.</span>
+<span class="gp">$</span> p1.add_processing_label<span class="o">(</span><span class="s1">&#39;taper1&#39;</span>,<span class="s1">&#39;taper&#39;</span>,<span class="o">{</span><span class="s2">&quot;flag&quot;</span>:<span class="s2">&quot;all&quot;</span>, <span class="s2">&quot;m&quot;</span>:100<span class="o">})</span>
+</pre></div>
+</div>
+<p>Define a filter for selecting stations at an epicentral distance less than 10 km.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p1.add_station_filter<span class="o">(</span><span class="s2">&quot;lesst10&quot;</span>, <span class="s2">&quot;epi_dist_lt&quot;</span>, <span class="o">{</span><span class="s2">&quot;distance&quot;</span>:10<span class="o">})</span>
+</pre></div>
+</div>
+<p>Plot velocity records based on the defined processing labels and stations
+selection filter.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> p1.plot_velocity_records<span class="o">([</span><span class="s1">&#39;inc_1&#39;</span><span class="o">]</span>,<span class="o">[[</span><span class="s1">&#39;taper1&#39;</span><span class="o">]]</span>,<span class="o">[</span><span class="s1">&#39;lesst10&#39;</span><span class="o">]</span>,<span class="o">{})</span>
+</pre></div>
+</div>
+<p>It should return tapered plots of stations at an epicentral distance less than
+10 km.</p>
+<p>See <a class="reference internal" href="api_ref.html"><span class="doc">API Reference</span></a> and <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> for more details.</p>
 </div>
 
 
@@ -207,10 +239,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="setup_env.html" class="btn btn-neutral float-right" title="Setting up Environment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="incidents.html" class="btn btn-neutral float-right" title="Incidents" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="about.html" class="btn btn-neutral float-left" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="setup_env.html" class="btn btn-neutral float-left" title="Setting Up Environment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

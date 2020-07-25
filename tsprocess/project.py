@@ -31,7 +31,9 @@ from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
 
 
 class Project:
-    """ Project Class """
+    """ Project Class    
+    p1 = Project('myproject')
+    """
 
     color_code  = ['k', 'r', 'b', 'm', 'g', 'c', 'y', 'brown',
                    'gold', 'blueviolet', 'grey', 'pink']
