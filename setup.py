@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tsprocess", 
-    version="0.0.1",
+    version="0.0.2",
     author="Naeem Khoshnevis",
     author_email="khoshnevis.naeem@gmail.com",
     maintainer="Naeem Khoshnevis, Fabio Silva, Ricardo Taborda, Christine Goulet",

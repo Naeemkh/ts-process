@@ -2,7 +2,14 @@
 
 See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 
-## [Unreleased]
+
+## [0.0.2] - 2020-07-26
+### Added
+- doc: index: pypi version
+- doc: index: licence and github actions status
+
+
+## [0.0.1] - 2020-07-25
 ### Added
 - database.py module and DataBase class
 - MANIFEST.in file
@@ -33,9 +40,5 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 ### Changed
 - package name (ts-process -> tsprocess)
 - Commands Quick reference -> API reference
-
-### Fixed
-
-### Removed
 
 
