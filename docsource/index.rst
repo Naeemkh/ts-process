@@ -1,7 +1,11 @@
 tsprocess
 ==========
+
 *Ground motion time series processing tools*
 
+.. image:: https://img.shields.io/pypi/v/tsprocess.svg
+    :target: https://pypi.org/project/tsprocess
+    :alt: PyPI version
 
 .. figure:: images/png/overview.png
    :alt: overview
