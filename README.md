@@ -1,7 +1,6 @@
 # tsprocess
 
 [![Licence](https://img.shields.io/pypi/l/tsprocess.svg)](https://pypi.org/project/tsprocess)
-[![Actions Status](https://github.com/naeemkh/tsprocess/workflows/Python\ package/badge.svg?branch=master&event=push)](https://github.com/naeemkh/tsprocess/actions)
 [![PyPI version](https://img.shields.io/pypi/v/tsprocess.svg)](https://pypi.org/project/tsprocess)
 
 Ground motion time series processing tools
