@@ -6,9 +6,11 @@ The core module for the Incident class.
 
 import os
 
+from .log import LOGGER
 from .station import Station
 from .database import DataBase
 from .seismicsource import SeismicSource
+from .ts_utils import is_lat_valid, is_lon_valid, is_depth_valid
 
 
 class Incident:
@@ -86,6 +88,27 @@ class Incident:
                             line = fp.readline()
                             tmp_line = line.split()
                             if len(tmp_line) == 3:
+                                try:
+                                    if not (is_lat_valid(float(
+                                        tmp_line[0].strip()))
+                                       and
+                                       is_lon_valid(float(
+                                        tmp_line[1].strip()))
+                                       and
+                                       is_depth_valid(float(
+                                           tmp_line[2].strip()))):
+                                       
+                                       LOGGER.warning(f"station.{str(i)}'s" 
+                                       "location is not valid location."
+                                       " Ignored.")
+                                       continue
+
+                                except ValueError as v:
+                                       LOGGER.warning(f"station.{str(i)}'s"
+                                       " location is not valid input. Ignored. "
+                                       + str(v))
+                                       continue
+
                                 self.stations_list.append(
                                     ['station.'+str(i),\
                                         Station.add_station(\
@@ -94,6 +117,16 @@ class Incident:
                                             float(tmp_line[2].strip()),\
                                             self.metadata["incident_name"],
                                              'station.'+str(i))] 
+                                    )
+                                LOGGER.debug(
+                                    f"station.{str(i)} location added.")
+                                i = i + 1
+                            elif len(tmp_line) == 0:
+                                # empty line, ignore it.
+                                pass
+                            else:
+                                LOGGER.debug(
+                                    f"station.{str(i)}'s location is not valid."
                                     )
                                 i = i + 1
                         break
