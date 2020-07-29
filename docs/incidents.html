@@ -210,12 +210,19 @@
 <h2>Hercules<a class="headerlink" href="#hercules" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/CMU-Quake/hercules/wiki/Hercules">Hercules</a> is a simulation software for anelastic wave propagation in highly heterogeneous media due to kinematic faulting. The following figure shows the required files and folders and their arrangements.</p>
 <a class="reference internal image-reference" href="_images/hercules_folder_arrangment.png"><img alt="hercules folder arrangement" class="align-center" src="_images/hercules_folder_arrangment.png" style="width: 600px;" /></a>
-<p>The only extra file is <strong>description.txt</strong> that has two mandatory keys and values. These keys are <em>incident_name</em> and <em>incident_type</em>. The former should be a unique name and the latter, in this case, is <em>hercules</em>.</p>
+<p>The only extra file is <strong>description.txt</strong> that has several mandatory keys and
+values. These keys are shown below. The incident name should be a unique name.
+Incident type is one of the supported incidents, which in this case, is
+<em>hercules</em>.  Horizontal orientations should be perpendecular, and vertical
+orientation shows the direction that records are considered positive.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> description.txt
 <span class="go">incident_name         =  hercules_1</span>
 <span class="go">incident_type         =  hercules</span>
 <span class="go">inputfiles_parameters =  inputfiles/parameters.in</span>
 <span class="go">source_hypocenter     =  lat, lon, depth(km)</span>
+<span class="go">hr_comp_orientation_1 =  degree</span>
+<span class="go">hr_comp_orientation_2 =  degree</span>
+<span class="go">ver_comp_orientation  =  up or down</span>
 </pre></div>
 </div>
 </div>

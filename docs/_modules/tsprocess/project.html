@@ -224,6 +224,8 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_make_output_dir</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">switch_ver_orientation_convention</span><span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Project named </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
@@ -270,6 +272,38 @@
         <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create </span><span class="si">{</span><span class="n">path_to_output</span><span class="si">}</span><span class="s2"> folder.&quot;</span><span class="p">)</span></div>
   
+
+<div class="viewcode-block" id="Project.switch_ver_orientation_convention"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.switch_ver_orientation_convention">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">switch_ver_orientation_convention</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        switches the vertical orientation convention to up or down. </span>
+
+<span class="sd">        Inputs:</span>
+
+<span class="sd">            ver_or: Vertical orientation (&quot;up&quot; or &quot;down&quot;)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ver_or</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">ver_or</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ver_or</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Vertical orientation is already &quot;</span><span class="si">{</span><span class="n">ver_or</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="n">ver_or</span>
+        <span class="n">Record</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="n">ver_or</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Vertical orientation is switched to </span><span class="si">{</span><span class="n">ver_or</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span></div>
+
+
     <span class="c1"># Incidents</span>
 <div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Adds a new incident to the project.</span>
@@ -862,7 +896,23 @@
     <span class="k">def</span> <span class="nf">database_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s2">&quot; : &quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s2">&quot; : &quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+    
+<div class="viewcode-block" id="Project.summary"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        prints out a summary of the project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># project</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Name:&quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># incidents</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;incidents: &quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_incidents</span><span class="p">())</span>
+
+        <span class="c1"># project vertical orientation</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vertical component positive orientation: &quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">)</span></div></div>
+
+
 
         
     

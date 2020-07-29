@@ -18,5 +18,9 @@ not sure how to pass a name to the saved figures.
     record went through. These details are also added to the bottom of each 
     figure. 
 
+**Q.** ``show_stations_on_map`` command does not render any map. 
 
+    **A.** This is a longlasting problem with *Jupyter Notebook*. You can fix
+    the problem by switching to *Jupyter Lab*. Please read more on 
+    this Github `issue. <https://github.com/Naeemkh/tsprocess/issues/43>`_
 

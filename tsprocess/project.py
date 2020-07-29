@@ -51,6 +51,8 @@ class Project:
             cls._instance._connect_to_database()
             cls._instance._make_output_dir()
             cls._instance.metadata = {}
+            cls._instance.ver_orientation_conv = None
+            cls._instance.switch_ver_orientation_convention("up")
             return cls._instance
         else:
             LOGGER.warning(f"Project named {cls._instance.name} "
@@ -97,6 +99,38 @@ class Project:
         except OSError:
             LOGGER.warning(f"Failed to create {path_to_output} folder.")
   
+
+    @classmethod
+    def switch_ver_orientation_convention(cls, ver_or):
+        """
+        switches the vertical orientation convention to up or down. 
+
+        Inputs:
+
+            ver_or: Vertical orientation ("up" or "down")
+
+        """
+        
+        if not isinstance(ver_or, str):
+            LOGGER.warning('Vertical orientation should be "up" or "down".'
+             ' Command is ignored.')
+            return
+
+        if ver_or.lower() not in ["up", "down"]:
+            LOGGER.warning('Vertical orientation should be "up" or "down".'
+             ' Command is ignored.')
+            return
+
+        if cls._instance.ver_orientation_conv:
+            if ver_or.lower() == cls._instance.ver_orientation_conv:
+                LOGGER.info(f'Vertical orientation is already "{ver_or}".')
+                return
+
+        cls._instance.ver_orientation_conv = ver_or
+        Record.ver_orientation_conv = ver_or
+        LOGGER.debug(f'Vertical orientation is switched to {ver_or}.')
+
+
     # Incidents
     def add_incident(self, incident_folder):
         """ Adds a new incident to the project.
@@ -690,6 +724,22 @@ class Project:
 
         for key, item in self.pr_db.db.items():
             print(key," : ", item)
+
+    
+    def summary(self):
+        """
+        prints out a summary of the project.
+        """
+        # project
+        print("Name:" , self.name)
+
+        # incidents
+        print("incidents: " , self.list_of_incidents())
+
+        # project vertical orientation
+        print("Vertical component positive orientation: " , self.ver_orientation_conv)
+
+
 
         
     

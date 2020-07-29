@@ -22,6 +22,7 @@ class Record:
     """ Record Class """
 
     pr_db = None
+    ver_orientation_conv = None
     processing_labels = {}
     label_types = {
         'rotate': 'angle: rotation angle'
@@ -31,7 +32,7 @@ class Record:
                 vel_h1, vel_h2, vel_ver,
                 acc_h1, acc_h2, acc_ver,
                 station, source_params,
-                hc_or1, hc_or2):
+                hc_or1, hc_or2, ver_or):
 
         self.station = station
         self.time_vec = time_vec
@@ -48,6 +49,7 @@ class Record:
         self.source_params = source_params
         self.hc_or1 = hc_or1
         self.hc_or2 = hc_or2
+        self.ver_or = ver_or
         self.unique_id_1 = None 
         self.unique_id_2 = None
         self.notes = []
@@ -166,6 +168,7 @@ class Record:
         incident_name = incident_metadata["incident_name"]
         incident_type = incident_metadata["incident_type"]
        
+       
         # extract station name:
         try:
             st_name = station_obj.inc_st_name[incident_name]
@@ -174,7 +177,8 @@ class Record:
             return
 
         # generate original record hash value.
-        hash_val = hashlib.sha256((incident_name+st_name).\
+        hash_val = hashlib.sha256(
+            (incident_name + st_name + Record.ver_orientation_conv).\
             encode('utf-8')).hexdigest()
 
         # retrieve the record from database.
@@ -186,14 +190,18 @@ class Record:
               " to the database. Loading ... " )
             # we need to load the data 
             if incident_type == "hercules":
+
                 station_folder = incident_metadata["output_stations_directory"]
                 hr_or1 = float(incident_metadata["hr_comp_orientation_1"])
                 hr_or2 = float(incident_metadata["hr_comp_orientation_2"])
+                ver_or = incident_metadata["ver_comp_orientation"]
+
                 station_file = os.path.join(incident_metadata[
                     "incident_folder"],station_folder,st_name)
                 try:
                     record_org = Record._from_hercules(station_file,
-                        station_obj, Station.pr_source_loc, hr_or1, hr_or2)
+                        station_obj, Station.pr_source_loc, hr_or1, hr_or2,
+                         ver_or)
                     record_org.this_record_hash = hash_val
     
                     # put the record in the database.
@@ -349,6 +357,7 @@ class Record:
             tmp_acc_ver = record.acc_ver._apply(label_name)
             n_hc_or1 = record.hc_or1
             n_hc_or2 = record.hc_or2
+            
     
             
             # TODO: check time vector
@@ -360,10 +369,11 @@ class Record:
                                        tmp_vel_h1, tmp_vel_h2, tmp_vel_ver,
                                        tmp_acc_h1, tmp_acc_h2, tmp_acc_ver,
                                        record.station, record.source_params,
-                                       n_hc_or1, n_hc_or2)
+                                       n_hc_or1, n_hc_or2, record.ver_or)
 
     @staticmethod
-    def _from_hercules(filename,station_obj,source_hypocenter, hr_or1, hr_or2):
+    def _from_hercules(filename,station_obj,source_hypocenter, hr_or1, hr_or2,
+     ver_or):
         """ Loads an instance of Hercules simulation results at one station.
         Returns a Record object.
         
@@ -371,6 +381,9 @@ class Record:
             | filename: station file name (e.g., station.10)
             | station_obj: a station object corresponding that filename
             | source_hypocenter: project source location
+            | hr_or1: first horizontal component's orientation
+            | hr_or2: second horizontal component's orientation
+            | ver_or: vertical component's orientation
 
         Outputs:
             | Record object 
@@ -414,21 +427,26 @@ class Record:
                 pieces = line.split()
                 pieces = [float(piece) for piece in pieces]
                 
-                # Write timeseries to files. Please note that Hercules files 
-                # have the vertical component positive pointing down so we have
-                # to flip it here to match the BBP format in which vertical
-                # component points up
+                if ver_or not in ["up", "down"]:
+                    LOGGER.error("should not get here. Something is wrong with"
+                    " vertical component orientation")
+                    return
+
+                if ver_or == Record.ver_orientation_conv:
+                    ver_or_switch_factor = 1
+                else:
+                    ver_or_switch_factor = -1
 
                 times.append(pieces[0])
                 dis_h1.append(pieces[1])
                 dis_h2.append(pieces[2])
-                dis_ver.append(-1 * pieces[3])
+                dis_ver.append(ver_or_switch_factor * pieces[3])
                 vel_h1.append(pieces[4])
                 vel_h2.append(pieces[5])
-                vel_ver.append(-1 * pieces[6])
+                vel_ver.append(ver_or_switch_factor * pieces[6])
                 acc_h1.append(pieces[7])
                 acc_h2.append(pieces[8])
-                acc_ver.append(-1 * pieces[9])
+                acc_ver.append(ver_or_switch_factor * pieces[9])
 
         except IOError as e:
             LOGGER.debug(str(e))            
@@ -468,4 +486,4 @@ class Record:
                     vel_h1, vel_h2, vel_ver,
                     acc_h1, acc_h2, acc_ver,
                     station_obj, source_hypocenter,
-                    hr_or1, hr_or2)
+                    hr_or1, hr_or2, ver_or)
