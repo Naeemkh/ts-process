@@ -13,7 +13,11 @@ Hercules
    :width: 600px
    :align: center 
 
-The only extra file is **description.txt** that has two mandatory keys and values. These keys are *incident_name* and *incident_type*. The former should be a unique name and the latter, in this case, is *hercules*.
+The only extra file is **description.txt** that has several mandatory keys and
+values. These keys are shown below. The incident name should be a unique name.
+Incident type is one of the supported incidents, which in this case, is
+*hercules*.  Horizontal orientations should be perpendecular, and vertical
+orientation shows the direction that records are considered positive. 
 
 .. code-block:: console
      
@@ -22,6 +26,10 @@ The only extra file is **description.txt** that has two mandatory keys and value
     incident_type         =  hercules
     inputfiles_parameters =  inputfiles/parameters.in
     source_hypocenter     =  lat, lon, depth(km)
+    hr_comp_orientation_1 =  degree
+    hr_comp_orientation_2 =  degree
+    ver_comp_orientation  =  up or down
+
 
 
 RWG

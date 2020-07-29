@@ -195,6 +195,7 @@
     <span class="sd">&quot;&quot;&quot; Record Class &quot;&quot;&quot;</span>
 
     <span class="n">pr_db</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">processing_labels</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">label_types</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;rotate&#39;</span><span class="p">:</span> <span class="s1">&#39;angle: rotation angle&#39;</span>
@@ -204,7 +205,7 @@
                 <span class="n">vel_h1</span><span class="p">,</span> <span class="n">vel_h2</span><span class="p">,</span> <span class="n">vel_ver</span><span class="p">,</span>
                 <span class="n">acc_h1</span><span class="p">,</span> <span class="n">acc_h2</span><span class="p">,</span> <span class="n">acc_ver</span><span class="p">,</span>
                 <span class="n">station</span><span class="p">,</span> <span class="n">source_params</span><span class="p">,</span>
-                <span class="n">hc_or1</span><span class="p">,</span> <span class="n">hc_or2</span><span class="p">):</span>
+                <span class="n">hc_or1</span><span class="p">,</span> <span class="n">hc_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">station</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_vec</span> <span class="o">=</span> <span class="n">time_vec</span>
@@ -221,6 +222,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">source_params</span> <span class="o">=</span> <span class="n">source_params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hc_or1</span> <span class="o">=</span> <span class="n">hc_or1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hc_or2</span> <span class="o">=</span> <span class="n">hc_or2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ver_or</span> <span class="o">=</span> <span class="n">ver_or</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_1</span> <span class="o">=</span> <span class="kc">None</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_2</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -339,6 +341,7 @@
         <span class="n">incident_name</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]</span>
         <span class="n">incident_type</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span>
        
+       
         <span class="c1"># extract station name:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">st_name</span> <span class="o">=</span> <span class="n">station_obj</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_name</span><span class="p">]</span>
@@ -347,7 +350,8 @@
             <span class="k">return</span>
 
         <span class="c1"># generate original record hash value.</span>
-        <span class="n">hash_val</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">((</span><span class="n">incident_name</span><span class="o">+</span><span class="n">st_name</span><span class="p">)</span><span class="o">.</span>\
+        <span class="n">hash_val</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">incident_name</span> <span class="o">+</span> <span class="n">st_name</span> <span class="o">+</span> <span class="n">Record</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">)</span><span class="o">.</span>\
             <span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 
         <span class="c1"># retrieve the record from database.</span>
@@ -359,14 +363,18 @@
               <span class="s2">&quot; to the database. Loading ... &quot;</span> <span class="p">)</span>
             <span class="c1"># we need to load the data </span>
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
+
                 <span class="n">station_folder</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;output_stations_directory&quot;</span><span class="p">]</span>
                 <span class="n">hr_or1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;hr_comp_orientation_1&quot;</span><span class="p">])</span>
                 <span class="n">hr_or2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;hr_comp_orientation_2&quot;</span><span class="p">])</span>
+                <span class="n">ver_or</span> <span class="o">=</span> <span class="n">incident_metadata</span><span class="p">[</span><span class="s2">&quot;ver_comp_orientation&quot;</span><span class="p">]</span>
+
                 <span class="n">station_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">incident_metadata</span><span class="p">[</span>
                     <span class="s2">&quot;incident_folder&quot;</span><span class="p">],</span><span class="n">station_folder</span><span class="p">,</span><span class="n">st_name</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_from_hercules</span><span class="p">(</span><span class="n">station_file</span><span class="p">,</span>
-                        <span class="n">station_obj</span><span class="p">,</span> <span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">,</span> <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">)</span>
+                        <span class="n">station_obj</span><span class="p">,</span> <span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">,</span> <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span>
+                         <span class="n">ver_or</span><span class="p">)</span>
                     <span class="n">record_org</span><span class="o">.</span><span class="n">this_record_hash</span> <span class="o">=</span> <span class="n">hash_val</span>
     
                     <span class="c1"># put the record in the database.</span>
@@ -522,6 +530,7 @@
             <span class="n">tmp_acc_ver</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
             <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span>
             <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or2</span>
+            
     
             
             <span class="c1"># TODO: check time vector</span>
@@ -533,10 +542,11 @@
                                        <span class="n">tmp_vel_h1</span><span class="p">,</span> <span class="n">tmp_vel_h2</span><span class="p">,</span> <span class="n">tmp_vel_ver</span><span class="p">,</span>
                                        <span class="n">tmp_acc_h1</span><span class="p">,</span> <span class="n">tmp_acc_h2</span><span class="p">,</span> <span class="n">tmp_acc_ver</span><span class="p">,</span>
                                        <span class="n">record</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">source_params</span><span class="p">,</span>
-                                       <span class="n">n_hc_or1</span><span class="p">,</span> <span class="n">n_hc_or2</span><span class="p">)</span></div>
+                                       <span class="n">n_hc_or1</span><span class="p">,</span> <span class="n">n_hc_or2</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">ver_or</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Record._from_hercules"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._from_hercules">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_from_hercules</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span><span class="n">source_hypocenter</span><span class="p">,</span> <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_from_hercules</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span><span class="n">source_hypocenter</span><span class="p">,</span> <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span>
+     <span class="n">ver_or</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Loads an instance of Hercules simulation results at one station.</span>
 <span class="sd">        Returns a Record object.</span>
 <span class="sd">        </span>
@@ -544,6 +554,9 @@
 <span class="sd">            | filename: station file name (e.g., station.10)</span>
 <span class="sd">            | station_obj: a station object corresponding that filename</span>
 <span class="sd">            | source_hypocenter: project source location</span>
+<span class="sd">            | hr_or1: first horizontal component&#39;s orientation</span>
+<span class="sd">            | hr_or2: second horizontal component&#39;s orientation</span>
+<span class="sd">            | ver_or: vertical component&#39;s orientation</span>
 
 <span class="sd">        Outputs:</span>
 <span class="sd">            | Record object </span>
@@ -587,21 +600,26 @@
                 <span class="n">pieces</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                 <span class="n">pieces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">piece</span><span class="p">)</span> <span class="k">for</span> <span class="n">piece</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">]</span>
                 
-                <span class="c1"># Write timeseries to files. Please note that Hercules files </span>
-                <span class="c1"># have the vertical component positive pointing down so we have</span>
-                <span class="c1"># to flip it here to match the BBP format in which vertical</span>
-                <span class="c1"># component points up</span>
+                <span class="k">if</span> <span class="n">ver_or</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;should not get here. Something is wrong with&quot;</span>
+                    <span class="s2">&quot; vertical component orientation&quot;</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="k">if</span> <span class="n">ver_or</span> <span class="o">==</span> <span class="n">Record</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">:</span>
+                    <span class="n">ver_or_switch_factor</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ver_or_switch_factor</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
                 <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">dis_h1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">dis_h2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">dis_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">dis_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ver_or_switch_factor</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
                 <span class="n">vel_h1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
                 <span class="n">vel_h2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
-                <span class="n">vel_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                <span class="n">vel_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ver_or_switch_factor</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
                 <span class="n">acc_h1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
                 <span class="n">acc_h2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pieces</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
-                <span class="n">acc_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+                <span class="n">acc_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ver_or_switch_factor</span> <span class="o">*</span> <span class="n">pieces</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
 
         <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>            
@@ -641,7 +659,7 @@
                     <span class="n">vel_h1</span><span class="p">,</span> <span class="n">vel_h2</span><span class="p">,</span> <span class="n">vel_ver</span><span class="p">,</span>
                     <span class="n">acc_h1</span><span class="p">,</span> <span class="n">acc_h2</span><span class="p">,</span> <span class="n">acc_ver</span><span class="p">,</span>
                     <span class="n">station_obj</span><span class="p">,</span> <span class="n">source_hypocenter</span><span class="p">,</span>
-                    <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">)</span></div></div>
+                    <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

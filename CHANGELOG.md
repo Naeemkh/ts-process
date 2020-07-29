@@ -3,15 +3,16 @@
 See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 
 
-##[Unreleased]
+## [Unreleased]
 ### Added
 - Record: Vertical orientation 
 - Doc: description.txt to include vertical orientation. 
+- Setup steps for jupyter lab.
 
 
 
 ### Changed
-- Original record hash value also includes vertical orientation convention.
+- original record hash value also includes vertical orientation convention.
 - loading vertical component for hercules now is according to the project convention. 
 
 ### Fixed 

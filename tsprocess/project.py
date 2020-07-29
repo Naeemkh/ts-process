@@ -725,6 +725,22 @@ class Project:
         for key, item in self.pr_db.db.items():
             print(key," : ", item)
 
+    
+    def summary(self):
+        """
+        prints out a summary of the project.
+        """
+        # project
+        print("Name:" , self.name)
+
+        # incidents
+        print("incidents: " , self.list_of_incidents())
+
+        # project vertical orientation
+        print("Vertical component positive orientation: " , self.ver_orientation_conv)
+
+
+
         
     
 
