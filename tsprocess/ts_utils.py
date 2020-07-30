@@ -578,7 +578,6 @@ def rotate_record(record, rotation_angle):
                         record.station, record.source_params,
                         n_hc_or1, n_hc_or2)
 
-
 def read_data(signal):
     """
         The function is to convert signal data into an numpy array of float
@@ -619,11 +618,11 @@ def read_smc_v2(input_file):
     try:
         fp = open(input_file, 'r')
     except IOError as e:
-        print("[ERROR]: opening input file %s" % (input_file))
+        LOGGER.warning(f"opening input file {input_file}")
         return False
 
     # Print status message
-    print("[READING]: %s..." % (input_file))
+    LOGGER.debug(f"Reading {input_file} file.")
 
     # Read data
     channels = fp.read()
@@ -741,13 +740,13 @@ def read_smc_v2(input_file):
                 elif dtype == 'd':
                     d_signal += s
 
-        acc_data = read_data(a_signal)
-        vel_data = read_data(v_signal)
         dis_data = read_data(d_signal)
+        vel_data = read_data(v_signal)
+        acc_data = read_data(a_signal)
 
-        print("[PROCESSING]: Found component: %s" % (orientation))
-        # record_list.append(TimeseriesComponent(samples, delta_t, orientation,
-        #                                        acc_data, vel_data, dis_data))
+        # print("[PROCESSING]: Found component: %s" % (orientation))
+        record_list.append([samples, delta_t, orientation,
+                                                [dis_data, vel_data, acc_data]])
 
     station_metadata = {}
     station_metadata['network'] = network
@@ -761,3 +760,6 @@ def read_smc_v2(input_file):
     station_metadata['low_pass'] = low_pass
 
     return record_list, station_metadata
+
+
+

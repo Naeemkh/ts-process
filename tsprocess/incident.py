@@ -169,7 +169,7 @@ class Incident:
                                     is_depth_valid(float(
                                     tmp_line[3].strip()))):
                                      
-                                LOGGER.warning(f"station.{str(i)}'s" 
+                                LOGGER.warning(f"{str(tmp_line[0])}'s" 
                                 "location is not valid location."
                                 " Ignored.")
                                 continue
@@ -187,7 +187,7 @@ class Incident:
                                     float(tmp_line[2].strip()),\
                                     float(tmp_line[3].strip()),\
                                     self.metadata["incident_name"],
-                                     tmp_line[0])] 
+                                     tmp_line[0]+".V2")] 
                             )
                         LOGGER.debug(
                             f"{tmp_line[0]} location added.")
