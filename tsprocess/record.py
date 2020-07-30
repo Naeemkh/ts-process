@@ -214,6 +214,29 @@ class Record:
                     LOGGER.warning(f"{st_name} from {incident_name} could not"
                      " load. " + str(e))
                
+            if incident_type == "cesmdv2":
+                station_file = os.join(incident_metadata[
+                    "incident_folder"],'seismic_records',st_name)
+
+                try:
+                    
+                    # load cesmdv2 file
+
+                    # create a record object
+
+
+    
+                    # put the record in the database.
+                    Record.pr_db.set_value(hash_val,record_org)
+                    Record.pr_inc_tracker.track_incident_hash(incident_name,
+                     hash_val)
+                
+                except Exception as e:
+                    record_org = None
+                    LOGGER.warning(f"{st_name} from {incident_name} could not"
+                     " load. " + str(e))
+
+            
             if incident_type == "awp":
                 print("AWP method is not implemented.")
 
