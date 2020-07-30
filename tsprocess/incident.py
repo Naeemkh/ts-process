@@ -20,7 +20,8 @@ class Incident:
     valid_incidents = [
         "hercules",
         "awp",
-        "rwg"]
+        "rwg",
+        "cesmdv2"]
 
     def __init__(self,folder_path, incident_description):
         """ Initiating an incident"""
@@ -61,6 +62,11 @@ class Incident:
 
         if self.metadata["incident_type"] == "rwg": 
             print("Methods for RWG is not implemented.")                 
+            return
+
+        if self.metadata["incident_type"] == "cesmdv2":
+            LOGGER.debug("cesmdv2 incidents are considered as observations" 
+            ", so they do not have input parameters.")
             return
 
     def _extract_station_name_location(self):
@@ -131,6 +137,7 @@ class Incident:
                                 i = i + 1
                         break
             return
+            
 
         if self.metadata["incident_type"] == "awp":
             print("Methods for AWP is not implemented.")                 
@@ -139,14 +146,70 @@ class Incident:
         if self.metadata["incident_type"] == "rwg":
             print("Methods for rwg is not implemented.")                 
             return
-    
+
+        if self.metadata["incident_type"] == "cesmdv2":
+            with open(os.path.join(self.metadata["incident_folder"],
+             'stations_list.txt'), 'r') as fp:
+                while True:
+                    line = fp.readline()
+                    if not line:
+                        break
+                    if line.startswith("#"):
+                        continue
+
+                    tmp_line = line.split()
+                    if len(tmp_line) == 4:
+                        try:
+                            if not (is_lat_valid(float(
+                                    tmp_line[1].strip()))
+                                    and
+                                    is_lon_valid(float(
+                                    tmp_line[2].strip()))
+                                    and
+                                    is_depth_valid(float(
+                                    tmp_line[3].strip()))):
+                                     
+                                LOGGER.warning(f"station.{str(i)}'s" 
+                                "location is not valid location."
+                                " Ignored.")
+                                continue
+
+                        except ValueError as v:
+                               LOGGER.warning(f"{tmp_line[0]}'s"
+                               " location is not valid input. Ignored. "
+                               + str(v))
+                               continue
+
+                        self.stations_list.append(
+                            [tmp_line[0],\
+                                Station.add_station(\
+                                    float(tmp_line[1].strip()),\
+                                    float(tmp_line[2].strip()),\
+                                    float(tmp_line[3].strip()),\
+                                    self.metadata["incident_name"],
+                                     tmp_line[0])] 
+                            )
+                        LOGGER.debug(
+                            f"{tmp_line[0]} location added.")
+
+                    elif len(tmp_line) == 0:
+                        # empty line, ignore it.
+                        pass
+                    else:
+                        LOGGER.debug(
+                            f"{tmp_line[0]}'s location is not valid."
+                            )
+                                
     def _extract_seismic_source_data(self):
         """ extracts seismic source details. """
         self.metadata["incident_source_hypocenter"] = \
         tuple([float(i.strip()) for
          i in self.metadata["source_hypocenter"].split(",")])
-        source_relative_path = self.metadata["source_directory"]
-        source_folder = os.path.join(self.metadata["incident_folder"],
-         source_relative_path)
-        self.source = SeismicSource(source_folder,
-         self.metadata["incident_type"])
+        
+        ## TODO: incidents seismic source requires comprehensive attention.
+        if self.metadata["incident_type"] == "hercules":
+            source_relative_path = self.metadata["source_directory"]
+            source_folder = os.path.join(self.metadata["incident_folder"],
+             source_relative_path) 
+            self.source = SeismicSource(source_folder,
+             self.metadata["incident_type"])

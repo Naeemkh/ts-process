@@ -191,7 +191,7 @@ class Project:
 
          """
 
-        if incident_description["incident_type"] == "hercules":
+        if incident_description["incident_type"] in  ["hercules", "cesmdv2"]:
             self.incidents[incident_description["incident_name"]] = \
             Incident(incident_folder, incident_description)
             return
@@ -203,6 +203,7 @@ class Project:
         if incident_description["incident_type"] == "rwg":
             print("RWG incident loading methods have not been added yet.")
             return 
+
 
     @staticmethod
     def _read_incident_description(incident_folder):
@@ -219,8 +220,12 @@ class Project:
                 line = fp.readline()
                 if not line:
                     break
-                key, value = tuple(line.strip().split("="))
-                incident_description[key.strip()] = value.strip()
+                try:
+                    key, value = tuple(line.strip().split("="))
+                    incident_description[key.strip()] = value.strip()
+                except ValueError as ve:
+                    LOGGER.warning("description.txt does not follow the format."
+                    + str(ve))
         return incident_description
 
     def _extract_records(self, list_inc, list_process, list_filters):
