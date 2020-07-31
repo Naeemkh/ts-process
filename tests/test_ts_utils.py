@@ -14,15 +14,16 @@ class TestCESMDV2(unittest.TestCase):
     def setUp(self):
         self.filename = 'CE12102.V2'
         signal, metadata = tsu.read_smc_v2(
-            os.path.join('sample_test_files',self.filename))
+            os.path.join(os.path.dirname(os.path.realpath(__file__)),
+             'sample_test_files',self.filename))
         
         self.signal = signal
         self.metadata = metadata
 
     def test_read_non_existing_cesmdv2_file(self):
         self.assertFalse(tsu.read_smc_v2(
-            os.path.join('sample_test_files','NotCE12502.V2')
-            ))
+            os.path.join(os.path.dirname(os.path.realpath(__file__)),
+             'sample_test_files','NotCE12502.V2')))
 
     def test_meta_data(self):
         self.assertEqual(self.metadata['network'],'CE')
