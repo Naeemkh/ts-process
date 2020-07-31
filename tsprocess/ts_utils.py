@@ -577,3 +577,192 @@ def rotate_record(record, rotation_angle):
                         rcs_acc_1, rcs_acc_2, rcs[8],
                         record.station, record.source_params,
                         n_hc_or1, n_hc_or2)
+
+def read_data(signal):
+    """
+        The function is to convert signal data into an numpy array of float
+        numbers
+
+        Inputs:
+            | string of numbers
+        
+        Outputs:
+            | numpy array of numbers
+    
+    """
+    # avoid negative number being stuck
+    signal = signal.replace('-', ' -')
+    signal = signal.split()
+    
+    data = []
+    for s in signal:
+        data.append(float(s))
+    data = np.array(data)
+    return data
+
+
+def read_smc_v2(input_file):
+    """
+    Reads and processes a COSMOS V2 file
+
+    Inputes:
+        | input_file: Input file path
+
+    Outputs:
+
+        | record_list: Includes list of records. Each item in this list includes
+        | number of samples, delta t, orientation, and [disp, vel, acc] records.
+        | station_metadata: Please see the end of this function for keys in the 
+        | metadata attribute.
+    """
+    record_list = []
+
+    # Loads station into a string
+    try:
+        fp = open(input_file, 'r')
+    except IOError as e:
+        LOGGER.warning(f"opening input file {input_file}")
+        return False
+
+    # Print status message
+    LOGGER.debug(f"Reading {input_file} file.")
+
+    # Read data
+    channels = fp.read()
+    fp.close()
+
+    # Splits the string by channels
+    channels = channels.split('/&')
+    del(channels[len(channels)-1])
+
+    # Splits the channels
+    for i in range(len(channels)):
+        channels[i] = channels[i].split('\n')
+
+    # Clean the first row in all but the first channel
+    for i in range(1, len(channels)):
+        del channels[i][0]
+
+    for i in range(len(channels)):
+        tmp = channels[i][0].split()
+        # Check this is the corrected acceleration data
+        ctype = (tmp[0] + " " + tmp[1]).lower()
+        if ctype != "corrected accelerogram":
+            print("[ERROR]: processing corrected accelerogram ONLY.")
+            return False
+
+        # Get network code and station id
+        network = input_file.split('/')[-1].split('.')[0][0:2].upper()
+        station_id = input_file.split('/')[-1].split('.')[0][2:].upper()
+
+        # Get location's latitude and longitude
+        tmp = channels[i][5].split()
+        latitude = tmp[3][:-1]
+        longitude = tmp[4]
+
+        # Make sure we captured the right values
+        if latitude[-1].upper() != "N" and latitude.upper() != "S":
+            # Maybe it is an old file, let's try to get the values again...
+            latitude = (float(tmp[3]) +
+                        (float(tmp[4]) / 60.0) +
+                        (float(tmp[5][:-2]) / 3600.0))
+            latitude = "%s%s" % (str(latitude), tmp[5][-2])
+            longitude = (float(tmp[6]) +
+                         (float(tmp[7]) / 60.0) +
+                         (float(tmp[8][:-1]) / 3600.0))
+            longitude = "%s%s" % (str(longitude), tmp[8][-1])
+
+        # Get orientation from integer header
+        orientation = float(int(channels[i][26][50:55]))
+        if orientation == 360:
+            orientation = 0.0
+        elif orientation == 500:
+            orientation = "up"
+        elif orientation == 600:
+            orientation = "down"
+
+        # Get filtering information
+        tmp = channels[i][14].split()
+        high_pass = float(tmp[8])
+        low_pass = float(tmp[10])
+
+        # Get station name
+        station_name = channels[i][6][0:40].strip()
+
+        # Get date and time; set to fixed format
+        start_time = channels[i][4][37:80].split()
+        try:
+            date = start_time[2][:-1]
+            tmp = start_time[3].split(':')
+            hour = tmp[0]
+            minute = tmp[1]
+            seconds, fraction = tmp[2].split('.')
+            # Works for both newer and older V2 files
+            tzone = channels[i][4].split()[5]
+        except IndexError:
+            date = '00/00/00'
+            hour = '00'
+            minute = '00'
+            seconds = '00'
+            fraction = '0'
+            tzone = '---'
+
+        # Put it all together
+        time = "%s:%s:%s.%s %s" % (hour, minute, seconds, fraction, tzone)
+
+        # Get number of samples and dt
+        tmp = channels[i][45].split()
+        samples = int(tmp[0])
+        delta_t = float(tmp[8])
+
+        # Get signals' data
+        tmp = channels[i][45:]
+        a_signal = str()
+        v_signal = str()
+        d_signal = str()
+
+        for s in tmp:
+            # Detecting separate line and get data type
+            if "points" in s.lower():
+                line = s.split()
+                if line[3].lower() == "accel" or line[3].lower() == "acc":
+                    dtype = 'a'
+                elif line[3].lower() == "veloc" or line[3].lower() == "vel":
+                    dtype = 'v'
+                elif line[3].lower() == "displ" or line[3].lower() == "dis":
+                    dtype = 'd'
+                else:
+                    dtype = "unknown"
+
+            # Processing data
+            else:
+                if dtype == 'a':
+                    a_signal += s
+                elif dtype == 'v':
+                    v_signal += s
+                elif dtype == 'd':
+                    d_signal += s
+
+        dis_data = read_data(d_signal)
+        vel_data = read_data(v_signal)
+        acc_data = read_data(a_signal)
+
+        # print("[PROCESSING]: Found component: %s" % (orientation))
+        record_list.append([samples, delta_t, orientation,
+                                                [dis_data, vel_data, acc_data]])
+
+    station_metadata = {}
+    station_metadata['network'] = network
+    station_metadata['station_id'] = station_id
+    station_metadata['type'] = "V2"
+    station_metadata['date'] = date
+    station_metadata['time'] = time
+    station_metadata['longitude'] = longitude
+    station_metadata['latitude'] = latitude
+    station_metadata['high_pass'] = high_pass
+    station_metadata['low_pass'] = low_pass
+
+    return record_list, station_metadata
+
+
+

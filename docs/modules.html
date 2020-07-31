@@ -892,6 +892,28 @@ between source and the station.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.record.Record._from_cesmdv2">
+<em class="property">static </em><code class="sig-name descname">_from_cesmdv2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">r_data</span></em>, <em class="sig-param"><span class="n">r_metadata</span></em>, <em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">source_hypocenter</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._from_cesmdv2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._from_cesmdv2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads an instance of Hercules simulation results at one station.
+Returns a Record object.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">r_data: nested list of data. See ts_utils.read_smc_v2 funtions first
+return value</div>
+<div class="line">r_metadata: dictionary of metadata regarding the loaded record. See
+ts_utils.read_smc_v2 functions second return value</div>
+<div class="line">station_obj: a station object corresponding that filename</div>
+<div class="line">source_hypocenter: project source location</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">Record object</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.record.Record._from_hercules">
 <em class="property">static </em><code class="sig-name descname">_from_hercules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">source_hypocenter</span></em>, <em class="sig-param"><span class="n">hr_or1</span></em>, <em class="sig-param"><span class="n">hr_or2</span></em>, <em class="sig-param"><span class="n">ver_or</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._from_hercules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._from_hercules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads an instance of Hercules simulation results at one station.
@@ -1160,6 +1182,44 @@ station_incident dictionary</p>
 <code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">query_opt_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">opt_params</span></em>, <em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#query_opt_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.query_opt_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the provided key in optional parameters dictionayr.
 Returns None if not found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.read_data">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">read_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">signal</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function is to convert signal data into an numpy array of float
+numbers</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">string of numbers</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">numpy array of numbers</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.read_smc_v2">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">read_smc_v2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#read_smc_v2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.read_smc_v2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads and processes a COSMOS V2 file</p>
+<dl>
+<dt>Inputes:</dt><dd><div class="line-block">
+<div class="line">input_file: Input file path</div>
+</div>
+</dd>
+</dl>
+<p>Outputs:</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">record_list: Includes list of records. Each item in this list includes</div>
+<div class="line">number of samples, delta t, orientation, and [disp, vel, acc] records.</div>
+<div class="line">station_metadata: Please see the end of this function for keys in the</div>
+<div class="line">metadata attribute.</div>
+</div>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">

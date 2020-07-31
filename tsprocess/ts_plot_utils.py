@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.font_manager import FontProperties
 
+from .log import LOGGER
 from .ts_utils import check_opt_param_minmax, query_opt_params, list2message
 
 
@@ -18,6 +19,10 @@ def plot_displacement_helper(record, color_code, opt_params, list_inc,
      plot_displacement_records methods in the Project class.
      should not be directly used by the end users.
     """
+
+    if not record:
+        LOGGER.debug('record is does not have any data.')
+        return 
     
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -117,7 +122,11 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process,
      plot_velocity_records methods in the Project class.
      should not be directly used by the end users.
     """
-    
+
+    if record:
+        LOGGER.debug('record does not have any data.')
+        return 
+
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
         nrs = 7          
@@ -179,6 +188,7 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process,
 
     f_name_save = "f_velocity_plot_" +\
          datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+    
     details = [f_name_save, list_inc, list_process, list_filters,
      temp_record.station.inc_st_name]
     message = list2message(details)
@@ -216,6 +226,10 @@ def plot_acceleration_helper(record, color_code, opt_params, list_inc,
      plot_acceleration_records methods in the Project class.
      should not be directly used by the end users.
     """
+
+    if not record:
+        LOGGER.debug('record does not have any data.')
+        return 
     
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -317,6 +331,7 @@ def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_proc
      plot_record_section methods in the Project class.
      should not be directly used by the end users.
     """
+
     # Check number of input incidents
     if len(records[0]) > len(color_code):
         LOGGER.error(f"Number of timeseries are more than dedicated" 

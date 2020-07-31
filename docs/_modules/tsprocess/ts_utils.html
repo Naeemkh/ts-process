@@ -750,6 +750,195 @@
                         <span class="n">rcs_acc_1</span><span class="p">,</span> <span class="n">rcs_acc_2</span><span class="p">,</span> <span class="n">rcs</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
                         <span class="n">record</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">source_params</span><span class="p">,</span>
                         <span class="n">n_hc_or1</span><span class="p">,</span> <span class="n">n_hc_or2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="read_data"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.read_data">[docs]</a><span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">signal</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The function is to convert signal data into an numpy array of float</span>
+<span class="sd">        numbers</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | string of numbers</span>
+<span class="sd">        </span>
+<span class="sd">        Outputs:</span>
+<span class="sd">            | numpy array of numbers</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># avoid negative number being stuck</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; -&#39;</span><span class="p">)</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">signal</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="read_smc_v2"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.read_smc_v2">[docs]</a><span class="k">def</span> <span class="nf">read_smc_v2</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads and processes a COSMOS V2 file</span>
+
+<span class="sd">    Inputes:</span>
+<span class="sd">        | input_file: Input file path</span>
+
+<span class="sd">    Outputs:</span>
+
+<span class="sd">        | record_list: Includes list of records. Each item in this list includes</span>
+<span class="sd">        | number of samples, delta t, orientation, and [disp, vel, acc] records.</span>
+<span class="sd">        | station_metadata: Please see the end of this function for keys in the </span>
+<span class="sd">        | metadata attribute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">record_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Loads station into a string</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;opening input file </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Print status message</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2"> file.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Read data</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Splits the string by channels</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&amp;&#39;</span><span class="p">)</span>
+    <span class="k">del</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Splits the channels</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)):</span>
+        <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Clean the first row in all but the first channel</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)):</span>
+        <span class="k">del</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="c1"># Check this is the corrected acceleration data</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ctype</span> <span class="o">!=</span> <span class="s2">&quot;corrected accelerogram&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ERROR]: processing corrected accelerogram ONLY.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># Get network code and station id</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">input_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">station_id</span> <span class="o">=</span> <span class="n">input_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="c1"># Get location&#39;s latitude and longitude</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">latitude</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">3</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">longitude</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+        <span class="c1"># Make sure we captured the right values</span>
+        <span class="k">if</span> <span class="n">latitude</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;N&quot;</span> <span class="ow">and</span> <span class="n">latitude</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+            <span class="c1"># Maybe it is an old file, let&#39;s try to get the values again...</span>
+            <span class="n">latitude</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span>
+                        <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">/</span> <span class="mf">60.0</span><span class="p">)</span> <span class="o">+</span>
+                        <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">5</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">))</span>
+            <span class="n">latitude</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">latitude</span><span class="p">),</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">longitude</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">+</span>
+                         <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span> <span class="o">/</span> <span class="mf">60.0</span><span class="p">)</span> <span class="o">+</span>
+                         <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">8</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mf">3600.0</span><span class="p">))</span>
+            <span class="n">longitude</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">longitude</span><span class="p">),</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Get orientation from integer header</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">26</span><span class="p">][</span><span class="mi">50</span><span class="p">:</span><span class="mi">55</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">360</span><span class="p">:</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="s2">&quot;up&quot;</span>
+        <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">600</span><span class="p">:</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="s2">&quot;down&quot;</span>
+
+        <span class="c1"># Get filtering information</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">14</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">high_pass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+        <span class="n">low_pass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
+
+        <span class="c1"># Get station name</span>
+        <span class="n">station_name</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">6</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">40</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># Get date and time; set to fixed format</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">4</span><span class="p">][</span><span class="mi">37</span><span class="p">:</span><span class="mi">80</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">date</span> <span class="o">=</span> <span class="n">start_time</span><span class="p">[</span><span class="mi">2</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">start_time</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+            <span class="n">hour</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">minute</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">seconds</span><span class="p">,</span> <span class="n">fraction</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="c1"># Works for both newer and older V2 files</span>
+            <span class="n">tzone</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;00/00/00&#39;</span>
+            <span class="n">hour</span> <span class="o">=</span> <span class="s1">&#39;00&#39;</span>
+            <span class="n">minute</span> <span class="o">=</span> <span class="s1">&#39;00&#39;</span>
+            <span class="n">seconds</span> <span class="o">=</span> <span class="s1">&#39;00&#39;</span>
+            <span class="n">fraction</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+            <span class="n">tzone</span> <span class="o">=</span> <span class="s1">&#39;---&#39;</span>
+
+        <span class="c1"># Put it all together</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">fraction</span><span class="p">,</span> <span class="n">tzone</span><span class="p">)</span>
+
+        <span class="c1"># Get number of samples and dt</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">45</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">delta_t</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+
+        <span class="c1"># Get signals&#39; data</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">45</span><span class="p">:]</span>
+        <span class="n">a_signal</span> <span class="o">=</span> <span class="nb">str</span><span class="p">()</span>
+        <span class="n">v_signal</span> <span class="o">=</span> <span class="nb">str</span><span class="p">()</span>
+        <span class="n">d_signal</span> <span class="o">=</span> <span class="nb">str</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">:</span>
+            <span class="c1"># Detecting separate line and get data type</span>
+            <span class="k">if</span> <span class="s2">&quot;points&quot;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;accel&quot;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;acc&quot;</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span>
+                <span class="k">elif</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;veloc&quot;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;vel&quot;</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span>
+                <span class="k">elif</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;displ&quot;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;dis&quot;</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;d&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
+
+            <span class="c1"># Processing data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
+                    <span class="n">a_signal</span> <span class="o">+=</span> <span class="n">s</span>
+                <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
+                    <span class="n">v_signal</span> <span class="o">+=</span> <span class="n">s</span>
+                <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span>
+                    <span class="n">d_signal</span> <span class="o">+=</span> <span class="n">s</span>
+
+        <span class="n">dis_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">d_signal</span><span class="p">)</span>
+        <span class="n">vel_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">v_signal</span><span class="p">)</span>
+        <span class="n">acc_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">a_signal</span><span class="p">)</span>
+
+        <span class="c1"># print(&quot;[PROCESSING]: Found component: %s&quot; % (orientation))</span>
+        <span class="n">record_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">samples</span><span class="p">,</span> <span class="n">delta_t</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span>
+                                                <span class="p">[</span><span class="n">dis_data</span><span class="p">,</span> <span class="n">vel_data</span><span class="p">,</span> <span class="n">acc_data</span><span class="p">]])</span>
+
+    <span class="n">station_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;station_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_id</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;V2&quot;</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">date</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;longitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">longitude</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;latitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">latitude</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;high_pass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">high_pass</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;low_pass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">low_pass</span>
+
+    <span class="k">return</span> <span class="n">record_list</span><span class="p">,</span> <span class="n">station_metadata</span></div>
+
+
+
 </pre></div>
 
            </div>

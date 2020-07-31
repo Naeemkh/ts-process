@@ -188,7 +188,7 @@
 <span class="kn">from</span> <span class="nn">.station</span> <span class="kn">import</span> <span class="n">Station</span>
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
 <span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span>  <span class="n">Disp</span><span class="p">,</span> <span class="n">Vel</span><span class="p">,</span> <span class="n">Acc</span><span class="p">,</span> <span class="n">Raw</span><span class="p">,</span> <span class="n">Unitless</span>
-<span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="n">haversine</span><span class="p">,</span> <span class="n">compute_azimuth</span><span class="p">,</span> <span class="n">rotate_record</span>
+<span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="n">haversine</span><span class="p">,</span> <span class="n">compute_azimuth</span><span class="p">,</span> <span class="n">rotate_record</span><span class="p">,</span> <span class="n">read_smc_v2</span>
 
 
 <div class="viewcode-block" id="Record"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record">[docs]</a><span class="k">class</span> <span class="nc">Record</span><span class="p">:</span>
@@ -387,6 +387,31 @@
                     <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2"> could not&quot;</span>
                      <span class="s2">&quot; load. &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
                
+            <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;cesmdv2&quot;</span><span class="p">:</span>
+                <span class="n">station_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">incident_metadata</span><span class="p">[</span>
+                    <span class="s2">&quot;incident_folder&quot;</span><span class="p">],</span><span class="s1">&#39;seismic_records&#39;</span><span class="p">,</span><span class="n">st_name</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    
+                    <span class="c1"># load cesmdv2 file</span>
+                    <span class="n">tmp_loaded_data</span><span class="p">,</span> <span class="n">tmp_meta_data</span> <span class="o">=</span> <span class="n">read_smc_v2</span><span class="p">(</span><span class="n">station_file</span><span class="p">)</span>
+
+                    <span class="c1"># create a record object</span>
+                    <span class="n">record_org</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_from_cesmdv2</span><span class="p">(</span><span class="n">tmp_loaded_data</span><span class="p">,</span> 
+                     <span class="n">tmp_meta_data</span><span class="p">,</span> <span class="n">station_obj</span><span class="p">,</span> <span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">)</span>
+
+                    <span class="n">record_org</span><span class="o">.</span><span class="n">this_record_hash</span> <span class="o">=</span> <span class="n">hash_val</span>
+    
+                    <span class="c1"># put the record in the database.</span>
+                    <span class="n">Record</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">hash_val</span><span class="p">,</span><span class="n">record_org</span><span class="p">)</span>
+                    <span class="n">Record</span><span class="o">.</span><span class="n">pr_inc_tracker</span><span class="o">.</span><span class="n">track_incident_hash</span><span class="p">(</span><span class="n">incident_name</span><span class="p">,</span>
+                     <span class="n">hash_val</span><span class="p">)</span>
+                
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">record_org</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">incident_name</span><span class="si">}</span><span class="s2"> could not&quot;</span>
+                     <span class="s2">&quot; load. &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            
             <span class="k">if</span> <span class="n">incident_type</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AWP method is not implemented.&quot;</span><span class="p">)</span>
 
@@ -659,7 +684,98 @@
                     <span class="n">vel_h1</span><span class="p">,</span> <span class="n">vel_h2</span><span class="p">,</span> <span class="n">vel_ver</span><span class="p">,</span>
                     <span class="n">acc_h1</span><span class="p">,</span> <span class="n">acc_h2</span><span class="p">,</span> <span class="n">acc_ver</span><span class="p">,</span>
                     <span class="n">station_obj</span><span class="p">,</span> <span class="n">source_hypocenter</span><span class="p">,</span>
-                    <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">)</span></div></div>
+                    <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Record._from_cesmdv2"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._from_cesmdv2">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_from_cesmdv2</span><span class="p">(</span><span class="n">r_data</span><span class="p">,</span> <span class="n">r_metadata</span><span class="p">,</span> <span class="n">station_obj</span><span class="p">,</span><span class="n">source_hypocenter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Loads an instance of Hercules simulation results at one station.</span>
+<span class="sd">        Returns a Record object.</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">            | r_data: nested list of data. See ts_utils.read_smc_v2 funtions first</span>
+<span class="sd">              return value</span>
+<span class="sd">            | r_metadata: dictionary of metadata regarding the loaded record. See</span>
+<span class="sd">              ts_utils.read_smc_v2 functions second return value</span>
+<span class="sd">            | station_obj: a station object corresponding that filename</span>
+<span class="sd">            | source_hypocenter: project source location</span>
+
+<span class="sd">        Outputs:</span>
+<span class="sd">            | Record object </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+         
+        <span class="c1"># TODO:if number of data samples and dt for different records are </span>
+        <span class="c1"># different, we need create a common dt and time vecotr.</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">r_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Station with id: </span><span class="si">{</span><span class="n">r_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;station_id&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;and type cesmdv2 record has missing component(s).&quot;</span>
+            <span class="s2">&quot; Handling this situation is not implemented yet.&quot;</span><span class="p">)</span>
+
+
+        <span class="c1"># generate the common dt and timevector</span>
+        <span class="n">dt_vector</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">n_s</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">orient</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">r_data</span><span class="p">:</span>
+            <span class="n">n_s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">dt_vector</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">orient</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dt_vector</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">n_s</span><span class="p">))</span> <span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Station with id: </span><span class="si">{</span><span class="n">r_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;station_id&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;and type cesmdv2 record has different dt or number of samples.&quot;</span>
+            <span class="s2">&quot; Handling this situation is not implemented yet.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        
+        
+        <span class="c1"># choosing the smalles dt, and longest record.</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">dt_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_sample</span> <span class="o">=</span> <span class="n">n_s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">time_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n_sample</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span>
+        
+        <span class="c1"># show different combination of orientation for future improvement.</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">orient</span><span class="p">))</span>
+        
+        <span class="n">tmp_disp_h</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tmp_vel_h</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tmp_acc_h</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">h_orient</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">while</span> <span class="n">r_data</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">r_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> 
+
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span><span class="s2">&quot;down&quot;</span><span class="p">]:</span>
+                <span class="c1"># it is a vertical component.</span>
+                <span class="n">ver_or</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">tmp_disp_ver</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">tmp_vel_ver</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">tmp_acc_ver</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">h_orient</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">tmp_disp_h</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Disp</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">tmp_vel_h</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vel</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">tmp_acc_h</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Acc</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+
+        
+        <span class="k">return</span> <span class="n">Record</span><span class="p">(</span><span class="n">time_vec</span><span class="p">,</span> <span class="n">tmp_disp_h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp_disp_h</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp_disp_ver</span><span class="p">,</span>
+                    <span class="n">tmp_vel_h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp_vel_h</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp_vel_ver</span><span class="p">,</span>
+                    <span class="n">tmp_acc_h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp_acc_h</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp_acc_ver</span><span class="p">,</span>
+                    <span class="n">station_obj</span><span class="p">,</span> <span class="n">source_hypocenter</span><span class="p">,</span>
+                    <span class="n">h_orient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h_orient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ver_or</span><span class="p">)</span></div></div>
+
+
+
+
+        
+
+
+        
+
+
+
+
+
 </pre></div>
 
            </div>

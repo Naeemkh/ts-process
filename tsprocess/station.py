@@ -116,7 +116,7 @@ class Station:
   
     def _include_stlist_by_incident(self, incident_name, stations):
 
-        if self.inc_st_name[incident_name] in stations:
+        if self.inc_st_name.get(incident_name, None) in stations:
             return True
         else:
             return False

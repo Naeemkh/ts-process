@@ -15,7 +15,7 @@ from .log import LOGGER
 from .station import Station
 from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
-from .ts_utils import haversine, compute_azimuth, rotate_record
+from .ts_utils import haversine, compute_azimuth, rotate_record, read_smc_v2
 
 
 class Record:
@@ -214,6 +214,31 @@ class Record:
                     LOGGER.warning(f"{st_name} from {incident_name} could not"
                      " load. " + str(e))
                
+            if incident_type == "cesmdv2":
+                station_file = os.path.join(incident_metadata[
+                    "incident_folder"],'seismic_records',st_name)
+
+                try:
+                    
+                    # load cesmdv2 file
+                    tmp_loaded_data, tmp_meta_data = read_smc_v2(station_file)
+
+                    # create a record object
+                    record_org = Record._from_cesmdv2(tmp_loaded_data, 
+                     tmp_meta_data, station_obj, Station.pr_source_loc)
+
+                    record_org.this_record_hash = hash_val
+    
+                    # put the record in the database.
+                    Record.pr_db.set_value(hash_val,record_org)
+                    Record.pr_inc_tracker.track_incident_hash(incident_name,
+                     hash_val)
+                
+                except Exception as e:
+                    record_org = None
+                    LOGGER.warning(f"{st_name} from {incident_name} could not"
+                     " load. " + str(e))
+            
             if incident_type == "awp":
                 print("AWP method is not implemented.")
 
@@ -487,3 +512,94 @@ class Record:
                     acc_h1, acc_h2, acc_ver,
                     station_obj, source_hypocenter,
                     hr_or1, hr_or2, ver_or)
+
+    @staticmethod
+    def _from_cesmdv2(r_data, r_metadata, station_obj,source_hypocenter):
+        """ Loads an instance of Hercules simulation results at one station.
+        Returns a Record object.
+        
+        Inputs:
+            | r_data: nested list of data. See ts_utils.read_smc_v2 funtions first
+              return value
+            | r_metadata: dictionary of metadata regarding the loaded record. See
+              ts_utils.read_smc_v2 functions second return value
+            | station_obj: a station object corresponding that filename
+            | source_hypocenter: project source location
+
+        Outputs:
+            | Record object 
+        """
+         
+        # TODO:if number of data samples and dt for different records are 
+        # different, we need create a common dt and time vecotr.
+        
+        if len(r_data) != 3:
+            LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
+            "and type cesmdv2 record has missing component(s)."
+            " Handling this situation is not implemented yet.")
+
+
+        # generate the common dt and timevector
+        dt_vector = []
+        n_s = []
+        orient = []
+        for item in r_data:
+            n_s.append(item[0])
+            dt_vector.append(item[1])
+            orient.append(item[2])
+
+        if len(set(dt_vector)) != 1 or len(set(n_s)) !=1:
+            LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
+            "and type cesmdv2 record has different dt or number of samples."
+            " Handling this situation is not implemented yet.")
+            return None
+        
+        
+        
+        # choosing the smalles dt, and longest record.
+        dt = dt_vector[0]
+        n_sample = n_s[0]
+        time_vec = np.arange(0,n_sample)*dt
+        
+        # show different combination of orientation for future improvement.
+        LOGGER.debug(str(orient))
+        
+        tmp_disp_h = []
+        tmp_vel_h  = []
+        tmp_acc_h  = []
+        h_orient = []
+
+        while r_data:
+            item = r_data.pop(0) 
+
+            if item[2] in ["up","down"]:
+                # it is a vertical component.
+                ver_or = item[2].lower()
+                tmp_disp_ver = Disp(item[3][0], item[1], 0)
+                tmp_vel_ver = Vel(item[3][1], item[1], 0)
+                tmp_acc_ver = Acc(item[3][2], item[1], 0)
+
+            h_orient.append(item[2])
+            tmp_disp_h.append(Disp(item[3][0], item[1], 0))
+            tmp_vel_h.append(Vel(item[3][1], item[1], 0))
+            tmp_acc_h.append(Acc(item[3][2], item[1], 0))
+
+        
+        return Record(time_vec, tmp_disp_h[0], tmp_disp_h[1], tmp_disp_ver,
+                    tmp_vel_h[0], tmp_vel_h[1], tmp_vel_ver,
+                    tmp_acc_h[0], tmp_acc_h[1], tmp_acc_ver,
+                    station_obj, source_hypocenter,
+                    h_orient[0], h_orient[1], ver_or)
+
+
+
+
+        
+
+
+        
+
+
+
+
+

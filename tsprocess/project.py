@@ -191,7 +191,7 @@ class Project:
 
          """
 
-        if incident_description["incident_type"] == "hercules":
+        if incident_description["incident_type"] in  ["hercules", "cesmdv2"]:
             self.incidents[incident_description["incident_name"]] = \
             Incident(incident_folder, incident_description)
             return
@@ -203,6 +203,7 @@ class Project:
         if incident_description["incident_type"] == "rwg":
             print("RWG incident loading methods have not been added yet.")
             return 
+
 
     @staticmethod
     def _read_incident_description(incident_folder):
@@ -219,8 +220,12 @@ class Project:
                 line = fp.readline()
                 if not line:
                     break
-                key, value = tuple(line.strip().split("="))
-                incident_description[key.strip()] = value.strip()
+                try:
+                    key, value = tuple(line.strip().split("="))
+                    incident_description[key.strip()] = value.strip()
+                except ValueError as ve:
+                    LOGGER.warning("description.txt does not follow the format."
+                    + str(ve))
         return incident_description
 
     def _extract_records(self, list_inc, list_process, list_filters):
@@ -255,10 +260,16 @@ class Project:
                 # choose the equivalent station for that incident.
                 incident_metadata = self.incidents[incident_item].metadata
 
-                st_name_inc = station.inc_st_name[incident_item]
-                list_process_cp = list_process[i].copy()
-                tmp_record = Record.get_record(station, incident_metadata,
-                 list_process_cp)
+                try:
+                    st_name_inc = station.inc_st_name[incident_item]
+                    list_process_cp = list_process[i].copy()
+                    tmp_record = Record.get_record(station, incident_metadata,
+                     list_process_cp)
+                except KeyError as e:
+                    LOGGER.debug(f' {str(e)} does not have any record at' 
+                    f' the location of station {st_name_inc}')
+                    tmp_record = None
+
                 st_records.append(tmp_record)
 
             records.append(st_records)
@@ -425,6 +436,12 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
+
         # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
@@ -432,9 +449,14 @@ class Project:
             return
 
         for record in records:
-            fig, message, f_name_save = plot_displacement_helper(record,
-             self.color_code,opt_params, list_inc, list_process, list_filters)
-                
+
+            try:
+                fig, message, f_name_save = plot_displacement_helper(record,
+                 self.color_code,opt_params, list_inc, list_process, list_filters)
+            
+            except TypeError as e:
+                continue
+
             if query_opt_params(opt_params, 'save_figure'):
                 
                 message = message + "\n----------------------------\n"
@@ -474,6 +496,11 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
         # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
@@ -481,9 +508,17 @@ class Project:
             return
 
         for record in records:
-            fig, message, f_name_save = plot_velocity_helper(record,
-             self.color_code,opt_params, list_inc, list_process, list_filters)
-                
+
+            try:
+                fig, message, f_name_save = plot_velocity_helper(record,
+                self.color_code,opt_params, list_inc, list_process, list_filters)
+            
+            except TypeError as e:
+                continue
+
+
+
+
             if query_opt_params(opt_params, 'save_figure'):
                 
                 # temp_record = None
@@ -536,6 +571,11 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
         # Check number of input timeseries
         if len(records[0]) > len(self.color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
@@ -543,10 +583,14 @@ class Project:
             return
 
         for record in records:
-            fig, message, f_name_save = plot_acceleration_helper(record,
-            self.color_code,opt_params,
-             list_inc, list_process, list_filters)
-                
+
+            try: 
+                fig, message, f_name_save = plot_acceleration_helper(record,
+                self.color_code,opt_params,
+                 list_inc, list_process, list_filters)
+            except TypeError as e:
+                continue
+            
             if query_opt_params(opt_params, 'save_figure'):
                 
                 message = message + "\n----------------------------\n"
@@ -582,6 +626,11 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
 
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
         fig, message, f_name_save = plot_recordsection_helper(records,
             self.color_code,opt_params,list_inc, list_process, list_filters)
 
@@ -610,6 +659,11 @@ class Project:
         """
                 
         records = self._extract_records(list_inc, list_process, list_filters)
+
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
 
         m = Map(
             basemap=basemap_to_tiles(basemaps.Esri.WorldImagery, "2020-04-08"),
@@ -658,6 +712,8 @@ class Project:
         records = self._extract_records(list_inc, list_process, list_filters)
         
         if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
             return
 
         for item in records:
