@@ -9,6 +9,8 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - Doc: description.txt to include vertical orientation. 
 - Setup steps for jupyter lab.
 - Doc: CESMDV2 incident documentation 
+- load CESMDV2 record
+- test: CESMDV2 read file
 
 
 ### Changed
