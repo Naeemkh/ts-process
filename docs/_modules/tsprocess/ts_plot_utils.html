@@ -181,6 +181,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
 <span class="kn">from</span> <span class="nn">matplotlib.font_manager</span> <span class="kn">import</span> <span class="n">FontProperties</span>
 
+<span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="n">check_opt_param_minmax</span><span class="p">,</span> <span class="n">query_opt_params</span><span class="p">,</span> <span class="n">list2message</span>
 
 
@@ -191,6 +192,10 @@
 <span class="sd">     plot_displacement_records methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">record</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;record is does not have any data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> 
     
     <span class="n">with_details</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>  
@@ -290,7 +295,11 @@
 <span class="sd">     plot_velocity_records methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
+    <span class="k">if</span> <span class="n">record</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;record does not have any data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> 
+
     <span class="n">with_details</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>  
         <span class="n">nrs</span> <span class="o">=</span> <span class="mi">7</span>          
@@ -352,6 +361,7 @@
 
     <span class="n">f_name_save</span> <span class="o">=</span> <span class="s2">&quot;f_velocity_plot_&quot;</span> <span class="o">+</span>\
          <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
+    
     <span class="n">details</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_name_save</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">,</span>
      <span class="n">temp_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">]</span>
     <span class="n">message</span> <span class="o">=</span> <span class="n">list2message</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
@@ -389,6 +399,10 @@
 <span class="sd">     plot_acceleration_records methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">record</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;record does not have any data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> 
     
     <span class="n">with_details</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>  
@@ -490,6 +504,7 @@
 <span class="sd">     plot_record_section methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Check number of input incidents</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">color_code</span><span class="p">):</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
