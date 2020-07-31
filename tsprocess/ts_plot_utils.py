@@ -20,9 +20,9 @@ def plot_displacement_helper(record, color_code, opt_params, list_inc,
      should not be directly used by the end users.
     """
 
-    if not record:
-        LOGGER.debug('record is does not have any data.')
-        return 
+    if all(value is None for value in record):
+        LOGGER.debug('record does not have any data.')
+        return None
     
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -123,9 +123,9 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process,
      should not be directly used by the end users.
     """
 
-    if record:
+    if all(value is None for value in record):
         LOGGER.debug('record does not have any data.')
-        return 
+        return None
 
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -227,9 +227,9 @@ def plot_acceleration_helper(record, color_code, opt_params, list_inc,
      should not be directly used by the end users.
     """
 
-    if not record:
+    if all(value is None for value in record):
         LOGGER.debug('record does not have any data.')
-        return 
+        return None
     
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -344,12 +344,14 @@ def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_proc
         fig, axarr = plt.subplots(nrows=nrs, ncols=1, figsize=(14, 9))
         rspan = 6
         with_details = True
+        axarr[0] = plt.subplot2grid((nrs,1),(0,0),rowspan=rspan, colspan=1)
+
     else:
         nrs = 1
         fig, axarr = plt.subplots(nrows=nrs, ncols=1, figsize=(14, 9))
         rspan = 1
+        axarr = plt.subplot2grid((nrs,1),(0,0),rowspan=rspan, colspan=1)
     
-    axarr[0] = plt.subplot2grid((nrs,1),(0,0),rowspan=rspan, colspan=1)
 
     if with_details:
         axarr[1] = plt.subplot2grid((nrs,1),(6,0),rowspan=1, colspan=1)
@@ -384,18 +386,35 @@ def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_proc
                 legend_label=list_inc[i]    
             else:
                 legend_label=None
-            axarr[0].plot(item.time_vec, tmp_data, color_code[i], 
-            label=legend_label, linewidth=0.2)
-        
-    axarr[0].set_xlabel('Time (s)')
-    axarr[0].set_ylabel('Epicentral Distance (km)')        
-    axarr[0].set_xlim(x_lim_t)
-    axarr[0].legend()
-    axarr[0].set_title(
-     f"Normalized Seismic Record Section -"
-     f"Number of stations/incident: {k+1}"
-     f"- Component: {comp}"
-    )    
+
+            if with_details:    
+                axarr[0].plot(item.time_vec, tmp_data, color_code[i], 
+                label=legend_label, linewidth=0.2)
+            else:
+                axarr.plot(item.time_vec, tmp_data, color_code[i], 
+                label=legend_label, linewidth=0.2)
+
+    if with_details:    
+        axarr[0].set_xlabel('Time (s)')
+        axarr[0].set_ylabel('Epicentral Distance (km)')        
+        axarr[0].set_xlim(x_lim_t)
+        axarr[0].legend()
+        axarr[0].set_title(
+         f"Normalized Seismic Record Section -"
+         f"Number of stations/incident: {k+1}"
+         f"- Component: {comp}"
+        )
+    else:
+        axarr.set_xlabel('Time (s)')
+        axarr.set_ylabel('Epicentral Distance (km)')        
+        axarr.set_xlim(x_lim_t)
+        axarr.legend()
+        axarr.set_title(
+         f"Normalized Seismic Record Section -"
+         f"Number of stations/incident: {k+1}"
+         f"- Component: {comp}"
+        )
+            
 
     f_name_save = "f_recordsection_plot_" +\
     datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
