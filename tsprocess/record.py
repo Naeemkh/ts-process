@@ -238,7 +238,6 @@ class Record:
                     record_org = None
                     LOGGER.warning(f"{st_name} from {incident_name} could not"
                      " load. " + str(e))
-
             
             if incident_type == "awp":
                 print("AWP method is not implemented.")

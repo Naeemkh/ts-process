@@ -610,7 +610,10 @@ def read_smc_v2(input_file):
 
     Outputs:
 
-        | 
+        | record_list: Includes list of records. Each item in this list includes
+        | number of samples, delta t, orientation, and [disp, vel, acc] records.
+        | station_metadata: Please see the end of this function for keys in the 
+        | metadata attribute.
     """
     record_list = []
 

@@ -102,8 +102,3 @@ from each seismic record file.
 
 You can add any key-value metadata to this file. They will be accessible in the 
 incident metadata attribute.
-
-
-
-
-

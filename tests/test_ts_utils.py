@@ -46,23 +46,3 @@ class TestCESMDV2(unittest.TestCase):
         self.assertEqual(self.signal[0][2],0)
         self.assertEqual(self.signal[1][2],'up')
         self.assertEqual(self.signal[2][2],90.0)
-        
-        
-
-        
-        
-
-
-    # def test_cesmdv2_file(self):
-
-    # def tearDown(self):
-    #     files = [glob.glob(e) for e in ['*.sqlite', '*.log']]
-    #     flat_list = [item for sublist in files for item in sublist]
-    #     f_files = [os.path.join(os.path.dirname(os.path.realpath(__file__)),e)
-    #      for e in flat_list]
-       
-    #     for f in f_files:
-    #         try:
-    #             os.remove(f)
-    #         except Exception:
-    #             pass
