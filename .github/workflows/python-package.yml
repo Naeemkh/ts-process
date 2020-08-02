@@ -21,6 +21,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
+      uses: s-weigand/setup-conda@v1
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -28,6 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        conda install -c conda-forge basemap 
     # - name: Lint with flake8
     #   run: |
     #     # stop the build if there are Python syntax errors or undefined names
