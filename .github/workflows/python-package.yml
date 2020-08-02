@@ -23,7 +23,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    # - name: Setup conda
+    - name: Setup conda
       uses: s-weigand/setup-conda@v1
     - name: Install dependencies
       run: |
