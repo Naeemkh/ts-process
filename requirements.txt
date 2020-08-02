@@ -4,7 +4,7 @@ attrs==19.3.0
 Babel==2.8.0
 backcall==0.2.0
 backports.functools-lru-cache==1.6.1
-basemap @ git+https://github.com/matplotlib/basemap.git@246dd6c7c4c2f585935a022f01c54ae0b4c7f164
+https://github.com/matplotlib/basemap/archive/master.zip
 bleach==3.1.5
 branca==0.3.1
 brotlipy==0.7.0
