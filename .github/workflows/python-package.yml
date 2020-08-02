@@ -23,15 +23,19 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Setup conda
-      uses: s-weigand/setup-conda@v1
+    # - name: Setup conda
+    #   uses: s-weigand/setup-conda@v1
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
+        apt-get install libgeos-3.X.X
+        apt-get install libgeos-dev
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        conda install -c conda-forge basemap
-        conda install -c conda-forge proj4
+        pip install --user https://github.com/matplotlib/basemap/archive/master.zip
+
+      # conda install -c conda-forge basemap
+      # conda install -c conda-forge proj4
 
         
     # - name: Lint with flake8
