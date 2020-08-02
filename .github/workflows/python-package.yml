@@ -31,6 +31,7 @@ jobs:
  
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
+    - name: Install basemap
       run: |
         conda install -c conda-forge basemap 
         
