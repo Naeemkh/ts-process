@@ -4,10 +4,12 @@ ts_plot_utils.py
 The core module for timeseries plot helper functions.
 """
 import numpy as np
+import cartopy.crs as ccrs
 from datetime import datetime
 import matplotlib.pyplot as plt
+import cartopy.feature as cfeature
 import matplotlib.gridspec as gridspec
-from mpl_toolkits.basemap import Basemap
+# from mpl_toolkits.basemap import Basemap
 from matplotlib.font_manager import FontProperties
 
 from .log import LOGGER
@@ -444,32 +446,35 @@ def plot_scatter_on_basemap(llcrnrlatlon, urcrnrlatlon, data):
     Plots scatter datapoints provided by data on the basemap plot.
 
     """
-    plt.figure(figsize=(8, 8))
-    map = Basemap(llcrnrlon=llcrnrlatlon[1],llcrnrlat=llcrnrlatlon[0],
-     urcrnrlon=urcrnrlatlon[1],urcrnrlat=urcrnrlatlon[0],
-     resolution='h', projection='merc',
-     lat_0 = (llcrnrlatlon[0]+urcrnrlatlon[0])/2,
-     lon_0 = (llcrnrlatlon[1]+urcrnrlatlon[1])/2)
+  
+    land_f = cfeature.NaturalEarthFeature('physical', 'land', '50m',
+                                        edgecolor='k',
+                                        facecolor=cfeature.COLORS['land'])
+    
+    ocean_f = cfeature.NaturalEarthFeature('physical', 'ocean', '50m',
+                                        edgecolor='k',
+                                        facecolor=cfeature.COLORS['water'])
+
+    fig = plt.figure(figsize=(10,10))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
+    ax.set_extent([llcrnrlatlon[1], urcrnrlatlon[1], llcrnrlatlon[0],
+     urcrnrlatlon[0]])
+    
+    ax.add_feature(land_f)
+    ax.add_feature(ocean_f)
+    
     
     # TODO: marker size should be dependent on the size of map
     # (a fraction of max distannce between corner points.)
     # also parallels and meridians should be provided by the user 
     # or dependent on the figure size. 
 
-    map.fillcontinents(color='#fcea9f',lake_color='#ebf2fa')
-    map.drawmapboundary(fill_color='#ebf2fa')
-    map.drawparallels(np.arange(-90.,90.,0.5),
-    labels=[True,False,False,False], dashes=[0,1], labelstyle="+/-")
-    map.drawmeridians(np.arange(-180,180.,0.5),
-    labels=[0,0,0,1],labelstyle="+/-",  dashes=[0,1])
-    map.drawstates(linewidth=0.5, linestyle='solid', color='k')
-    map.drawcountries(linewidth=2, linestyle='solid', color='k' )
-    map.drawcoastlines()
 
-    x, y = map(data[0], data[1])
-    plt.plot(x[1:], y[1:], "k+", markersize=5, label='station')
-    plt.plot(x[0], y[0], "r*", markersize=10, label='source')
-    plt.legend()
-    fig = plt.gcf()
+    ax.plot(data[0][1:],data[1][1:],'k+', label='station',
+     transform=ccrs.PlateCarree())
+    ax.plot(data[0][0],data[1][0],'r*', label='source',
+     transform=ccrs.PlateCarree())
+    ax.gridlines(draw_labels=True)
+    ax.legend()
 
     return fig
