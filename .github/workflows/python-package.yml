@@ -30,8 +30,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        export PROJ_LIB="$CONDA_PREFIX/share/proj"
         conda install basemap
-        export PROJ_LIB=$CONDA_PREFIX/share/proj
+        export PROJ_LIB="$CONDA_PREFIX/share/proj"
 
         
     # - name: Lint with flake8
