@@ -30,8 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        conda install -c conda-forge basemap
-        conda install -c conda-forge matplotlib
         conda install -c conda-forge proj4
 
         
