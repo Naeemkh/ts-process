@@ -585,8 +585,8 @@ not modified.</div>
 </dd></dl>
 
 <dl class="py method">
-<dt id="tsprocess.project.Project.show_stations_on_basemap">
-<code class="sig-name descname">show_stations_on_basemap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.show_stations_on_basemap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.show_stations_on_basemap" title="Permalink to this definition">¶</a></dt>
+<dt id="tsprocess.project.Project.show_stations_on_map">
+<code class="sig-name descname">show_stations_on_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.show_stations_on_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.show_stations_on_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an interactive map of source and stations, use only in
 Jupyter Notebooks.</p>
 <dl>
@@ -602,20 +602,23 @@ Jupyter Notebooks.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="tsprocess.project.Project.show_stations_on_map">
-<code class="sig-name descname">show_stations_on_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.show_stations_on_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.show_stations_on_map" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an interactive map of source and stations, use only in
-Jupyter Notebooks.</p>
+<dt id="tsprocess.project.Project.show_stations_on_map2">
+<code class="sig-name descname">show_stations_on_map2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.show_stations_on_map2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.show_stations_on_map2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a map including the source and stations</p>
 <dl>
 <dt>Inputs:</dt><dd><div class="line-block">
-<div class="line">list_inc: list of incidents</div>
+<div class="line">list_inc: list of incidents (supports one incident)</div>
 <div class="line">list_process: list of processes, one list per incident</div>
 <div class="line">list filters: list of filters defined for stations</div>
 <div class="line">opt_params: optional parameters (dictionary)</div>
 </div>
 </dd>
+<dt>Optional parameters:</dt><dd><div class="line-block">
+<div class="line">save_figure: True, False</div>
+<div class="line">llrtlatlon: lower_left then upper_right lat and lon</div>
+</div>
+</dd>
 </dl>
-<p>Optional parameters:</p>
 </dd></dl>
 
 <dl class="py method">

@@ -9,7 +9,6 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
 import matplotlib.gridspec as gridspec
-# from mpl_toolkits.basemap import Basemap
 from matplotlib.font_manager import FontProperties
 
 from .log import LOGGER

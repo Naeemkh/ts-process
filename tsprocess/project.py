@@ -692,18 +692,19 @@ class Project:
         
         return m
 
-    def show_stations_on_basemap(self,list_inc,list_process,list_filters,
+    def show_stations_on_map2(self,list_inc,list_process,list_filters,
      opt_params):
-        """ Returns an interactive map of source and stations, use only in 
-        Jupyter Notebooks.  
+        """ Returns a map including the source and stations  
 
         Inputs:
-            | list_inc: list of incidents
+            | list_inc: list of incidents (supports one incident)
             | list_process: list of processes, one list per incident
             | list filters: list of filters defined for stations
             | opt_params: optional parameters (dictionary)
 
         Optional parameters:
+            | save_figure: True, False
+            | llrtlatlon: lower_left then upper_right lat and lon
 
         """
 
@@ -758,7 +759,6 @@ class Project:
             plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
              format='pdf',transparent=False, dpi=300)  
         
-
 
 
     def which_records(self, list_inc,list_process,list_filters, opt_params):

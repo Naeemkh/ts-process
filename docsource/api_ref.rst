@@ -19,6 +19,7 @@ section.
 :ref:`plot_velocity_label`
 :ref:`plot_acceleration_label`
 :ref:`show_stations_on_map_label`
+:ref:`show_stations_on_map_label_2`
 ====================================  =
 
 .. _create_project_label:
@@ -360,6 +361,27 @@ popups shows station names.
     $ p1.show_stations_on_map(['hercules101'],[[]],['lesst30','moret25'])
 
 .. image:: images/png/quick_ref_leaflet.png
+   :alt: leaflet image of stations
+   :width: 600px
+   :align: center 
+
+
+.. _show_stations_on_map_label_2:
+
+Show stations on the map (cartopy)
+----------------------------------
+Shows stations and source on the map using 
+`cartopy <https://scitools.org.uk/cartopy/docs/latest/#>`_ package. The
+following command shows the stations in azimuth between 0 and 90 degrees
+from 2014 5.1 La Habra, CA, earthquake. 
+
+.. code-block:: console
+    
+    $ p1.add_station_filter("az090","azimuth_bt",{"azmth":[0,90]})
+    $ p1.show_stations_on_map2(['hercules101'],[[]],['az090'])
+
+
+.. image:: images/png/f_stations_location_plot_20200802_222319_888072.png
    :alt: leaflet image of stations
    :width: 600px
    :align: center 
