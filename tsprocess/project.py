@@ -17,6 +17,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.font_manager import FontProperties
 from ipyleaflet import Map, Marker, basemaps, basemap_to_tiles, AwesomeIcon, Popup
 
+
 from .log import LOGGER
 from .record import Record
 from .station import Station
@@ -27,7 +28,8 @@ from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
                       list2message, is_lat_valid, is_lon_valid, is_depth_valid)
 from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
-                            plot_acceleration_helper, plot_recordsection_helper)
+                            plot_acceleration_helper, plot_recordsection_helper,
+                            plot_scatter_on_basemap)
 
 
 class Project:
@@ -689,6 +691,74 @@ class Project:
          draggable=False))
         
         return m
+
+    def show_stations_on_map2(self,list_inc,list_process,list_filters,
+     opt_params):
+        """ Returns a map including the source and stations  
+
+        Inputs:
+            | list_inc: list of incidents (supports one incident)
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+            | save_figure: True, False
+            | llrtlatlon: lower_left then upper_right lat and lon
+
+        """
+
+        # Only supports one incident.        
+        tmp_inc_list = []
+        tmp_inc_list.append(list_inc[0])
+        
+        records = self._extract_records(list_inc, list_process, list_filters)
+        # extract stations location from records.
+        lat,lon = [], []
+        
+        # first point is the source
+        lat.append(self.metadata["project_source_hypocenter"][0])
+        lon.append(self.metadata["project_source_hypocenter"][1])
+
+
+        for record in records:
+            if record[0]:
+                lat.append(record[0].station.lat)
+                lon.append(record[0].station.lon)
+
+        # find min max values.
+        min_lon, max_lon = min(lon), max(lon)
+        min_lat, max_lat = min(lat), max(lat)
+
+        if opt_params.get('llrtlatlon',None):
+            llcrnrlatlon = opt_params['llrtlatlon'][0:2]
+            urcrnrlatlon = opt_params['llrtlatlon'][2:4]
+        else:
+            llcrnrlatlon = [min_lat - 0.05, min_lon - 0.05]
+            urcrnrlatlon = [max_lat + 0.05, max_lon + 0.05]
+         
+        data = [lon, lat]
+        import numpy as np
+ 
+        # TODO: add epsg capability to the plots. 
+    
+        fig = plot_scatter_on_basemap(llcrnrlatlon, urcrnrlatlon, data)
+        
+        if query_opt_params(opt_params, 'save_figure'):
+            f_name_save = "f_stations_location_plot_" +\
+             datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+    
+            details = [f_name_save, list_inc, list_process, list_filters,
+             {}]
+            message = list2message(details)
+            
+            message = message + "\n----------------------------\n"
+            write_into_file(os.path.join(self.path_to_output_dir,
+            "output_item_description.txt"),message)
+            # save item.
+            plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+             format='pdf',transparent=False, dpi=300)  
+        
 
 
     def which_records(self, list_inc,list_process,list_filters, opt_params):

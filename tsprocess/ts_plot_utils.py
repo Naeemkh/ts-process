@@ -3,8 +3,11 @@ ts_plot_utils.py
 ====================================
 The core module for timeseries plot helper functions.
 """
+import numpy as np
+import cartopy.crs as ccrs
 from datetime import datetime
 import matplotlib.pyplot as plt
+import cartopy.feature as cfeature
 import matplotlib.gridspec as gridspec
 from matplotlib.font_manager import FontProperties
 
@@ -20,9 +23,9 @@ def plot_displacement_helper(record, color_code, opt_params, list_inc,
      should not be directly used by the end users.
     """
 
-    if not record:
-        LOGGER.debug('record is does not have any data.')
-        return 
+    if all(value is None for value in record):
+        LOGGER.debug('record does not have any data.')
+        return None
     
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -123,9 +126,9 @@ def plot_velocity_helper(record, color_code, opt_params, list_inc, list_process,
      should not be directly used by the end users.
     """
 
-    if record:
+    if all(value is None for value in record):
         LOGGER.debug('record does not have any data.')
-        return 
+        return None
 
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -227,9 +230,9 @@ def plot_acceleration_helper(record, color_code, opt_params, list_inc,
      should not be directly used by the end users.
     """
 
-    if not record:
+    if all(value is None for value in record):
         LOGGER.debug('record does not have any data.')
-        return 
+        return None
     
     with_details = False
     if query_opt_params(opt_params, 'save_figure'):  
@@ -344,12 +347,14 @@ def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_proc
         fig, axarr = plt.subplots(nrows=nrs, ncols=1, figsize=(14, 9))
         rspan = 6
         with_details = True
+        axarr[0] = plt.subplot2grid((nrs,1),(0,0),rowspan=rspan, colspan=1)
+
     else:
         nrs = 1
         fig, axarr = plt.subplots(nrows=nrs, ncols=1, figsize=(14, 9))
         rspan = 1
+        axarr = plt.subplot2grid((nrs,1),(0,0),rowspan=rspan, colspan=1)
     
-    axarr[0] = plt.subplot2grid((nrs,1),(0,0),rowspan=rspan, colspan=1)
 
     if with_details:
         axarr[1] = plt.subplot2grid((nrs,1),(6,0),rowspan=1, colspan=1)
@@ -384,18 +389,35 @@ def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_proc
                 legend_label=list_inc[i]    
             else:
                 legend_label=None
-            axarr[0].plot(item.time_vec, tmp_data, color_code[i], 
-            label=legend_label, linewidth=0.2)
-        
-    axarr[0].set_xlabel('Time (s)')
-    axarr[0].set_ylabel('Epicentral Distance (km)')        
-    axarr[0].set_xlim(x_lim_t)
-    axarr[0].legend()
-    axarr[0].set_title(
-     f"Normalized Seismic Record Section -"
-     f"Number of stations/incident: {k+1}"
-     f"- Component: {comp}"
-    )    
+
+            if with_details:    
+                axarr[0].plot(item.time_vec, tmp_data, color_code[i], 
+                label=legend_label, linewidth=0.2)
+            else:
+                axarr.plot(item.time_vec, tmp_data, color_code[i], 
+                label=legend_label, linewidth=0.2)
+
+    if with_details:    
+        axarr[0].set_xlabel('Time (s)')
+        axarr[0].set_ylabel('Epicentral Distance (km)')        
+        axarr[0].set_xlim(x_lim_t)
+        axarr[0].legend()
+        axarr[0].set_title(
+         f"Normalized Seismic Record Section -"
+         f"Number of stations/incident: {k+1}"
+         f"- Component: {comp}"
+        )
+    else:
+        axarr.set_xlabel('Time (s)')
+        axarr.set_ylabel('Epicentral Distance (km)')        
+        axarr.set_xlim(x_lim_t)
+        axarr.legend()
+        axarr.set_title(
+         f"Normalized Seismic Record Section -"
+         f"Number of stations/incident: {k+1}"
+         f"- Component: {comp}"
+        )
+            
 
     f_name_save = "f_recordsection_plot_" +\
     datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
@@ -417,3 +439,41 @@ def plot_recordsection_helper(records, color_code, opt_params,list_inc,list_proc
     fig.tight_layout() 
 
     return fig, message, f_name_save        
+
+def plot_scatter_on_basemap(llcrnrlatlon, urcrnrlatlon, data):
+    """
+    Plots scatter datapoints provided by data on the basemap plot.
+
+    """
+  
+    land_f = cfeature.NaturalEarthFeature('physical', 'land', '50m',
+                                        edgecolor='k',
+                                        facecolor=cfeature.COLORS['land'])
+    
+    ocean_f = cfeature.NaturalEarthFeature('physical', 'ocean', '50m',
+                                        edgecolor='k',
+                                        facecolor=cfeature.COLORS['water'])
+
+    fig = plt.figure(figsize=(10,10))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
+    ax.set_extent([llcrnrlatlon[1], urcrnrlatlon[1], llcrnrlatlon[0],
+     urcrnrlatlon[0]])
+    
+    ax.add_feature(land_f)
+    ax.add_feature(ocean_f)
+    
+    
+    # TODO: marker size should be dependent on the size of map
+    # (a fraction of max distannce between corner points.)
+    # also parallels and meridians should be provided by the user 
+    # or dependent on the figure size. 
+
+
+    ax.plot(data[0][1:],data[1][1:],'k+', label='station',
+     transform=ccrs.PlateCarree())
+    ax.plot(data[0][0],data[1][0],'r*', label='source',
+     transform=ccrs.PlateCarree())
+    ax.gridlines(draw_labels=True)
+    ax.legend()
+
+    return fig

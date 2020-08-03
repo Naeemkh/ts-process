@@ -190,6 +190,7 @@
 <span class="kn">from</span> <span class="nn">matplotlib.font_manager</span> <span class="kn">import</span> <span class="n">FontProperties</span>
 <span class="kn">from</span> <span class="nn">ipyleaflet</span> <span class="kn">import</span> <span class="n">Map</span><span class="p">,</span> <span class="n">Marker</span><span class="p">,</span> <span class="n">basemaps</span><span class="p">,</span> <span class="n">basemap_to_tiles</span><span class="p">,</span> <span class="n">AwesomeIcon</span><span class="p">,</span> <span class="n">Popup</span>
 
+
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.record</span> <span class="kn">import</span> <span class="n">Record</span>
 <span class="kn">from</span> <span class="nn">.station</span> <span class="kn">import</span> <span class="n">Station</span>
@@ -200,7 +201,8 @@
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">check_opt_param_minmax</span><span class="p">,</span> <span class="n">query_opt_params</span><span class="p">,</span> <span class="n">write_into_file</span><span class="p">,</span>
                       <span class="n">list2message</span><span class="p">,</span> <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.ts_plot_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">plot_displacement_helper</span><span class="p">,</span> <span class="n">plot_velocity_helper</span><span class="p">,</span>
-                            <span class="n">plot_acceleration_helper</span><span class="p">,</span> <span class="n">plot_recordsection_helper</span><span class="p">)</span>
+                            <span class="n">plot_acceleration_helper</span><span class="p">,</span> <span class="n">plot_recordsection_helper</span><span class="p">,</span>
+                            <span class="n">plot_scatter_on_basemap</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">:</span>
@@ -862,6 +864,74 @@
          <span class="n">draggable</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
         
         <span class="k">return</span> <span class="n">m</span></div>
+
+<div class="viewcode-block" id="Project.show_stations_on_map2"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.show_stations_on_map2">[docs]</a>    <span class="k">def</span> <span class="nf">show_stations_on_map2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+     <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a map including the source and stations  </span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents (supports one incident)</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Optional parameters:</span>
+<span class="sd">            | save_figure: True, False</span>
+<span class="sd">            | llrtlatlon: lower_left then upper_right lat and lon</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Only supports one incident.        </span>
+        <span class="n">tmp_inc_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tmp_inc_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        <span class="c1"># extract stations location from records.</span>
+        <span class="n">lat</span><span class="p">,</span><span class="n">lon</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        
+        <span class="c1"># first point is the source</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;project_source_hypocenter&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;project_source_hypocenter&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">lat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
+                <span class="n">lon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
+
+        <span class="c1"># find min max values.</span>
+        <span class="n">min_lon</span><span class="p">,</span> <span class="n">max_lon</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+        <span class="n">min_lat</span><span class="p">,</span> <span class="n">max_lat</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">opt_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;llrtlatlon&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">llcrnrlatlon</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[</span><span class="s1">&#39;llrtlatlon&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">urcrnrlatlon</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[</span><span class="s1">&#39;llrtlatlon&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">llcrnrlatlon</span> <span class="o">=</span> <span class="p">[</span><span class="n">min_lat</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">min_lon</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">]</span>
+            <span class="n">urcrnrlatlon</span> <span class="o">=</span> <span class="p">[</span><span class="n">max_lat</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">max_lon</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">]</span>
+         
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">]</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+ 
+        <span class="c1"># TODO: add epsg capability to the plots. </span>
+    
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_scatter_on_basemap</span><span class="p">(</span><span class="n">llcrnrlatlon</span><span class="p">,</span> <span class="n">urcrnrlatlon</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
+            <span class="n">f_name_save</span> <span class="o">=</span> <span class="s2">&quot;f_stations_location_plot_&quot;</span> <span class="o">+</span>\
+             <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
+    
+            <span class="n">details</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_name_save</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">,</span>
+             <span class="p">{}]</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">list2message</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+            
+            <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+            <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
+            <span class="c1"># save item.</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  </div>
+        
 
 
 <div class="viewcode-block" id="Project.which_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.which_records">[docs]</a>    <span class="k">def</span> <span class="nf">which_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span> <span class="n">opt_params</span><span class="p">):</span>
