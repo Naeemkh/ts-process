@@ -237,6 +237,17 @@
              <span class="s2">&quot;This command will be ignored.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
          
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Project: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Database: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Incidents: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Vertical Orientation: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Unit: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_convention</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Project(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+
     <span class="c1"># database</span>
 <div class="viewcode-block" id="Project._connect_to_database"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._connect_to_database">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_connect_to_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>

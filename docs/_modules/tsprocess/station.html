@@ -190,15 +190,6 @@
     <span class="sd">&quot;&quot;&quot; Class Station &quot;&quot;&quot;</span>
     <span class="n">list_of_stations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">vicinity_estimations</span> <span class="o">=</span> <span class="mi">10</span> 
-    <span class="c1"># station_filter_types = [</span>
-    <span class="c1">#     &quot;epi_dist_lt&quot;,</span>
-    <span class="c1">#     &quot;epi_dist_gt&quot;,</span>
-    <span class="c1">#     &quot;epi_dist_lte&quot;,</span>
-    <span class="c1">#     &quot;epi_dist_gte&quot;,</span>
-    <span class="c1">#     &quot;azimuth_bt&quot;,</span>
-    <span class="c1">#     &quot;include_stlist_by_incident&quot;,</span>
-    <span class="c1">#     &quot;exclude_stlist_by_incident&quot;</span>
-    <span class="c1"># ]</span>
 
     <span class="n">station_filter_types</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;epi_dist_lt&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;distance&#39;</span><span class="p">:</span> <span class="s1">&#39;in km&#39;</span><span class="p">},</span>
@@ -221,6 +212,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vs_1d</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inc_st_name</span><span class="o">=</span><span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Station located at : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Incident records at the station:&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Station(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="si">}</span><span class="s2">)&quot;</span>
 
     <span class="k">def</span> <span class="nf">add_vs_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
