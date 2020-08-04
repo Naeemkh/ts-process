@@ -822,3 +822,96 @@ def unit_convention_factor(pr_unit, inc_unit):
 
     # should not get here. 
     LOGGER.debug('Code logic does not sound right. DOUBLE CHECK.')
+
+def is_incident_description_valid(inc_des, valid_incidents, current_incidents,
+    valid_vertical_orientation, valid_incident_unit):
+        """
+        checks incident description and if it follows incident description 
+        format, returns True, otherwise returns False.
+
+        Inputs:
+            | inc_des: Incident description key-value dictionary
+            | valid_incidents: List of valid incidents type
+            | current_incidents: List of current incidents name
+            | valid_vertical_orientation: valid vertical orientation
+            | valid_incident_unit: valid units for incidents
+
+        Outputs:
+            | True or False
+        """
+        try: 
+            if "incident_name" not in inc_des.keys():
+                LOGGER.warning("incident name is not provided in the"
+                " description.txt file.")
+                return False
+    
+            if "incident_type" not in inc_des.keys():
+                LOGGER.warning("incident type is not provided in the"
+                " description.txt file.")
+                return False
+    
+            if inc_des["incident_type"] not in valid_incidents:
+                LOGGER.warning(f"The incident type is not supported (valid "
+                 f"incidents: {valid_incidents})")
+                return False
+    
+            if inc_des["incident_name"] in current_incidents:
+                LOGGER.warning(f"The provided incident name" 
+                  f" ({inc_des['incident_name']}) has been used before.\n"
+                  "The incident name should be a unique name. Current incidents: "
+                 f"{current_incidents} ")
+                return False
+    
+            
+            # checks for hercules
+            if inc_des["incident_type"] == "hercules":
+    
+                if "incident_unit" not in inc_des.keys():
+                    LOGGER.warning("incident unit is not provided in the"
+                     " description.txt file.")
+                    return False
+    
+                if "ver_comp_orientation" not in inc_des.keys():
+                    LOGGER.warning("incident vertical orientation is not provided"
+                     " in the description.txt file.")
+                    return False
+    
+                if (("hr_comp_orientation_1" not in inc_des.keys()) or
+                    ("hr_comp_orientation_2" not in inc_des.keys())):
+                    LOGGER.warning("At least one horizontal orientation is not"
+                     " provided in the description.txt file.")
+                    return False
+    
+                if "inputfiles_parameters" not in inc_des.keys():
+                    LOGGER.warning("inputfiles_parameters is not provided"
+                     " in the description.txt file.")
+                    return False
+    
+                if inc_des["incident_unit"] not in valid_incident_unit:
+                    LOGGER.warning(f"incident unit is not valid. "
+                     f" List of valid units: {valid_incident_unit}")
+                    return False
+    
+                if (inc_des["ver_comp_orientation"] not in
+                 valid_vertical_orientation):
+                    LOGGER.warning(f"incident vertical orientation is not valid. "
+                     f" List of valid units: {valid_vertical_orientation}")
+                    return False
+    
+                if (abs(float(inc_des["hr_comp_orientation_1"])) < 0 or 
+                    abs(float(inc_des["hr_comp_orientation_1"])) > 360 or 
+                    abs(float(inc_des["hr_comp_orientation_2"])) < 0 or 
+                    abs(float(inc_des["hr_comp_orientation_2"])) > 360):
+                    LOGGER.warning("At least one horizontal orientation is not a "
+                     "valid number in the description.txt file. Valid range:"
+                     "[0,360]")
+                    return False
+
+                # TODO: add check for perpendicular horizontal components.
+
+        
+        except Exception as e:
+            LOGGER.error("description.txt: " + str(e))
+            return False
+                
+        return True

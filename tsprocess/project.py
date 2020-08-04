@@ -26,7 +26,8 @@ from .database import DataBase
 from .timeseries import TimeSeries
 from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
-                      list2message, is_lat_valid, is_lon_valid, is_depth_valid)
+                      list2message, is_lat_valid, is_lon_valid, is_depth_valid,
+                      is_incident_description_valid)
 from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
                             plot_acceleration_helper, plot_recordsection_helper,
                             plot_scatter_on_basemap)
@@ -39,6 +40,9 @@ class Project:
 
     color_code  = ['k', 'r', 'b', 'm', 'g', 'c', 'y', 'brown',
                    'gold', 'blueviolet', 'grey', 'pink']
+
+    valid_vertical_orientation = ["up", "down"]
+    valid_incident_unit = ["m", "cm"]
 
     _instance = None
 
@@ -197,27 +201,12 @@ class Project:
         # read the description file of incident
         inc_des = self._read_incident_description(incident_folder)
         
-        #TODO these checks do not follow EAFP
-        if "incident_name" not in inc_des.keys():
-            LOGGER.warning("incident name is not provided in the"
-            " description.txt file.")
-            return
+        # These checks do not follow EAFP, however, it is better to catch any 
+        # problem while the user has not started working on the data. 
 
-        if "incident_type" not in inc_des.keys():
-            LOGGER.warning("incident name is not provided in the"
-            " description.txt file.")
-            return
-
-        if inc_des["incident_type"] not in Incident.valid_incidents:
-            LOGGER.warning(f"The incident type is not supported (valid "
-             f"incidents: {Incident.valid_incidents})")
-            return
-
-        if inc_des["incident_name"] in self.incidents.keys():
-            LOGGER.warning(f"The provided incident name" 
-              f" ({inc_des['incident_name']}) has been used before.\n"
-              "The incident name should be a unique name. Current incidents: "
-             f"{list(self.incidents.keys())} ")
+        if not is_incident_description_valid(inc_des, Incident.valid_incidents,
+         list(self.incidents.keys()), Project.valid_vertical_orientation,
+         Project.valid_incident_unit):
             return
 
         # load incident
@@ -254,7 +243,8 @@ class Project:
         
         Inputs:
 
-            incident_folder: path to incident folder.
+            | incident_folder: path to incident folder.
+            
          """
         incident_description = {}
         incident_description["incident_folder"] = incident_folder
@@ -263,12 +253,17 @@ class Project:
                 line = fp.readline()
                 if not line:
                     break
+                
+                if line == "\n":
+                    continue
+                
                 try:
                     key, value = tuple(line.strip().split("="))
                     incident_description[key.strip()] = value.strip()
                 except ValueError as ve:
                     LOGGER.warning("description.txt does not follow the format."
                     + str(ve))
+
         return incident_description
 
     def _extract_records(self, list_inc, list_process, list_filters):
