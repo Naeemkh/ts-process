@@ -227,7 +227,9 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_make_output_dir</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">switch_ver_orientation_convention</span><span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">switch_unit_convention</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Project named </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
@@ -304,6 +306,36 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="n">ver_or</span>
         <span class="n">Record</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="n">ver_or</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Vertical orientation is switched to </span><span class="si">{</span><span class="n">ver_or</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Project.switch_unit_convention"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.switch_unit_convention">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">switch_unit_convention</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        switches the unit convention to cm or m. </span>
+
+<span class="sd">        Inputs:</span>
+
+<span class="sd">            unit: Project unit convention (&quot;cm&quot; or &quot;m&quot;)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Project unit convention should be &quot;cm&quot; or &quot;m&quot;.&#39;</span>
+             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">unit</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">]:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Project unit convention should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">unit</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unit is already &quot;</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="n">Record</span><span class="o">.</span><span class="n">unit_convention</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unit convention is switched to </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span></div>
 
 
     <span class="c1"># Incidents</span>

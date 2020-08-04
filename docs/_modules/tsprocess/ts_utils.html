@@ -815,7 +815,8 @@
     <span class="c1"># Clean the first row in all but the first channel</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)):</span>
         <span class="k">del</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-
+    
+    <span class="n">channels_unit</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)):</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="c1"># Check this is the corrected acceleration data</span>
@@ -823,7 +824,23 @@
         <span class="k">if</span> <span class="n">ctype</span> <span class="o">!=</span> <span class="s2">&quot;corrected accelerogram&quot;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ERROR]: processing corrected accelerogram ONLY.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># detect unit of the record</span>
+        <span class="n">acc_unit</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">17</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">vel_unit</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">18</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">disp_unit</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">19</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span>
 
+        <span class="k">if</span> <span class="p">(</span><span class="n">acc_unit</span> <span class="o">==</span> <span class="s2">&quot;cm/sec/sec&quot;</span> <span class="ow">and</span> <span class="n">vel_unit</span> <span class="o">==</span> <span class="s2">&quot;cm/sec&quot;</span> <span class="ow">and</span>
+         <span class="n">disp_unit</span> <span class="o">==</span> <span class="s2">&quot;cm&quot;</span><span class="p">):</span>
+            <span class="n">record_unit</span> <span class="o">=</span> <span class="s2">&quot;cm&quot;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">acc_unit</span> <span class="o">==</span> <span class="s2">&quot;m/sec/sec&quot;</span> <span class="ow">and</span> <span class="n">vel_unit</span> <span class="o">==</span> <span class="s2">&quot;m/sec&quot;</span> <span class="ow">and</span>
+         <span class="n">disp_unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">):</span>
+            <span class="n">record_unit</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">record_unit</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
+        
+        <span class="n">channels_unit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record_unit</span><span class="p">)</span>
+        
         <span class="c1"># Get network code and station id</span>
         <span class="n">network</span> <span class="o">=</span> <span class="n">input_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="n">station_id</span> <span class="o">=</span> <span class="n">input_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -915,7 +932,7 @@
                     <span class="n">v_signal</span> <span class="o">+=</span> <span class="n">s</span>
                 <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span>
                     <span class="n">d_signal</span> <span class="o">+=</span> <span class="n">s</span>
-
+        
         <span class="n">dis_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">d_signal</span><span class="p">)</span>
         <span class="n">vel_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">v_signal</span><span class="p">)</span>
         <span class="n">acc_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">a_signal</span><span class="p">)</span>
@@ -934,8 +951,55 @@
     <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;latitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">latitude</span>
     <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;high_pass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">high_pass</span>
     <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;low_pass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">low_pass</span>
+    <span class="n">station_metadata</span><span class="p">[</span><span class="s1">&#39;channels_unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels_unit</span>
 
     <span class="k">return</span> <span class="n">record_list</span><span class="p">,</span> <span class="n">station_metadata</span></div>
+
+
+<div class="viewcode-block" id="unit_convention_factor"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.unit_convention_factor">[docs]</a><span class="k">def</span> <span class="nf">unit_convention_factor</span><span class="p">(</span><span class="n">pr_unit</span><span class="p">,</span> <span class="n">inc_unit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    controls project and incident units and returns multiplicaiton factor that</span>
+<span class="sd">    converts the incident&#39;s or record&#39;s unit into projects unit. Only</span>
+<span class="sd">    m(meter) anc cm(centimeter) are supported.  </span>
+<span class="sd">    </span>
+<span class="sd">    Inputs: </span>
+<span class="sd">        | pr_unit: The project conventional unit</span>
+<span class="sd">        | inc_unit: Incident or record unit</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        | multiplication factor</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; unit_convention_factor(&quot;cm&quot;, &quot;cm&quot;)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; unit_convention_factor(&quot;m&quot;, &quot;cm&quot;)</span>
+<span class="sd">    0.01</span>
+<span class="sd">    &gt;&gt;&gt; unit_convention_factor(&quot;cm&quot;, &quot;m&quot;)</span>
+<span class="sd">    100</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">allowed_units</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pr_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_units</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">inc_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_units</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unit is not supported. Allowed units: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">pr_unit</span> <span class="o">==</span> <span class="n">inc_unit</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">pr_unit</span> <span class="o">==</span> <span class="s2">&quot;cm&quot;</span> <span class="ow">and</span> <span class="n">inc_unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">100</span>
+
+    <span class="k">if</span> <span class="n">pr_unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span> <span class="ow">and</span> <span class="n">inc_unit</span> <span class="o">==</span> <span class="s2">&quot;cm&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.01</span>
+
+    <span class="c1"># should not get here. </span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Code logic does not sound right. DOUBLE CHECK.&#39;</span><span class="p">)</span></div>
+
+
+    
+
+
 
 
 

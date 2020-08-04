@@ -29,6 +29,8 @@ orientation shows the direction that records are considered positive.
     hr_comp_orientation_1 =  degree
     hr_comp_orientation_2 =  degree
     ver_comp_orientation  =  up or down
+    incident_unit         =  cm or m
+
 
 
 
@@ -101,4 +103,5 @@ from each seismic record file.
     incident_type         =  cesmdv2
 
 You can add any key-value metadata to this file. They will be accessible in the 
-incident metadata attribute.
+incident metadata attribute. Note that each record unit will be extracted from 
+the record's file. 
