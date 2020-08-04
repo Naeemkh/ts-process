@@ -17,15 +17,27 @@ class Station:
     """ Class Station """
     list_of_stations = []
     vicinity_estimations = 10 
-    station_filter_types = [
-        "epi_dist_lt",
-        "epi_dist_gt",
-        "epi_dist_lte",
-        "epi_dist_gte",
-        "azimuth_bt",
-        "include_stlist_by_incident",
-        "exclude_stlist_by_incident"
-    ]
+    # station_filter_types = [
+    #     "epi_dist_lt",
+    #     "epi_dist_gt",
+    #     "epi_dist_lte",
+    #     "epi_dist_gte",
+    #     "azimuth_bt",
+    #     "include_stlist_by_incident",
+    #     "exclude_stlist_by_incident"
+    # ]
+
+    station_filter_types = {
+        "epi_dist_lt": {'distance': 'in km'},
+        "epi_dist_gt": {'distance': 'in km'},
+        "epi_dist_lte": {'distance': 'in km'},
+        "epi_dist_gte": {'distance': 'in km'},
+        "azimuth_bt": {'azmth': '[az1, az2]'},
+        "include_stlist_by_incident": {"incident_name":"name of incident",
+                       "stations":'list of stations'},
+        "exclude_stlist_by_incident": {"incident_name":"name of incident",
+                       "stations":'list of stations'}
+    }
 
     station_filters = {}
 
@@ -54,14 +66,29 @@ class Station:
         if filter_name in cls.station_filters:
             #TODO probably customize exception should be a better option
             #  to handle this.
-            print("Filter name is already used. Has not been added.")
+            LOGGER.warning("Filter name is already used. Has not been added.")
             return
 
         if filter_type not in cls.station_filter_types:
             #TODO probably customize exception should be a better option
             #  to handle this.
-            print("Filter type is not supported. Has not been added.")
+            LOGGER.warning("Filter type is not supported. Has not been added.")
             return
+
+        for ak in argument_dict.keys():
+            if ak not in list(cls.station_filter_types[filter_type].keys()):
+                LOGGER.warning(f" '{ak}' is not a valid argument for"
+                 f" {filter_type}. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.station_filter_types[filter_type].keys())}")
+                return
+        
+        for rak in list(cls.station_filter_types[filter_type].keys()):
+            if rak not in argument_dict.keys():
+                LOGGER.warning(f" '{rak}' is not provided. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.station_filter_types[filter_type].keys())}")
+                return 
         
         cls.station_filters[filter_name] = [filter_type, argument_dict]
     
