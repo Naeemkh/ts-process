@@ -69,11 +69,12 @@ class Record:
                f"{self.epicentral_distance:.2f} km distance from source."    
 
     def __repr__(self):
-        return f"Record({self.time_vec},"\
-               f"{self.disp_h1},{self.disp_h2},{self.disp_ver}"\
-               f"{self.vel_h1},{self.vel_h2},{self.vel_ver}"\
-               f"{self.acc_h1},{self.acc_h2},{self.acc_ver}"\
-               f"{self.station}.{self.source_params})"
+        return (f"Record({self.time_vec},"
+               f"{self.disp_h1},{self.disp_h2},{self.disp_ver},"
+               f"{self.vel_h1},{self.vel_h2},{self.vel_ver},"
+               f"{self.acc_h1},{self.acc_h2},{self.acc_ver},"
+               f"{self.station},{self.source_params},"
+               f"{self.hc_or1},{self.hc_or2},{self.ver_or})")
                         
     @classmethod
     def _add_processing_label(cls, label_name, label_type, argument_dict):

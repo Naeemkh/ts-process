@@ -27,12 +27,20 @@ class Incident:
         """ Initiating an incident"""
         self.folder_path = folder_path
         self.metadata = dict()
-        self.metadata.update(incident_description)
+        self.incident_description = incident_description
+        self.metadata.update(self.incident_description)
         self.stations_list = []
         self.records = []
         self._extract_input_parameters()
         self._extract_station_name_location()
         self._extract_seismic_source_data()
+
+    def __str__(self):
+        return (f"Incident name: {self.metadata['incident_name']},"
+        f" type: {self.metadata['incident_type']}")
+
+    def __repr__(self):
+        return f"Incident({self.folder_path},{self.incident_description})"
 
     def _extract_input_parameters(self):
         """ Extracts input parameters from the incident folder. Stores the

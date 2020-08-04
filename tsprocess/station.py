@@ -17,15 +17,6 @@ class Station:
     """ Class Station """
     list_of_stations = []
     vicinity_estimations = 10 
-    # station_filter_types = [
-    #     "epi_dist_lt",
-    #     "epi_dist_gt",
-    #     "epi_dist_lte",
-    #     "epi_dist_gte",
-    #     "azimuth_bt",
-    #     "include_stlist_by_incident",
-    #     "exclude_stlist_by_incident"
-    # ]
 
     station_filter_types = {
         "epi_dist_lt": {'distance': 'in km'},
@@ -48,6 +39,14 @@ class Station:
         self.depth = depth
         self.vs_1d = None
         self.inc_st_name={}
+
+    def __str__(self):
+        return (f"Station located at : {self.lat}, {self.lon}"
+        f"\nIncident records at the station:"
+        f"\n{list(self.inc_st_name)}")
+
+    def __repr__(self):
+        return f"Station({self.lat},{self.lon},{self.depth})"
 
     def add_vs_1d(self):
         pass

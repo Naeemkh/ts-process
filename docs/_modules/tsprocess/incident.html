@@ -200,12 +200,20 @@
         <span class="sd">&quot;&quot;&quot; Initiating an incident&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">folder_path</span> <span class="o">=</span> <span class="n">folder_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">incident_description</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incident_description</span> <span class="o">=</span> <span class="n">incident_description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incident_description</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stations_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extract_input_parameters</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extract_station_name_location</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extract_seismic_source_data</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incident name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;incident_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot; type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;incident_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Incident(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">folder_path</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">incident_description</span><span class="si">}</span><span class="s2">)&quot;</span>
 
 <div class="viewcode-block" id="Incident._extract_input_parameters"><a class="viewcode-back" href="../../modules.html#tsprocess.incident.Incident._extract_input_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">_extract_input_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Extracts input parameters from the incident folder. Stores the</span>

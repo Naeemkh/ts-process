@@ -43,7 +43,10 @@ class TimeSeries:
         self.f_init_point = 0
         self.notes = None
         self.peak_vv = None
-        self.peak_vt = None        
+        self.peak_vt = None
+
+    def __str__(self):
+        return "Timeseries abstract class"        
 
     def add_note(self):
         pass
@@ -237,9 +240,18 @@ class Disp(TimeSeries):
     """ Disp Class """
     def __init__(self, value, dt, t_init_point):
         super().__init__()
+        self.dt = dt
+        self.t_init_point = t_init_point
         self.type = "Disp"
         self._add_values(value, dt, t_init_point)
         self._compute_fft_value()
+    
+    def __str__(self):
+        return (f"Disp signal, #points: {len(self.value)}, dt:{self.dt},"
+         f"init point: {self.t_init_point}")
+
+    def __repr__(self):
+        return f"Disp({self.value}, {self.dt}, {self.t_init_point})"
         
     def compute_diff(self):
         """ Returns Vel instance """
@@ -249,9 +261,18 @@ class Vel(TimeSeries):
     """ Vel Class """
     def __init__(self, value, dt, t_init_point):
         super().__init__()
+        self.dt = dt
+        self.t_init_point = t_init_point
         self.type = "Vel"
         self._add_values(value, dt, t_init_point)
         self._compute_fft_value()
+
+    def __str__(self):
+        return (f"Vel signal, #points: {len(self.value)}, dt:{self.dt},"
+         f"init point: {self.t_init_point}")
+
+    def __repr__(self):
+        return f"Vel({self.value}, {self.dt}, {self.t_init_point})"
 
     def compute_diff(self):
         """ Returns ACC instance """
@@ -265,11 +286,19 @@ class Acc(TimeSeries):
     """ Acc Class """
     def __init__(self, value, dt, t_init_point):
         super().__init__()
+        self.dt = dt
+        self.t_init_point = t_init_point
         self.type = "Acc"
         self._add_values(value, dt, t_init_point)
         self._compute_fft_value()
         self._compute_response_spectra()
         
+    def __str__(self):
+        return (f"Acc signal, #points: {len(self.value)}, dt:{self.dt},"
+         f"init point: {self.t_init_point}")
+
+    def __repr__(self):
+        return f"Acc({self.value}, {self.dt}, {self.t_init_point})"
 
     def compute_integral(self):
         """ Returns Vel instance """

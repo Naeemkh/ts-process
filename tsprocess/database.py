@@ -27,6 +27,12 @@ class DataBase:
         self.cache_size = cache_size
         self.cache = OrderedDict()
 
+    def __str__(self):
+        return f"SQLitedict Database: {self.name}"
+
+    def __repr__(self):
+        return f"Database({self.name},{self.cache_size})"
+
     def set_value(self, key, value):
         """ 
         Sets the key and given value in the database. If the key exists,

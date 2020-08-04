@@ -17,6 +17,14 @@ class DataBaseTracker:
         self.buffer = dict()
         self._initiate_tracker()
 
+    def __str__(self):
+        return (f"Database hash values tracker: {self.name}, {self.projcet},"
+        f" {self.buffer_capacity}")
+
+    def __repr__(self):
+        return (f"DataBaseTracker({self.name},{self.projcet},"
+        f"{self.buffer_capacity})")
+
     def _initiate_tracker(self):
         try:
             tracker = self.dt_db.get_nested_container(self.name)
