@@ -229,11 +229,13 @@ class Project:
             return
 
         if incident_description["incident_type"] == "awp":
-            print("AWP incident loading methods have not been added yet.")
+            LOGGER.warning("AWP incident loading methods have not been added"
+             " yet.")
             return 
 
         if incident_description["incident_type"] == "rwg":
-            print("RWG incident loading methods have not been added yet.")
+            LOGGER.warning("RWG incident loading methods have not been added"
+             " yet.")
             return 
 
 

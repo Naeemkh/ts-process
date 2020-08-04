@@ -135,7 +135,7 @@ class Station:
             else:
                 return False
         else:
-            if tmp_azimuth >= azmth[1] or tmp_azimuth <= azmth[0]:
+            if tmp_azimuth >= azmth[0] or tmp_azimuth <= azmth[1]:
                 return True
             else:
                 return False
