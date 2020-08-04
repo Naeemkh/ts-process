@@ -27,7 +27,7 @@ class Record:
     unit_convention = None
     processing_labels = {}
     label_types = {
-        'rotate': 'angle: rotation angle'
+        'rotate': {'angle': 'rotation angle'}
     }
 
     def __init__(self, time_vec, disp_h1, disp_h2, disp_ver,
@@ -95,6 +95,21 @@ class Record:
         if label_type not in cls.label_types:
             LOGGER.warning("Label type is not supported. Command is ignored.")
             return
+
+        for ak in argument_dict.keys():
+            if ak not in list(cls.label_types[label_type].keys()):
+                LOGGER.warning(f" '{ak}' is not a valid argument for"
+                 f" {label_type}. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.label_types[label_type].keys())}")
+                return
+        
+        for rak in list(cls.label_types[label_type].keys()):
+            if rak not in argument_dict.keys():
+                LOGGER.warning(f" '{rak}' is not provided. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.label_types[label_type].keys())}")
+                return 
         
         cls.processing_labels[label_name] = [label_type, argument_dict]
 

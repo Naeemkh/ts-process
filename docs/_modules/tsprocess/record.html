@@ -200,7 +200,7 @@
     <span class="n">unit_convention</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">processing_labels</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">label_types</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;rotate&#39;</span><span class="p">:</span> <span class="s1">&#39;angle: rotation angle&#39;</span>
+        <span class="s1">&#39;rotate&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;angle&#39;</span><span class="p">:</span> <span class="s1">&#39;rotation angle&#39;</span><span class="p">}</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_vec</span><span class="p">,</span> <span class="n">disp_h1</span><span class="p">,</span> <span class="n">disp_h2</span><span class="p">,</span> <span class="n">disp_ver</span><span class="p">,</span>
@@ -268,6 +268,21 @@
         <span class="k">if</span> <span class="n">label_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Label type is not supported. Command is ignored.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">ak</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">ak</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">ak</span><span class="si">}</span><span class="s2">&#39; is not a valid argument for&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2">. Command ignored.&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; List of argumets:&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+        
+        <span class="k">for</span> <span class="n">rak</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">rak</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">rak</span><span class="si">}</span><span class="s2">&#39; is not provided. Command ignored.&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; List of argumets:&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> 
         
         <span class="bp">cls</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">]</span></div>
 

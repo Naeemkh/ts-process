@@ -16,16 +16,20 @@ from .ts_utils import (cal_acc_response, get_period, get_points, FAS, taper,
 class TimeSeries:
     """ TimeSeries Abstract Class """
     processing_labels = {}
+
     label_types = {
-        'lowpass_filter':'fc: corner freq (Hz); N: order (default:4)',
-        'highpass_filter':'fc: corner freq (Hz); N: order (default:4)',
-        'bandpass_filter':'fcs: corner freqs (Hz); N: order (default:4)',
-        'scale':'factor',
-        'taper':'flag: front, end, all; m: number of samples for tapering',
-        'cut':'flag: front, end; m: number of samples for tapering,\
-        t_diff: time to cut',
-        'zero_pad':'flag: front, end; m: number of samples for tapering,\
-        t_diff: time to add'
+        'lowpass_filter': {'fc': 'corner freq (Hz)','N': 'order (default:4)'},
+        'highpass_filter': {'fc': 'corner freq (Hz)',
+         'N': 'order (default:4)'},
+        'bandpass_filter': {'fcs': 'corner freqs (Hz)',
+         'N': 'order (default:4)'},
+        'scale':{'factor': 'scaling factor'},
+        'taper':{'flag': 'front, end, all',
+         'm' : 'number of samples for tapering'},
+        'cut':{'flag': 'front, end', 'm': 'number of samples for tapering',
+         't_diff': 'time to cut'},
+        'zero_pad':{'flag': 'front, end', 'm': 'number of samples for tapering',
+         't_diff': 'time to add'}
     }
 
     def __init__(self):
@@ -65,6 +69,22 @@ class TimeSeries:
             LOGGER.warning("Label type is not supported. Command is ignored.")
             return
         
+        for ak in argument_dict.keys():
+            if ak not in list(cls.label_types[label_type].keys()):
+                LOGGER.warning(f" '{ak}' is not a valid argument for"
+                 f" {label_type}. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.label_types[label_type].keys())}")
+                return
+        
+        for rak in list(cls.label_types[label_type].keys()):
+            if rak not in argument_dict.keys():
+                LOGGER.warning(f" '{rak}' is not provided. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.label_types[label_type].keys())}")
+                return 
+
+
         cls.processing_labels[label_name] = [label_type, argument_dict]
 
     def _lowpass_filter(self, fc, N = 4):
