@@ -628,6 +628,16 @@ Jupyter Notebooks.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.project.Project.switch_unit_convention">
+<em class="property">classmethod </em><code class="sig-name descname">switch_unit_convention</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.switch_unit_convention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.switch_unit_convention" title="Permalink to this definition">¶</a></dt>
+<dd><p>switches the unit convention to cm or m.</p>
+<p>Inputs:</p>
+<blockquote>
+<div><p>unit: Project unit convention (“cm” or “m”)</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.project.Project.switch_ver_orientation_convention">
 <em class="property">classmethod </em><code class="sig-name descname">switch_ver_orientation_convention</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ver_or</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.switch_ver_orientation_convention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.switch_ver_orientation_convention" title="Permalink to this definition">¶</a></dt>
 <dd><p>switches the vertical orientation convention to up or down.</p>
@@ -935,7 +945,7 @@ ts_utils.read_smc_v2 functions second return value</div>
 
 <dl class="py method">
 <dt id="tsprocess.record.Record._from_hercules">
-<em class="property">static </em><code class="sig-name descname">_from_hercules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">source_hypocenter</span></em>, <em class="sig-param"><span class="n">hr_or1</span></em>, <em class="sig-param"><span class="n">hr_or2</span></em>, <em class="sig-param"><span class="n">ver_or</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._from_hercules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._from_hercules" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">_from_hercules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">station_obj</span></em>, <em class="sig-param"><span class="n">source_hypocenter</span></em>, <em class="sig-param"><span class="n">hr_or1</span></em>, <em class="sig-param"><span class="n">hr_or2</span></em>, <em class="sig-param"><span class="n">ver_or</span></em>, <em class="sig-param"><span class="n">inc_unit</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/record.html#Record._from_hercules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.record.Record._from_hercules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads an instance of Hercules simulation results at one station.
 Returns a Record object.</p>
 <dl>
@@ -946,6 +956,7 @@ Returns a Record object.</p>
 <div class="line">hr_or1: first horizontal component’s orientation</div>
 <div class="line">hr_or2: second horizontal component’s orientation</div>
 <div class="line">ver_or: vertical component’s orientation</div>
+<div class="line">inc_unit: Incident unit</div>
 </div>
 </dd>
 <dt>Outputs:</dt><dd><div class="line-block">
@@ -1325,6 +1336,32 @@ at the end, or at both ends of the timeseries</div>
 </div>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.unit_convention_factor">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">unit_convention_factor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pr_unit</span></em>, <em class="sig-param"><span class="n">inc_unit</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#unit_convention_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.unit_convention_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>controls project and incident units and returns multiplicaiton factor that
+converts the incident’s or record’s unit into projects unit. Only
+m(meter) anc cm(centimeter) are supported.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">pr_unit: The project conventional unit</div>
+<div class="line">inc_unit: Incident or record unit</div>
+</div>
+</dd>
+<dt>Output:</dt><dd><div class="line-block">
+<div class="line">multiplication factor</div>
+</div>
+</dd>
+</dl>
+<p>Example:
+&gt;&gt;&gt; unit_convention_factor(“cm”, “cm”)
+1
+&gt;&gt;&gt; unit_convention_factor(“m”, “cm”)
+0.01
+&gt;&gt;&gt; unit_convention_factor(“cm”, “m”)
+100</p>
 </dd></dl>
 
 </div>

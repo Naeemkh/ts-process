@@ -15,7 +15,8 @@ from .log import LOGGER
 from .station import Station
 from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
-from .ts_utils import haversine, compute_azimuth, rotate_record, read_smc_v2
+from .ts_utils import (haversine, compute_azimuth, rotate_record, read_smc_v2,
+                       unit_convention_factor)
 
 
 class Record:
@@ -23,6 +24,7 @@ class Record:
 
     pr_db = None
     ver_orientation_conv = None
+    unit_convention = None
     processing_labels = {}
     label_types = {
         'rotate': 'angle: rotation angle'
@@ -178,7 +180,8 @@ class Record:
 
         # generate original record hash value.
         hash_val = hashlib.sha256(
-            (incident_name + st_name + Record.ver_orientation_conv).\
+            (incident_name + st_name + Record.ver_orientation_conv +\
+             Record.unit_convention).\
             encode('utf-8')).hexdigest()
 
         # retrieve the record from database.
@@ -195,13 +198,14 @@ class Record:
                 hr_or1 = float(incident_metadata["hr_comp_orientation_1"])
                 hr_or2 = float(incident_metadata["hr_comp_orientation_2"])
                 ver_or = incident_metadata["ver_comp_orientation"]
+                inc_unit = incident_metadata["incident_unit"]
 
                 station_file = os.path.join(incident_metadata[
                     "incident_folder"],station_folder,st_name)
                 try:
                     record_org = Record._from_hercules(station_file,
                         station_obj, Station.pr_source_loc, hr_or1, hr_or2,
-                         ver_or)
+                         ver_or, inc_unit)
                     record_org.this_record_hash = hash_val
     
                     # put the record in the database.
@@ -398,7 +402,7 @@ class Record:
 
     @staticmethod
     def _from_hercules(filename,station_obj,source_hypocenter, hr_or1, hr_or2,
-     ver_or):
+     ver_or, inc_unit):
         """ Loads an instance of Hercules simulation results at one station.
         Returns a Record object.
         
@@ -409,6 +413,7 @@ class Record:
             | hr_or1: first horizontal component's orientation
             | hr_or2: second horizontal component's orientation
             | ver_or: vertical component's orientation
+            | inc_unit: Incident unit
 
         Outputs:
             | Record object 
@@ -477,18 +482,20 @@ class Record:
             LOGGER.debug(str(e))            
         finally:
             input_fp.close()
-            
+
+        ucf = unit_convention_factor(Record.unit_convention, inc_unit)
+
         # Convert to NumPy Arrays
         times = np.array(times)
-        vel_h1 = np.array(vel_h1)
-        vel_h2 = np.array(vel_h2)
-        vel_ver = np.array(vel_ver)
-        acc_h1 = np.array(acc_h1)
-        acc_h2 = np.array(acc_h2)
-        acc_ver = np.array(acc_ver)
-        dis_h1 = np.array(dis_h1)
-        dis_h2 = np.array(dis_h2)
-        dis_ver = np.array(dis_ver)
+        vel_h1 = np.array(vel_h1)*ucf
+        vel_h2 = np.array(vel_h2)*ucf
+        vel_ver = np.array(vel_ver)*ucf
+        acc_h1 = np.array(acc_h1)*ucf
+        acc_h2 = np.array(acc_h2)*ucf
+        acc_ver = np.array(acc_ver)*ucf
+        dis_h1 = np.array(dis_h1)*ucf
+        dis_h2 = np.array(dis_h2)*ucf
+        dis_ver = np.array(dis_ver)*ucf
 
         dt = times[1] - times[0]
 
@@ -536,9 +543,9 @@ class Record:
         if len(r_data) != 3:
             LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
             "and type cesmdv2 record has missing component(s)."
-            " Handling this situation is not implemented yet.")
+            " Handling this situation is not implemented.")
 
-
+        
         # generate the common dt and timevector
         dt_vector = []
         n_s = []
@@ -551,10 +558,16 @@ class Record:
         if len(set(dt_vector)) != 1 or len(set(n_s)) !=1:
             LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
             "and type cesmdv2 record has different dt or number of samples."
-            " Handling this situation is not implemented yet.")
+            " Handling this situation is not implemented.")
             return None
-        
-        
+
+        channels_unit = r_metadata['channels_unit']
+        if "unknown" in channels_unit:
+            LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
+            "and type cesmdv2 record has at least one channel with unknown"
+            " unit. Handling this situation is not implemented.")
+            return None
+              
         
         # choosing the smalles dt, and longest record.
         dt = dt_vector[0]
@@ -571,18 +584,20 @@ class Record:
 
         while r_data:
             item = r_data.pop(0) 
+            ch_unit = channels_unit.pop(0)
+            ufc = unit_convention_factor(Record.unit_convention, ch_unit)
 
             if item[2] in ["up","down"]:
                 # it is a vertical component.
                 ver_or = item[2].lower()
-                tmp_disp_ver = Disp(item[3][0], item[1], 0)
-                tmp_vel_ver = Vel(item[3][1], item[1], 0)
-                tmp_acc_ver = Acc(item[3][2], item[1], 0)
+                tmp_disp_ver = Disp(item[3][0]*ufc, item[1], 0)
+                tmp_vel_ver = Vel(item[3][1]*ufc, item[1], 0)
+                tmp_acc_ver = Acc(item[3][2]*ufc, item[1], 0)
 
             h_orient.append(item[2])
-            tmp_disp_h.append(Disp(item[3][0], item[1], 0))
-            tmp_vel_h.append(Vel(item[3][1], item[1], 0))
-            tmp_acc_h.append(Acc(item[3][2], item[1], 0))
+            tmp_disp_h.append(Disp(item[3][0]*ufc, item[1], 0))
+            tmp_vel_h.append(Vel(item[3][1]*ufc, item[1], 0))
+            tmp_acc_h.append(Acc(item[3][2]*ufc, item[1], 0))
 
         
         return Record(time_vec, tmp_disp_h[0], tmp_disp_h[1], tmp_disp_ver,
