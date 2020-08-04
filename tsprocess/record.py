@@ -483,7 +483,6 @@ class Record:
         finally:
             input_fp.close()
 
-
         ucf = unit_convention_factor(Record.unit_convention, inc_unit)
 
         # Convert to NumPy Arrays

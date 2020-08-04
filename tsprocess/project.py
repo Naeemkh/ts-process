@@ -164,7 +164,6 @@ class Project:
         Record.unit_convention = unit
         LOGGER.debug(f'Unit convention is switched to {unit}.')
 
-
     # Incidents
     def add_incident(self, incident_folder):
         """ Adds a new incident to the project.

@@ -822,11 +822,3 @@ def unit_convention_factor(pr_unit, inc_unit):
 
     # should not get here. 
     LOGGER.debug('Code logic does not sound right. DOUBLE CHECK.')
-
-
-    
-
-
-
-
-
