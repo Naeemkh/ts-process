@@ -64,6 +64,17 @@ class Project:
              "This command will be ignored.")
             return cls._instance
          
+    def __str__(self):
+        return (f"Project: {self.name} "
+        f"\nDatabase: {self.pr_db}"
+        f"\nIncidents: {list(self.incidents.keys())}"
+        f"\nVertical Orientation: {self.ver_orientation_conv}"
+        f"\nUnit: {self.unit_convention}")
+
+    def __repr__(self):
+        return f"Project({self.name})"
+
+
     # database
     @classmethod
     def _connect_to_database(cls):
