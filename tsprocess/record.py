@@ -75,7 +75,6 @@ class Record:
                f"{self.acc_h1},{self.acc_h2},{self.acc_ver},"
                f"{self.station},{self.source_params},"
                f"{self.hc_or1},{self.hc_or2},{self.ver_or})")
-
                         
     @classmethod
     def _add_processing_label(cls, label_name, label_type, argument_dict):

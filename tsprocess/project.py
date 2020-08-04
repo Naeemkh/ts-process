@@ -74,7 +74,6 @@ class Project:
     def __repr__(self):
         return f"Project({self.name})"
 
-
     # database
     @classmethod
     def _connect_to_database(cls):
