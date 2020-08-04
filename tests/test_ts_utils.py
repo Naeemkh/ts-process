@@ -9,6 +9,13 @@ class TestTsUtils(unittest.TestCase):
     def test_valid_latitude(self):
         self.assertFalse(tsu.is_lat_valid(-177))
 
+    def test_unit_convention(self):
+        self.assertEqual(tsu.unit_convention_factor("cm","cm"),1)
+        self.assertEqual(tsu.unit_convention_factor("m","m"),1)
+        self.assertEqual(tsu.unit_convention_factor("m","cm"),0.01)
+        self.assertEqual(tsu.unit_convention_factor("cm","m"),100)
+
+
 class TestCESMDV2(unittest.TestCase):
 
     def setUp(self):
@@ -46,3 +53,4 @@ class TestCESMDV2(unittest.TestCase):
         self.assertEqual(self.signal[0][2],0)
         self.assertEqual(self.signal[1][2],'up')
         self.assertEqual(self.signal[2][2],90.0)
+

@@ -54,7 +54,9 @@ class Project:
             cls._instance._make_output_dir()
             cls._instance.metadata = {}
             cls._instance.ver_orientation_conv = None
+            cls._instance.unit_convention = None
             cls._instance.switch_ver_orientation_convention("up")
+            cls._instance.switch_unit_convention("m")
             return cls._instance
         else:
             LOGGER.warning(f"Project named {cls._instance.name} "
@@ -131,6 +133,36 @@ class Project:
         cls._instance.ver_orientation_conv = ver_or
         Record.ver_orientation_conv = ver_or
         LOGGER.debug(f'Vertical orientation is switched to {ver_or}.')
+
+    @classmethod
+    def switch_unit_convention(cls, unit):
+        """
+        switches the unit convention to cm or m. 
+
+        Inputs:
+
+            unit: Project unit convention ("cm" or "m")
+
+        """
+        
+        if not isinstance(unit, str):
+            LOGGER.warning('Project unit convention should be "cm" or "m".'
+             ' Command is ignored.')
+            return
+
+        if unit.lower() not in ["cm", "m"]:
+            LOGGER.warning('Project unit convention should be "up" or "down".'
+             ' Command is ignored.')
+            return
+
+        if cls._instance.unit_convention:
+            if unit.lower() == cls._instance.unit_convention:
+                LOGGER.info(f'Unit is already "{unit}".')
+                return
+
+        cls._instance.unit_convention = unit
+        Record.unit_convention = unit
+        LOGGER.debug(f'Unit convention is switched to {unit}.')
 
 
     # Incidents

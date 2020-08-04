@@ -642,7 +642,8 @@ def read_smc_v2(input_file):
     # Clean the first row in all but the first channel
     for i in range(1, len(channels)):
         del channels[i][0]
-
+    
+    channels_unit = []
     for i in range(len(channels)):
         tmp = channels[i][0].split()
         # Check this is the corrected acceleration data
@@ -650,7 +651,23 @@ def read_smc_v2(input_file):
         if ctype != "corrected accelerogram":
             print("[ERROR]: processing corrected accelerogram ONLY.")
             return False
+        
+        # detect unit of the record
+        acc_unit = channels[i][17].split()[4]
+        vel_unit = channels[i][18].split()[4]
+        disp_unit = channels[i][19].split()[4]
 
+        if (acc_unit == "cm/sec/sec" and vel_unit == "cm/sec" and
+         disp_unit == "cm"):
+            record_unit = "cm"
+        elif (acc_unit == "m/sec/sec" and vel_unit == "m/sec" and
+         disp_unit == "m"):
+            record_unit = "m"
+        else:
+            record_unit = "unknown"
+        
+        channels_unit.append(record_unit)
+        
         # Get network code and station id
         network = input_file.split('/')[-1].split('.')[0][0:2].upper()
         station_id = input_file.split('/')[-1].split('.')[0][2:].upper()
@@ -742,7 +759,7 @@ def read_smc_v2(input_file):
                     v_signal += s
                 elif dtype == 'd':
                     d_signal += s
-
+        
         dis_data = read_data(d_signal)
         vel_data = read_data(v_signal)
         acc_data = read_data(a_signal)
@@ -761,8 +778,55 @@ def read_smc_v2(input_file):
     station_metadata['latitude'] = latitude
     station_metadata['high_pass'] = high_pass
     station_metadata['low_pass'] = low_pass
+    station_metadata['channels_unit'] = channels_unit
 
     return record_list, station_metadata
+
+
+def unit_convention_factor(pr_unit, inc_unit):
+    """
+    controls project and incident units and returns multiplicaiton factor that
+    converts the incident's or record's unit into projects unit. Only
+    m(meter) anc cm(centimeter) are supported.  
+    
+    Inputs: 
+        | pr_unit: The project conventional unit
+        | inc_unit: Incident or record unit
+
+    Output:
+        | multiplication factor
+
+    Example:
+    >>> unit_convention_factor("cm", "cm")
+    1
+    >>> unit_convention_factor("m", "cm")
+    0.01
+    >>> unit_convention_factor("cm", "m")
+    100
+
+    """
+    
+    allowed_units = ["cm", "m"]
+    if (pr_unit not in allowed_units) or (inc_unit not in allowed_units):
+        LOGGER.error("Unit is not supported. Allowed units: "+str(a))
+        return None
+
+    if pr_unit == inc_unit:
+        return 1
+
+    if pr_unit == "cm" and inc_unit == "m":
+        return 100
+
+    if pr_unit == "m" and inc_unit == "cm":
+        return 0.01
+
+    # should not get here. 
+    LOGGER.debug('Code logic does not sound right. DOUBLE CHECK.')
+
+
+    
+
+
 
 
 
