@@ -386,9 +386,7 @@
             <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     
         <span class="k">if</span> <span class="n">window</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">samples</span><span class="p">:</span>
-            <span class="c1"># print(window.size)</span>
-            <span class="c1"># print(samples)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ERROR]: taper and data do not have the same number of</span><span class="se">\</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;[ERROR]: taper and data do not have the same number of</span><span class="se">\</span>
 <span class="s2">                 samples.&quot;</span><span class="p">)</span>
             <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
     
@@ -450,7 +448,7 @@
     <span class="n">num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t_diff</span> <span class="o">/</span> <span class="n">delta_t</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">num</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_vec</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ERROR]: fail to cut timeseries.&quot;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;[ERROR]: fail to cut timeseries.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">timeseries</span>
 
     <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="s1">&#39;front&#39;</span> <span class="ow">and</span> <span class="n">num</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -794,7 +792,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;opening input file </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;opening input file </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Print status message</span>
@@ -822,7 +820,7 @@
         <span class="c1"># Check this is the corrected acceleration data</span>
         <span class="n">ctype</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">ctype</span> <span class="o">!=</span> <span class="s2">&quot;corrected accelerogram&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ERROR]: processing corrected accelerogram ONLY.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;[ERROR]: processing corrected accelerogram ONLY.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         
         <span class="c1"># detect unit of the record</span>
@@ -937,7 +935,6 @@
         <span class="n">vel_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">v_signal</span><span class="p">)</span>
         <span class="n">acc_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">a_signal</span><span class="p">)</span>
 
-        <span class="c1"># print(&quot;[PROCESSING]: Found component: %s&quot; % (orientation))</span>
         <span class="n">record_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">samples</span><span class="p">,</span> <span class="n">delta_t</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span>
                                                 <span class="p">[</span><span class="n">dis_data</span><span class="p">,</span> <span class="n">vel_data</span><span class="p">,</span> <span class="n">acc_data</span><span class="p">]])</span>
 
@@ -995,6 +992,99 @@
 
     <span class="c1"># should not get here. </span>
     <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Code logic does not sound right. DOUBLE CHECK.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="is_incident_description_valid"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.is_incident_description_valid">[docs]</a><span class="k">def</span> <span class="nf">is_incident_description_valid</span><span class="p">(</span><span class="n">inc_des</span><span class="p">,</span> <span class="n">valid_incidents</span><span class="p">,</span> <span class="n">current_incidents</span><span class="p">,</span>
+    <span class="n">valid_vertical_orientation</span><span class="p">,</span> <span class="n">valid_incident_unit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        checks incident description and if it follows incident description </span>
+<span class="sd">        format, returns True, otherwise returns False.</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | inc_des: Incident description key-value dictionary</span>
+<span class="sd">            | valid_incidents: List of valid incidents type</span>
+<span class="sd">            | current_incidents: List of current incidents name</span>
+<span class="sd">            | valid_vertical_orientation: valid vertical orientation</span>
+<span class="sd">            | valid_incident_unit: valid units for incidents</span>
+
+<span class="sd">        Outputs:</span>
+<span class="sd">            | True or False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="s2">&quot;incident_name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident name is not provided in the&quot;</span>
+                <span class="s2">&quot; description.txt file.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    
+            <span class="k">if</span> <span class="s2">&quot;incident_type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident type is not provided in the&quot;</span>
+                <span class="s2">&quot; description.txt file.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    
+            <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_incidents</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The incident type is not supported (valid &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;incidents: </span><span class="si">{</span><span class="n">valid_incidents</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    
+            <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">current_incidents</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The provided incident name&quot;</span> 
+                  <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">inc_des</span><span class="p">[</span><span class="s1">&#39;incident_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">) has been used before.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;The incident name should be a unique name. Current incidents: &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">current_incidents</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    
+            
+            <span class="c1"># checks for hercules</span>
+            <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
+    
+                <span class="k">if</span> <span class="s2">&quot;incident_unit&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident unit is not provided in the&quot;</span>
+                     <span class="s2">&quot; description.txt file.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+    
+                <span class="k">if</span> <span class="s2">&quot;ver_comp_orientation&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident vertical orientation is not provided&quot;</span>
+                     <span class="s2">&quot; in the description.txt file.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+    
+                <span class="k">if</span> <span class="p">((</span><span class="s2">&quot;hr_comp_orientation_1&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="s2">&quot;hr_comp_orientation_2&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one horizontal orientation is not&quot;</span>
+                     <span class="s2">&quot; provided in the description.txt file.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+    
+                <span class="k">if</span> <span class="s2">&quot;inputfiles_parameters&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;inputfiles_parameters is not provided&quot;</span>
+                     <span class="s2">&quot; in the description.txt file.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+    
+                <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_unit&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_incident_unit</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;incident unit is not valid. &quot;</span>
+                     <span class="sa">f</span><span class="s2">&quot; List of valid units: </span><span class="si">{</span><span class="n">valid_incident_unit</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+    
+                <span class="k">if</span> <span class="p">(</span><span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;ver_comp_orientation&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span>
+                 <span class="n">valid_vertical_orientation</span><span class="p">):</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;incident vertical orientation is not valid. &quot;</span>
+                     <span class="sa">f</span><span class="s2">&quot; List of valid units: </span><span class="si">{</span><span class="n">valid_vertical_orientation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+    
+                <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;hr_comp_orientation_1&quot;</span><span class="p">]))</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> 
+                    <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;hr_comp_orientation_1&quot;</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">360</span> <span class="ow">or</span> 
+                    <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;hr_comp_orientation_2&quot;</span><span class="p">]))</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> 
+                    <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;hr_comp_orientation_2&quot;</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">360</span><span class="p">):</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one horizontal orientation is not a &quot;</span>
+                     <span class="s2">&quot;valid number in the description.txt file. Valid range:&quot;</span>
+                     <span class="s2">&quot;[0,360]&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+
+                <span class="c1"># TODO: add check for perpendicular horizontal components.</span>
+
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;description.txt: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+                
+        <span class="k">return</span> <span class="kc">True</span></div>
 </pre></div>
 
            </div>

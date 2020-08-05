@@ -248,7 +248,6 @@
                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acc_h1</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acc_h2</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acc_ver</span><span class="si">}</span><span class="s2">,&quot;</span>
                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source_params</span><span class="si">}</span><span class="s2">,&quot;</span>
                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hc_or1</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hc_or2</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ver_or</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-
                         
 <div class="viewcode-block" id="Record._add_processing_label"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._add_processing_label">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_add_processing_label</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">):</span>
@@ -580,7 +579,7 @@
     
             
             <span class="c1"># TODO: check time vector</span>
-            <span class="n">tmp_time_vector</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmp_disp_h1</span><span class="o">.</span><span class="n">value</span><span class="p">))</span><span class="o">*</span>\
+            <span class="n">tmp_time_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmp_disp_h1</span><span class="o">.</span><span class="n">value</span><span class="p">)))</span><span class="o">*</span>\
                     <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">+</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">t_init_point</span>   
     
 

@@ -12,6 +12,7 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - load CESMDV2 record
 - test: CESMDV2 read file
 - plot stations on basemap
+- stations joint table
 
 
 ### Changed

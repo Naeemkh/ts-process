@@ -399,7 +399,9 @@ None.</p>
 <dd><p>Extract incident descriptions</p>
 <p>Inputs:</p>
 <blockquote>
-<div><p>incident_folder: path to incident folder.</p>
+<div><div class="line-block">
+<div class="line">incident_folder: path to incident folder.</div>
+</div>
 </div></blockquote>
 </dd></dl>
 
@@ -616,6 +618,26 @@ Jupyter Notebooks.</p>
 <dt>Optional parameters:</dt><dd><div class="line-block">
 <div class="line">save_figure: True, False</div>
 <div class="line">llrtlatlon: lower_left then upper_right lat and lon</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tsprocess.project.Project.stations_joint_table">
+<code class="sig-name descname">stations_joint_table</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.stations_joint_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.stations_joint_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a joint table that shows stations’ location and
+corresponding station name at different incidents.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">stations_joint_table: as a pandas dataframe</div>
 </div>
 </dd>
 </dl>
@@ -1134,6 +1156,27 @@ the earth interior.</p>
 <span class="go">False</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_utils.is_incident_description_valid">
+<code class="sig-prename descclassname">tsprocess.ts_utils.</code><code class="sig-name descname">is_incident_description_valid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inc_des</span></em>, <em class="sig-param"><span class="n">valid_incidents</span></em>, <em class="sig-param"><span class="n">current_incidents</span></em>, <em class="sig-param"><span class="n">valid_vertical_orientation</span></em>, <em class="sig-param"><span class="n">valid_incident_unit</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_utils.html#is_incident_description_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_utils.is_incident_description_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks incident description and if it follows incident description
+format, returns True, otherwise returns False.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">inc_des: Incident description key-value dictionary</div>
+<div class="line">valid_incidents: List of valid incidents type</div>
+<div class="line">current_incidents: List of current incidents name</div>
+<div class="line">valid_vertical_orientation: valid vertical orientation</div>
+<div class="line">valid_incident_unit: valid units for incidents</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">True or False</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
