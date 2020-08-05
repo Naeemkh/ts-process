@@ -213,9 +213,7 @@ def taper(flag, m, ts_vec):
             window = np.append(window, 1)
     
         if window.size != samples:
-            # print(window.size)
-            # print(samples)
-            print("[ERROR]: taper and data do not have the same number of\
+            LOGGER.error("[ERROR]: taper and data do not have the same number of\
                  samples.")
             window = np.ones(samples)
     
@@ -277,7 +275,7 @@ def seism_cutting(flag, t_diff, m, timeseries, delta_t):
     num = int(t_diff / delta_t)
 
     if num >= len(ts_vec):
-        print("[ERROR]: fail to cut timeseries.")
+        LOGGER.error("[ERROR]: fail to cut timeseries.")
         return timeseries
 
     if flag == 'front' and num != 0:
@@ -621,7 +619,7 @@ def read_smc_v2(input_file):
     try:
         fp = open(input_file, 'r')
     except IOError as e:
-        LOGGER.warning(f"opening input file {input_file}")
+        LOGGER.debug(f"opening input file {input_file}")
         return False
 
     # Print status message
@@ -649,7 +647,7 @@ def read_smc_v2(input_file):
         # Check this is the corrected acceleration data
         ctype = (tmp[0] + " " + tmp[1]).lower()
         if ctype != "corrected accelerogram":
-            print("[ERROR]: processing corrected accelerogram ONLY.")
+            LOGGER.error("[ERROR]: processing corrected accelerogram ONLY.")
             return False
         
         # detect unit of the record
@@ -764,7 +762,6 @@ def read_smc_v2(input_file):
         vel_data = read_data(v_signal)
         acc_data = read_data(a_signal)
 
-        # print("[PROCESSING]: Found component: %s" % (orientation))
         record_list.append([samples, delta_t, orientation,
                                                 [dis_data, vel_data, acc_data]])
 

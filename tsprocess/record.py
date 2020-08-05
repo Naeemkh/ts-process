@@ -406,7 +406,7 @@ class Record:
     
             
             # TODO: check time vector
-            tmp_time_vector = range(len(tmp_disp_h1.value))*\
+            tmp_time_vector = np.array(range(len(tmp_disp_h1.value)))*\
                     record.acc_h1.delta_t + record.acc_h1.t_init_point   
     
 
