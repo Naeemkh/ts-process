@@ -199,7 +199,8 @@
 <span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
 <span class="kn">from</span> <span class="nn">.db_tracker</span> <span class="kn">import</span> <span class="n">DataBaseTracker</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">check_opt_param_minmax</span><span class="p">,</span> <span class="n">query_opt_params</span><span class="p">,</span> <span class="n">write_into_file</span><span class="p">,</span>
-                      <span class="n">list2message</span><span class="p">,</span> <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">)</span>
+                      <span class="n">list2message</span><span class="p">,</span> <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">,</span>
+                      <span class="n">is_incident_description_valid</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.ts_plot_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">plot_displacement_helper</span><span class="p">,</span> <span class="n">plot_velocity_helper</span><span class="p">,</span>
                             <span class="n">plot_acceleration_helper</span><span class="p">,</span> <span class="n">plot_recordsection_helper</span><span class="p">,</span>
                             <span class="n">plot_scatter_on_basemap</span><span class="p">)</span>
@@ -212,6 +213,9 @@
 
     <span class="n">color_code</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;brown&#39;</span><span class="p">,</span>
                    <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;blueviolet&#39;</span><span class="p">,</span> <span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="s1">&#39;pink&#39;</span><span class="p">]</span>
+
+    <span class="n">valid_vertical_orientation</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]</span>
+    <span class="n">valid_incident_unit</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;cm&quot;</span><span class="p">]</span>
 
     <span class="n">_instance</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -246,7 +250,6 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Project(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
-
 
     <span class="c1"># database</span>
 <div class="viewcode-block" id="Project._connect_to_database"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._connect_to_database">[docs]</a>    <span class="nd">@classmethod</span>
@@ -371,27 +374,12 @@
         <span class="c1"># read the description file of incident</span>
         <span class="n">inc_des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_incident_description</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">)</span>
         
-        <span class="c1">#TODO these checks do not follow EAFP</span>
-        <span class="k">if</span> <span class="s2">&quot;incident_name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident name is not provided in the&quot;</span>
-            <span class="s2">&quot; description.txt file.&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
+        <span class="c1"># These checks do not follow EAFP, however, it is better to catch any </span>
+        <span class="c1"># problem while the user has not started working on the data. </span>
 
-        <span class="k">if</span> <span class="s2">&quot;incident_type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident name is not provided in the&quot;</span>
-            <span class="s2">&quot; description.txt file.&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-
-        <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The incident type is not supported (valid &quot;</span>
-             <span class="sa">f</span><span class="s2">&quot;incidents: </span><span class="si">{</span><span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-
-        <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The provided incident name&quot;</span> 
-              <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">inc_des</span><span class="p">[</span><span class="s1">&#39;incident_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">) has been used before.</span><span class="se">\n</span><span class="s2">&quot;</span>
-              <span class="s2">&quot;The incident name should be a unique name. Current incidents: &quot;</span>
-             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_incident_description_valid</span><span class="p">(</span><span class="n">inc_des</span><span class="p">,</span> <span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="p">,</span>
+         <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">Project</span><span class="o">.</span><span class="n">valid_vertical_orientation</span><span class="p">,</span>
+         <span class="n">Project</span><span class="o">.</span><span class="n">valid_incident_unit</span><span class="p">):</span>
             <span class="k">return</span>
 
         <span class="c1"># load incident</span>
@@ -414,11 +402,13 @@
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AWP incident loading methods have not been added yet.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;AWP incident loading methods have not been added&quot;</span>
+             <span class="s2">&quot; yet.&quot;</span><span class="p">)</span>
             <span class="k">return</span> 
 
         <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;rwg&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RWG incident loading methods have not been added yet.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;RWG incident loading methods have not been added&quot;</span>
+             <span class="s2">&quot; yet.&quot;</span><span class="p">)</span>
             <span class="k">return</span> </div>
 
 
@@ -428,7 +418,8 @@
 <span class="sd">        </span>
 <span class="sd">        Inputs:</span>
 
-<span class="sd">            incident_folder: path to incident folder.</span>
+<span class="sd">            | incident_folder: path to incident folder.</span>
+<span class="sd">            </span>
 <span class="sd">         &quot;&quot;&quot;</span>
         <span class="n">incident_description</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">incident_folder</span>
@@ -437,12 +428,17 @@
                 <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
                     <span class="k">break</span>
+
+                <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">))</span>
                     <span class="n">incident_description</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">ve</span><span class="p">:</span>
                     <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;description.txt does not follow the format.&quot;</span>
                     <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ve</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="n">incident_description</span></div>
 
 <div class="viewcode-block" id="Project._extract_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._extract_records">[docs]</a>    <span class="k">def</span> <span class="nf">_extract_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">):</span>
@@ -456,7 +452,7 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_inc</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Number of incidents, and number of nested lists of&quot;</span>
-             <span class="s2">&quot;processing labels should be the same.&quot;</span><span class="p">)</span>
+             <span class="s2">&quot; processing labels should be the same.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
@@ -734,8 +730,6 @@
                 <span class="k">continue</span>
 
 
-
-
             <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
                 
                 <span class="c1"># temp_record = None</span>
@@ -928,6 +922,13 @@
         <span class="n">tmp_inc_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No record has been collected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        
         <span class="c1"># extract stations location from records.</span>
         <span class="n">lat</span><span class="p">,</span><span class="n">lon</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         
@@ -993,7 +994,6 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
             <span class="k">return</span>
-
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
@@ -1002,13 +1002,11 @@
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> </div>
-
+            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
     
 <div class="viewcode-block" id="Project.list_of_incidents"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_incidents">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_incidents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of incidents.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
-
 
 <div class="viewcode-block" id="Project.compare_incidents"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.compare_incidents">[docs]</a>    <span class="k">def</span> <span class="nf">compare_incidents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ls_inc</span><span class="p">,</span> <span class="n">only_differences</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
@@ -1078,11 +1076,72 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;incidents: &quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_incidents</span><span class="p">())</span>
 
         <span class="c1"># project vertical orientation</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vertical component positive orientation: &quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">)</span></div></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vertical component positive orientation: &quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="Project.stations_joint_table"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.stations_joint_table">[docs]</a>    <span class="k">def</span> <span class="nf">stations_joint_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+                             <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a joint table that shows stations&#39; location and</span>
+<span class="sd">        corresponding station name at different incidents.</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Outputs: </span>
+<span class="sd">            | stations_joint_table: as a pandas dataframe</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No record has been collected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">record_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">st_record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">lat_lon_registered</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">tmp_data</span><span class="p">,</span> <span class="n">location_data</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">inc_record</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st_record</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">lat_lon_registered</span> <span class="ow">and</span> <span class="n">inc_record</span><span class="p">):</span>
+                    <span class="n">location_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">depth</span><span class="p">]</span>
+                    <span class="n">lat_lon_registered</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">inc_record</span><span class="p">:</span>
+                    <span class="n">tmp_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="n">tmp_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="kc">None</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">location_data</span><span class="p">:</span>
+                <span class="c1"># there is no record for this station. </span>
+                <span class="k">continue</span>
+
+            <span class="n">location_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tmp_data</span><span class="p">)</span>
+            <span class="n">record_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">location_data</span><span class="p">)</span>
 
         
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>
+        <span class="n">column_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">list_inc</span><span class="p">)</span> 
+        <span class="n">table_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">record_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table_df</span>       </div></div>
+
+        
+
+
+  
+
+
     
 
 
