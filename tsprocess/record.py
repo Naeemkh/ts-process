@@ -29,6 +29,7 @@ class Record:
     label_types = {
         'rotate': {'angle': 'rotation angle'},
         'set_unit': {'unit': 'm, cm'},
+        'set_vertical_or': {'ver_or':'up, down'},
         'align_record': {'hc_or1':'angle','hc_or2':'angle','ver_or':'up, down'}
     }
 
@@ -422,6 +423,49 @@ class Record:
 
                 n_unit = r_unit
                 
+            elif Record.processing_labels[label_name][0] == "set_vertical_or":
+                def extract_params(ver_or):
+                    return ver_or
+
+                label_kwargs = Record.processing_labels[label_name][1]
+                # requested unit
+                rver_or = extract_params(**label_kwargs)
+
+                if rver_or not in ["up", "down"]:
+                    LOGGER.error(f"Invalid vertical orientattion: {rver_or}")
+                    return None
+                
+                if record.ver_or == rver_or:
+                    return record
+
+                tmp_time_vector = record.time_vec 
+                tmp_disp_h1 = Disp(record.disp_h1.value, record.disp_h1.delta_t,
+                 record.disp_h1.t_init_point)
+                tmp_disp_h2 = Disp(record.disp_h2.value, record.disp_h2.delta_t,
+                 record.disp_h2.t_init_point)
+                tmp_disp_ver = Disp(record.disp_ver.value*-1,
+                 record.disp_ver.delta_t, record.disp_ver.t_init_point)
+
+                tmp_vel_h1 = Vel(record.vel_h1.value,  record.vel_h1.delta_t,
+                 record.vel_h1.t_init_point)
+                tmp_vel_h2 = Vel(record.vel_h2.value,  record.vel_h2.delta_t,
+                 record.vel_h2.t_init_point)
+                tmp_vel_ver = Vel(record.vel_ver.value*-1,
+                 record.vel_ver.delta_t, record.vel_ver.t_init_point)
+
+                tmp_acc_h1 = Acc(record.acc_h1.value, record.acc_h1.delta_t,
+                 record.acc_h1.t_init_point)
+                tmp_acc_h2 = Acc(record.acc_h2.value, record.acc_h2.delta_t,
+                 record.acc_h2.t_init_point)
+                tmp_acc_ver = Acc(record.acc_ver.value*-1,
+                 record.acc_ver.delta_t, record.acc_ver.t_init_point)
+
+                n_hc_or1 = record.hc_or1
+                n_hc_or2 = record.hc_or2
+                n_ver_or = rver_or
+
+                n_unit = record.unit
+               
 
             elif Record.processing_labels[label_name][0] == "align_record":
                 def extract_params(rhc_or1, rhc_or2, rver_or):
@@ -429,7 +473,7 @@ class Record:
                        
             else:
                 LOGGER.warning("The processing lable is not defined.")
-                return record
+                return None
 
         else: 
         

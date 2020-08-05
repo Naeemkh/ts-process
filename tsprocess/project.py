@@ -386,7 +386,8 @@ class Project:
     # processing labels
     def add_processing_label(self, label_name, label_type, hyper_parameters):
         """ Creates a processing label """
-        if label_type in ["rotate", "set_unit", "align_record"]:
+        if (label_type in
+         ["rotate", "set_unit", "set_vertical_or", "align_record"]):
             Record._add_processing_label(label_name, label_type,
             hyper_parameters)
             return            
