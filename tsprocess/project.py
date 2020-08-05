@@ -386,7 +386,7 @@ class Project:
     # processing labels
     def add_processing_label(self, label_name, label_type, hyper_parameters):
         """ Creates a processing label """
-        if label_type == "rotate":
+        if label_type in ["rotate", "set_unit", "align_record"]:
             Record._add_processing_label(label_name, label_type,
             hyper_parameters)
             return            
@@ -397,10 +397,13 @@ class Project:
         
     def list_of_processing_labels(self):
         """ Returns a list of available processing labels"""
-        if not TimeSeries.processing_labels:
-            return
-        for item in TimeSeries.processing_labels:
-            print(item, '-->', TimeSeries.processing_labels[item])
+        if TimeSeries.processing_labels:
+            for item in TimeSeries.processing_labels:
+                print(item, '-->', TimeSeries.processing_labels[item])
+
+        if Record.processing_labels:
+            for item in Record.processing_labels:
+                print(item, '-->', Record.processing_labels[item])
 
     def _is_processing_label_valid(self,list_process):
         """ Checks if the requested processing label is a valid lable
@@ -966,7 +969,57 @@ class Project:
         
 
 
-  
+    def records_orientation(self, list_inc,list_process,list_filters,
+                             opt_params):
+        """ 
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Outputs: 
+            | stations_joint_table: as a pandas dataframe
+
+        """
+
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+        if not records:
+            LOGGER.warning("No record has been collected.")
+            return
+        
+        #st_record: all records in one station.
+        #inc_record: records of different incident at one station.
+
+        tmp_st_record = []
+        for st_record in records:
+            tmp_record = []
+            for i,inc_record in enumerate(st_record):
+                tmp = []                
+                if inc_record: 
+                   inc_name = list_inc[i]
+                   st_name = inc_record.station.inc_st_name.get(list_inc[i],None)
+                   tmp = [inc_name, st_name, list_process[i],
+                   inc_record.hc_or1, inc_record.hc_or2, inc_record.ver_or]
+                   tmp_record.append(tmp)
+                else:
+                    tmp = [None, None, list_process[i], None, None, None]
+                    tmp_record.append(tmp)
+            tmp_st_record.append(tmp_record)
+         
+        print(tmp_st_record)
+
+                    
+
+
 
 
     

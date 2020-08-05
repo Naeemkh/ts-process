@@ -11,7 +11,7 @@ from scipy.signal import (sosfiltfilt, filtfilt, ellip, butter, zpk2sos,
 from .log import LOGGER
 from .database import DataBase as db
 from .ts_utils import (cal_acc_response, get_period, get_points, FAS, taper,
-                       seism_appendzeros, seism_cutting)
+                       seism_appendzeros, seism_cutting, unit_convention_factor)
 
 class TimeSeries:
     """ TimeSeries Abstract Class """
@@ -201,7 +201,7 @@ class TimeSeries:
             p = extract_params(**label_kwargs)
             proc_data = seism_appendzeros(p[0], p[1], p[2],self.value,
              self.delta_t)
-                         
+
         if ts_type == "Disp":
             return Disp(proc_data, self.delta_t, self.t_init_point)
 

@@ -780,14 +780,14 @@ def read_smc_v2(input_file):
     return record_list, station_metadata
 
 
-def unit_convention_factor(pr_unit, inc_unit):
+def unit_convention_factor(r_unit, inc_unit):
     """
-    controls project and incident units and returns multiplicaiton factor that
-    converts the incident's or record's unit into projects unit. Only
+    controls requested and incident units and returns multiplicaiton factor that
+    converts the incident's or record's unit into the requested unit. Only
     m(meter) anc cm(centimeter) are supported.  
     
     Inputs: 
-        | pr_unit: The project conventional unit
+        | r_unit: The requested conventional unit
         | inc_unit: Incident or record unit
 
     Output:
@@ -804,17 +804,17 @@ def unit_convention_factor(pr_unit, inc_unit):
     """
     
     allowed_units = ["cm", "m"]
-    if (pr_unit not in allowed_units) or (inc_unit not in allowed_units):
+    if (r_unit not in allowed_units) or (inc_unit not in allowed_units):
         LOGGER.error("Unit is not supported. Allowed units: "+str(a))
         return None
 
-    if pr_unit == inc_unit:
+    if r_unit == inc_unit:
         return 1
 
-    if pr_unit == "cm" and inc_unit == "m":
+    if r_unit == "cm" and inc_unit == "m":
         return 100
 
-    if pr_unit == "m" and inc_unit == "cm":
+    if r_unit == "m" and inc_unit == "cm":
         return 0.01
 
     # should not get here. 
