@@ -195,13 +195,12 @@ class Record:
         try:
             st_name = station_obj.inc_st_name[incident_name]
         except KeyError as e:
-            print(e)
+            LOGGER.error(e)
             return
 
         # generate original record hash value.
         hash_val = hashlib.sha256(
-            (incident_name + st_name + Record.ver_orientation_conv +\
-             Record.unit_convention).\
+            (incident_name + st_name).\
             encode('utf-8')).hexdigest()
 
         # retrieve the record from database.
@@ -318,6 +317,13 @@ class Record:
         # add the hash value to the processed attribute, and put the hash and
         # value into the database.
         proc_record = Record._apply(record, pl)
+
+        if not proc_record:
+            # if cannot process the record, return None. By this point
+            # other loggers reported the problem. 
+            return None
+
+
         proc_record.this_record_hash = proc_hash_val
         
         # put data in the database
@@ -483,8 +489,8 @@ class Record:
                 rotation_angle = compute_rotation_angle(
                     [current_h_or1, current_h_or2],[rhc_or1, rhc_or2])
 
-                if not rotation_angle:
-                    LOGGER.error("something went wrong with rotation angle.")
+                if rotation_angle is None:
+                    LOGGER.error("Something went wrong with rotation angle." + str(rotation_angle))
                     return
 
                 if rotation_angle == 0 and rver_or == current_ver_or:
@@ -499,6 +505,10 @@ class Record:
                 # and here. 
 
                 proc_record = rotate_record(record, rotation_angle)
+
+                if not proc_record:
+                    LOGGER.error("A problem is happened with record rotation.")
+                    return None
                 
                 tmp_time_vector = proc_record[0]
                 tmp_disp_h1 = Disp(proc_record[1],record.disp_h1.delta_t,
@@ -763,8 +773,6 @@ class Record:
             tmp_disp_h.append(Disp(item[3][0]*ufc, item[1], 0))
             tmp_vel_h.append(Vel(item[3][1]*ufc, item[1], 0))
             tmp_acc_h.append(Acc(item[3][2]*ufc, item[1], 0))
-            print(h_orient)
-
         
         return Record(time_vec, tmp_disp_h[0], tmp_disp_h[1], tmp_disp_ver,
                     tmp_vel_h[0], tmp_vel_h[1], tmp_vel_ver,

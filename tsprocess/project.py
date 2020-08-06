@@ -57,10 +57,7 @@ class Project:
             cls._instance._connect_to_database()
             cls._instance._make_output_dir()
             cls._instance.metadata = {}
-            cls._instance.ver_orientation_conv = None
-            cls._instance.unit_convention = None
-            cls._instance.switch_ver_orientation_convention("up")
-            cls._instance.switch_unit_convention("m")
+
             return cls._instance
         else:
             LOGGER.warning(f"Project named {cls._instance.name} "
@@ -118,65 +115,65 @@ class Project:
             LOGGER.warning(f"Failed to create {path_to_output} folder.")
   
 
-    @classmethod
-    def switch_ver_orientation_convention(cls, ver_or):
-        """
-        switches the vertical orientation convention to up or down. 
+    # @classmethod
+    # def switch_ver_orientation_convention(cls, ver_or):
+    #     """
+    #     switches the vertical orientation convention to up or down. 
 
-        Inputs:
+    #     Inputs:
 
-            ver_or: Vertical orientation ("up" or "down")
+    #         ver_or: Vertical orientation ("up" or "down")
 
-        """
+    #     """
         
-        if not isinstance(ver_or, str):
-            LOGGER.warning('Vertical orientation should be "up" or "down".'
-             ' Command is ignored.')
-            return
+    #     if not isinstance(ver_or, str):
+    #         LOGGER.warning('Vertical orientation should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
 
-        if ver_or.lower() not in ["up", "down"]:
-            LOGGER.warning('Vertical orientation should be "up" or "down".'
-             ' Command is ignored.')
-            return
+    #     if ver_or.lower() not in ["up", "down"]:
+    #         LOGGER.warning('Vertical orientation should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
 
-        if cls._instance.ver_orientation_conv:
-            if ver_or.lower() == cls._instance.ver_orientation_conv:
-                LOGGER.info(f'Vertical orientation is already "{ver_or}".')
-                return
+    #     if cls._instance.ver_orientation_conv:
+    #         if ver_or.lower() == cls._instance.ver_orientation_conv:
+    #             LOGGER.info(f'Vertical orientation is already "{ver_or}".')
+    #             return
 
-        cls._instance.ver_orientation_conv = ver_or
-        Record.ver_orientation_conv = ver_or
-        LOGGER.debug(f'Vertical orientation is switched to {ver_or}.')
+    #     cls._instance.ver_orientation_conv = ver_or
+    #     Record.ver_orientation_conv = ver_or
+    #     LOGGER.debug(f'Vertical orientation is switched to {ver_or}.')
 
-    @classmethod
-    def switch_unit_convention(cls, unit):
-        """
-        switches the unit convention to cm or m. 
+    # @classmethod
+    # def switch_unit_convention(cls, unit):
+    #     """
+    #     switches the unit convention to cm or m. 
 
-        Inputs:
+    #     Inputs:
 
-            unit: Project unit convention ("cm" or "m")
+    #         unit: Project unit convention ("cm" or "m")
 
-        """
+    #     """
         
-        if not isinstance(unit, str):
-            LOGGER.warning('Project unit convention should be "cm" or "m".'
-             ' Command is ignored.')
-            return
+    #     if not isinstance(unit, str):
+    #         LOGGER.warning('Project unit convention should be "cm" or "m".'
+    #          ' Command is ignored.')
+    #         return
 
-        if unit.lower() not in ["cm", "m"]:
-            LOGGER.warning('Project unit convention should be "up" or "down".'
-             ' Command is ignored.')
-            return
+    #     if unit.lower() not in ["cm", "m"]:
+    #         LOGGER.warning('Project unit convention should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
 
-        if cls._instance.unit_convention:
-            if unit.lower() == cls._instance.unit_convention:
-                LOGGER.info(f'Unit is already "{unit}".')
-                return
+    #     if cls._instance.unit_convention:
+    #         if unit.lower() == cls._instance.unit_convention:
+    #             LOGGER.info(f'Unit is already "{unit}".')
+    #             return
 
-        cls._instance.unit_convention = unit
-        Record.unit_convention = unit
-        LOGGER.debug(f'Unit convention is switched to {unit}.')
+    #     cls._instance.unit_convention = unit
+    #     Record.unit_convention = unit
+    #     LOGGER.debug(f'Unit convention is switched to {unit}.')
 
     # Incidents
     def add_incident(self, incident_folder):

@@ -478,14 +478,14 @@ def rotate_record(record, rotation_angle):
     # Check rotation angle
     if rotation_angle is None:
         # Nothing to do!
-        return record
+        return None
 
     
     # check if rotateion angle is valid.
     if rotation_angle < 0 or rotation_angle > 360:
         LOGGER.error(f"Rotation angle is not valid {rotation_angle:f}."
          "Command ignored.")
-        return record
+        return None
 
     # these info should be read from records:
     x = record.hc_or1
@@ -496,7 +496,7 @@ def rotate_record(record, rotation_angle):
         # This should never happen.
         LOGGER.error("there is a problem with orientaiton ordering."
          "Command ignored.")
-        return record
+        return None
 
         # Swap channels
         # I think swaping channels may cause unknown bugs in the longrun
@@ -512,7 +512,7 @@ def rotate_record(record, rotation_angle):
     if abs(angle) != 90 and abs(angle) != 270:
         LOGGER.error("Rotation needs two orthogonal channels!"
          "Command ignored.")
-        return record
+        return None
     
         # Create rotation matrix
     if angle == 90:
@@ -951,7 +951,5 @@ def compute_rotation_angle(a , b):
         
     if rotation_angle:
         rotation_angle = (360 + rotation_angle) % 360
-    
-    print(rotation_angle)
 
     return rotation_angle
