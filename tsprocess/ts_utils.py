@@ -478,14 +478,14 @@ def rotate_record(record, rotation_angle):
     # Check rotation angle
     if rotation_angle is None:
         # Nothing to do!
-        return record
+        return None
 
     
     # check if rotateion angle is valid.
     if rotation_angle < 0 or rotation_angle > 360:
         LOGGER.error(f"Rotation angle is not valid {rotation_angle:f}."
          "Command ignored.")
-        return record
+        return None
 
     # these info should be read from records:
     x = record.hc_or1
@@ -496,7 +496,7 @@ def rotate_record(record, rotation_angle):
         # This should never happen.
         LOGGER.error("there is a problem with orientaiton ordering."
          "Command ignored.")
-        return record
+        return None
 
         # Swap channels
         # I think swaping channels may cause unknown bugs in the longrun
@@ -512,7 +512,7 @@ def rotate_record(record, rotation_angle):
     if abs(angle) != 90 and abs(angle) != 270:
         LOGGER.error("Rotation needs two orthogonal channels!"
          "Command ignored.")
-        return record
+        return None
     
         # Create rotation matrix
     if angle == 90:
@@ -780,14 +780,14 @@ def read_smc_v2(input_file):
     return record_list, station_metadata
 
 
-def unit_convention_factor(pr_unit, inc_unit):
+def unit_convention_factor(r_unit, inc_unit):
     """
-    controls project and incident units and returns multiplicaiton factor that
-    converts the incident's or record's unit into projects unit. Only
+    controls requested and incident units and returns multiplicaiton factor that
+    converts the incident's or record's unit into the requested unit. Only
     m(meter) anc cm(centimeter) are supported.  
     
     Inputs: 
-        | pr_unit: The project conventional unit
+        | r_unit: The requested conventional unit
         | inc_unit: Incident or record unit
 
     Output:
@@ -804,17 +804,17 @@ def unit_convention_factor(pr_unit, inc_unit):
     """
     
     allowed_units = ["cm", "m"]
-    if (pr_unit not in allowed_units) or (inc_unit not in allowed_units):
+    if (r_unit not in allowed_units) or (inc_unit not in allowed_units):
         LOGGER.error("Unit is not supported. Allowed units: "+str(a))
         return None
 
-    if pr_unit == inc_unit:
+    if r_unit == inc_unit:
         return 1
 
-    if pr_unit == "cm" and inc_unit == "m":
+    if r_unit == "cm" and inc_unit == "m":
         return 100
 
-    if pr_unit == "m" and inc_unit == "cm":
+    if r_unit == "m" and inc_unit == "cm":
         return 0.01
 
     # should not get here. 
@@ -912,3 +912,44 @@ def is_incident_description_valid(inc_des, valid_incidents, current_incidents,
             return False
                 
         return True
+
+
+def compute_rotation_angle(a , b):
+    """ Computes angle to align vector b on to vector a.
+    North toward East is considered as a positive orientation (N10E = 10.) 
+    All inputs should be positive. (N10W = 350) 
+    The order of orientations are not important. 
+    Inputs:
+        | a: [hr1, hr2] current orientation
+        | b: [hr1, hr2] target orientation
+
+    Outputs:
+        | rotation_angle: returns rotation angle
+    
+    """
+    rotation_angle = None
+    if abs(a[0] - a[1]) != 90:
+        LOGGER.error('Current orientation is not perpendicualr.')
+        return None
+    
+    if abs(b[0] - b[1]) != 90:
+        LOGGER.error('Target orientation is not perpendicualr.')
+        return None
+
+    angles = []
+    for i in a:
+        for j in b:
+            angles.append(i - j)
+               
+    tmp = []
+    for item in angles:
+        for ii in tmp:
+            if math.isclose(item,ii, rel_tol=1e-06,abs_tol=0):
+                rotation_angle = round(item,6)
+        tmp.append(item)
+        continue
+        
+    if rotation_angle:
+        rotation_angle = (360 + rotation_angle) % 360
+
+    return rotation_angle

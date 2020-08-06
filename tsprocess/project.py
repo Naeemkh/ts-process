@@ -57,10 +57,7 @@ class Project:
             cls._instance._connect_to_database()
             cls._instance._make_output_dir()
             cls._instance.metadata = {}
-            cls._instance.ver_orientation_conv = None
-            cls._instance.unit_convention = None
-            cls._instance.switch_ver_orientation_convention("up")
-            cls._instance.switch_unit_convention("m")
+
             return cls._instance
         else:
             LOGGER.warning(f"Project named {cls._instance.name} "
@@ -118,65 +115,65 @@ class Project:
             LOGGER.warning(f"Failed to create {path_to_output} folder.")
   
 
-    @classmethod
-    def switch_ver_orientation_convention(cls, ver_or):
-        """
-        switches the vertical orientation convention to up or down. 
+    # @classmethod
+    # def switch_ver_orientation_convention(cls, ver_or):
+    #     """
+    #     switches the vertical orientation convention to up or down. 
 
-        Inputs:
+    #     Inputs:
 
-            ver_or: Vertical orientation ("up" or "down")
+    #         ver_or: Vertical orientation ("up" or "down")
 
-        """
+    #     """
         
-        if not isinstance(ver_or, str):
-            LOGGER.warning('Vertical orientation should be "up" or "down".'
-             ' Command is ignored.')
-            return
+    #     if not isinstance(ver_or, str):
+    #         LOGGER.warning('Vertical orientation should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
 
-        if ver_or.lower() not in ["up", "down"]:
-            LOGGER.warning('Vertical orientation should be "up" or "down".'
-             ' Command is ignored.')
-            return
+    #     if ver_or.lower() not in ["up", "down"]:
+    #         LOGGER.warning('Vertical orientation should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
 
-        if cls._instance.ver_orientation_conv:
-            if ver_or.lower() == cls._instance.ver_orientation_conv:
-                LOGGER.info(f'Vertical orientation is already "{ver_or}".')
-                return
+    #     if cls._instance.ver_orientation_conv:
+    #         if ver_or.lower() == cls._instance.ver_orientation_conv:
+    #             LOGGER.info(f'Vertical orientation is already "{ver_or}".')
+    #             return
 
-        cls._instance.ver_orientation_conv = ver_or
-        Record.ver_orientation_conv = ver_or
-        LOGGER.debug(f'Vertical orientation is switched to {ver_or}.')
+    #     cls._instance.ver_orientation_conv = ver_or
+    #     Record.ver_orientation_conv = ver_or
+    #     LOGGER.debug(f'Vertical orientation is switched to {ver_or}.')
 
-    @classmethod
-    def switch_unit_convention(cls, unit):
-        """
-        switches the unit convention to cm or m. 
+    # @classmethod
+    # def switch_unit_convention(cls, unit):
+    #     """
+    #     switches the unit convention to cm or m. 
 
-        Inputs:
+    #     Inputs:
 
-            unit: Project unit convention ("cm" or "m")
+    #         unit: Project unit convention ("cm" or "m")
 
-        """
+    #     """
         
-        if not isinstance(unit, str):
-            LOGGER.warning('Project unit convention should be "cm" or "m".'
-             ' Command is ignored.')
-            return
+    #     if not isinstance(unit, str):
+    #         LOGGER.warning('Project unit convention should be "cm" or "m".'
+    #          ' Command is ignored.')
+    #         return
 
-        if unit.lower() not in ["cm", "m"]:
-            LOGGER.warning('Project unit convention should be "up" or "down".'
-             ' Command is ignored.')
-            return
+    #     if unit.lower() not in ["cm", "m"]:
+    #         LOGGER.warning('Project unit convention should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
 
-        if cls._instance.unit_convention:
-            if unit.lower() == cls._instance.unit_convention:
-                LOGGER.info(f'Unit is already "{unit}".')
-                return
+    #     if cls._instance.unit_convention:
+    #         if unit.lower() == cls._instance.unit_convention:
+    #             LOGGER.info(f'Unit is already "{unit}".')
+    #             return
 
-        cls._instance.unit_convention = unit
-        Record.unit_convention = unit
-        LOGGER.debug(f'Unit convention is switched to {unit}.')
+    #     cls._instance.unit_convention = unit
+    #     Record.unit_convention = unit
+    #     LOGGER.debug(f'Unit convention is switched to {unit}.')
 
     # Incidents
     def add_incident(self, incident_folder):
@@ -386,7 +383,8 @@ class Project:
     # processing labels
     def add_processing_label(self, label_name, label_type, hyper_parameters):
         """ Creates a processing label """
-        if label_type == "rotate":
+        if (label_type in
+         ["rotate", "set_unit", "set_vertical_or", "align_record"]):
             Record._add_processing_label(label_name, label_type,
             hyper_parameters)
             return            
@@ -397,10 +395,13 @@ class Project:
         
     def list_of_processing_labels(self):
         """ Returns a list of available processing labels"""
-        if not TimeSeries.processing_labels:
-            return
-        for item in TimeSeries.processing_labels:
-            print(item, '-->', TimeSeries.processing_labels[item])
+        if TimeSeries.processing_labels:
+            for item in TimeSeries.processing_labels:
+                print(item, '-->', TimeSeries.processing_labels[item])
+
+        if Record.processing_labels:
+            for item in Record.processing_labels:
+                print(item, '-->', Record.processing_labels[item])
 
     def _is_processing_label_valid(self,list_process):
         """ Checks if the requested processing label is a valid lable
@@ -425,6 +426,10 @@ class Project:
         """ Returns a list of valid processing labels """
         for i,item in enumerate(TimeSeries.label_types):
             print(f"{i}: {item} - args: {TimeSeries.label_types[item]}")
+        
+        i = max(0,i)
+        for j,item in enumerate(Record.label_types):
+            print(f"{i+j+1}: {item} - args: {Record.label_types[item]}")
 
     # station filtering
     def add_station_filter(self, station_filter_name, station_filter_type,
@@ -966,7 +971,57 @@ class Project:
         
 
 
-  
+    def records_orientation(self, list_inc,list_process,list_filters,
+                             opt_params):
+        """ 
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Outputs: 
+            | stations_joint_table: as a pandas dataframe
+
+        """
+
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+        if not records:
+            LOGGER.warning("No record has been collected.")
+            return
+        
+        #st_record: all records in one station.
+        #inc_record: records of different incident at one station.
+
+        tmp_st_record = []
+        for st_record in records:
+            tmp_record = []
+            for i,inc_record in enumerate(st_record):
+                tmp = []                
+                if inc_record: 
+                   inc_name = list_inc[i]
+                   st_name = inc_record.station.inc_st_name.get(list_inc[i],None)
+                   tmp = [inc_name, st_name, list_process[i],
+                   inc_record.hc_or1, inc_record.hc_or2, inc_record.ver_or]
+                   tmp_record.append(tmp)
+                else:
+                    tmp = [None, None, list_process[i], None, None, None]
+                    tmp_record.append(tmp)
+            tmp_st_record.append(tmp_record)
+         
+        print(tmp_st_record)
+
+                    
+
+
 
 
     

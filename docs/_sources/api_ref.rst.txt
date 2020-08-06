@@ -184,9 +184,9 @@ labels and it can be defined at any place before it is called.
   
 The following table shows different label types and their required arguments. 
 
-=================  ======================================================================  
+=================  ========================================================================================  
    Label Type      Required Arguments                   
-=================  ======================================================================  
+=================  ========================================================================================  
  lowpass_filter     "N":order, "fc": corner frequency    
  highpass_filter    "N":order, "fc": corner frequency    
  bandpass_filter    "N":order, "fcs": [fc1, fc2] corner frequencies.
@@ -195,7 +195,10 @@ The following table shows different label types and their required arguments.
  taper              "m": number of points, "flag": "front","end","all" 
  cut                "m": number of points, "flag": "front","end", "t_diff":cut time (s)
  zero_pad           "m": number of points, "flag": "front","end", "t_diff":added time (s)  
-=================  ======================================================================
+ set_unit           "unit": requested unit "m"(meter) or "cm"(centimeter)
+ set_vertical_or    "ver_or": vertical orientation "up" or "down"
+ align_record       "hc_or1", "hc_or2", "ver_or": horizontal components and vertical component orientation.
+=================  ========================================================================================
 
 - filters
 
@@ -212,10 +215,11 @@ The following table shows different label types and their required arguments.
   
 - rotation
 
-  Rotating timeseries are done at the record level. The orientation of the
-  records are provided by the user in the **description.txt** file. However, 
-  the command is applying a relative rotation. Records orientation will be
-  adjusted.
+  Rotating timeseries are done at the record level. In case of simulation
+  incidents, the orientation of the records are provided by the user in the
+  **description.txt** file. In case of observation (e.g., CESMD format), each
+  record comes with different orientation. The command is applying a relative
+  rotation. Records orientation will be adjusted.
 
 
 

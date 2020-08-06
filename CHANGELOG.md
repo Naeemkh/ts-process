@@ -13,13 +13,12 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - test: CESMDV2 read file
 - plot stations on basemap
 - stations joint table
+- processing label: set_unit
+- processing label: set_vertical_or
+- processing label: align_record
 
 
 ### Changed
-- original record hash value also includes vertical orientation convention.
-- loading vertical component for hercules now is according to the project convention. 
-- loading Hercules and CESMD records are according to their and project unit convention
-- original record hash value also includes unite convention. 
 - processing labels and station filters arguments are checked at the adding stage. 
 
 ### Fixed 
