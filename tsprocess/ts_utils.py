@@ -912,3 +912,46 @@ def is_incident_description_valid(inc_des, valid_incidents, current_incidents,
             return False
                 
         return True
+
+
+def compute_rotation_angle(a , b):
+    """ Computes angle to align vector b on to vector a.
+    North toward East is considered as a positive orientation (N10E = 10.) 
+    All inputs should be positive. (N10W = 350) 
+    The order of orientations are not important. 
+    Inputs:
+        | a: [hr1, hr2] current orientation
+        | b: [hr1, hr2] target orientation
+
+    Outputs:
+        | rotation_angle: returns rotation angle
+    
+    """
+    rotation_angle = None
+    if abs(a[0] - a[1]) != 90:
+        LOGGER.error('Current orientation is not perpendicualr.')
+        return None
+    
+    if abs(b[0] - b[1]) != 90:
+        LOGGER.error('Target orientation is not perpendicualr.')
+        return None
+
+    angles = []
+    for i in a:
+        for j in b:
+            angles.append(i - j)
+               
+    tmp = []
+    for item in angles:
+        for ii in tmp:
+            if math.isclose(item,ii, rel_tol=1e-06,abs_tol=0):
+                rotation_angle = round(item,6)
+        tmp.append(item)
+        continue
+        
+    if rotation_angle:
+        rotation_angle = (360 + rotation_angle) % 360
+    
+    print(rotation_angle)
+
+    return rotation_angle

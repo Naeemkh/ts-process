@@ -16,7 +16,7 @@ from .station import Station
 from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
 from .ts_utils import (haversine, compute_azimuth, rotate_record, read_smc_v2,
-                       unit_convention_factor)
+                       unit_convention_factor, compute_rotation_angle)
 
 
 class Record:
@@ -385,6 +385,7 @@ class Record:
                  record.acc_ver.t_init_point)
                 n_hc_or1 = proc_record[12]
                 n_hc_or2 = proc_record[13]
+                n_unit = record.unit
             
             elif Record.processing_labels[label_name][0] == "set_unit":
                 def extract_params(unit):
@@ -468,9 +469,61 @@ class Record:
                
 
             elif Record.processing_labels[label_name][0] == "align_record":
-                def extract_params(rhc_or1, rhc_or2, rver_or):
-                    return rhc_or1, rhc_or2, rver_or
-                       
+                def extract_params(hc_or1, hc_or2, ver_or):
+                    return hc_or1, hc_or2, ver_or
+                
+                label_kwargs = Record.processing_labels[label_name][1]
+        
+                rhc_or1, rhc_or2, rver_or = extract_params(**label_kwargs)
+
+                current_h_or1 = record.hc_or1
+                current_h_or2 = record.hc_or2
+                current_ver_or = record.ver_or
+
+                rotation_angle = compute_rotation_angle(
+                    [current_h_or1, current_h_or2],[rhc_or1, rhc_or2])
+
+                if not rotation_angle:
+                    LOGGER.error("something went wrong with rotation angle.")
+                    return
+
+                if rotation_angle == 0 and rver_or == current_ver_or:
+                    return record
+
+                vertical_coeff = 1
+                if rver_or != current_ver_or:
+                    vertical_coeff = -1
+                    n_vertical_or = rver_or
+                                
+                #TODO: following piece of code are repeated in both rotation
+                # and here. 
+
+                proc_record = rotate_record(record, rotation_angle)
+                
+                tmp_time_vector = proc_record[0]
+                tmp_disp_h1 = Disp(proc_record[1],record.disp_h1.delta_t,
+                 record.disp_h1.t_init_point)
+                tmp_disp_h2 = Disp(proc_record[2],record.disp_h2.delta_t,
+                 record.disp_h2.t_init_point)
+                tmp_disp_ver = Disp(proc_record[3]*vertical_coeff,
+                 record.disp_ver.delta_t, record.disp_ver.t_init_point)
+                tmp_vel_h1 = Vel(proc_record[4],record.vel_h1.delta_t,
+                 record.vel_h1.t_init_point)
+                tmp_vel_h2 = Vel(proc_record[5],record.vel_h2.delta_t,
+                 record.vel_h2.t_init_point)
+                tmp_vel_ver = Vel(proc_record[6]*vertical_coeff,
+                 record.vel_ver.delta_t, record.vel_ver.t_init_point)
+                tmp_acc_h1 = Acc(proc_record[7],record.acc_h1.delta_t,
+                 record.acc_h1.t_init_point)
+                tmp_acc_h2 = Acc(proc_record[8],record.acc_h2.delta_t,
+                 record.acc_h2.t_init_point)
+                tmp_acc_ver = Acc(proc_record[9]*vertical_coeff,
+                 record.acc_ver.delta_t, record.acc_ver.t_init_point)
+                n_hc_or1 = proc_record[12]
+                n_hc_or2 = proc_record[13]
+                n_ver_or = rver_or
+                n_unit = record.unit
+            
             else:
                 LOGGER.warning("The processing lable is not defined.")
                 return None
@@ -493,9 +546,7 @@ class Record:
             n_ver_or = record.ver_or
             n_unit = record.unit
             
-            
-    
-            
+                        
             # TODO: check time vector
             tmp_time_vector = np.array(range(len(tmp_disp_h1.value)))*\
                     record.acc_h1.delta_t + record.acc_h1.t_init_point   
