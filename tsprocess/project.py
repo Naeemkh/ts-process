@@ -426,6 +426,10 @@ class Project:
         """ Returns a list of valid processing labels """
         for i,item in enumerate(TimeSeries.label_types):
             print(f"{i}: {item} - args: {TimeSeries.label_types[item]}")
+        
+        i = max(0,i)
+        for j,item in enumerate(Record.label_types):
+            print(f"{i+j+1}: {item} - args: {Record.label_types[item]}")
 
     # station filtering
     def add_station_filter(self, station_filter_name, station_filter_type,

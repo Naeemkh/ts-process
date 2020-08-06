@@ -230,10 +230,7 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_make_output_dir</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">switch_ver_orientation_convention</span><span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">)</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">switch_unit_convention</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Project named </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
@@ -291,65 +288,65 @@
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create </span><span class="si">{</span><span class="n">path_to_output</span><span class="si">}</span><span class="s2"> folder.&quot;</span><span class="p">)</span></div>
   
 
-<div class="viewcode-block" id="Project.switch_ver_orientation_convention"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.switch_ver_orientation_convention">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">switch_ver_orientation_convention</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        switches the vertical orientation convention to up or down. </span>
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def switch_ver_orientation_convention(cls, ver_or):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     switches the vertical orientation convention to up or down. </span>
 
-<span class="sd">        Inputs:</span>
+    <span class="c1">#     Inputs:</span>
 
-<span class="sd">            ver_or: Vertical orientation (&quot;up&quot; or &quot;down&quot;)</span>
+    <span class="c1">#         ver_or: Vertical orientation (&quot;up&quot; or &quot;down&quot;)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
         
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ver_or</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
-             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
+    <span class="c1">#     if not isinstance(ver_or, str):</span>
+    <span class="c1">#         LOGGER.warning(&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
 
-        <span class="k">if</span> <span class="n">ver_or</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
-             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
+    <span class="c1">#     if ver_or.lower() not in [&quot;up&quot;, &quot;down&quot;]:</span>
+    <span class="c1">#         LOGGER.warning(&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
 
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ver_or</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">:</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Vertical orientation is already &quot;</span><span class="si">{</span><span class="n">ver_or</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
-                <span class="k">return</span>
+    <span class="c1">#     if cls._instance.ver_orientation_conv:</span>
+    <span class="c1">#         if ver_or.lower() == cls._instance.ver_orientation_conv:</span>
+    <span class="c1">#             LOGGER.info(f&#39;Vertical orientation is already &quot;{ver_or}&quot;.&#39;)</span>
+    <span class="c1">#             return</span>
 
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="n">ver_or</span>
-        <span class="n">Record</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">=</span> <span class="n">ver_or</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Vertical orientation is switched to </span><span class="si">{</span><span class="n">ver_or</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span></div>
+    <span class="c1">#     cls._instance.ver_orientation_conv = ver_or</span>
+    <span class="c1">#     Record.ver_orientation_conv = ver_or</span>
+    <span class="c1">#     LOGGER.debug(f&#39;Vertical orientation is switched to {ver_or}.&#39;)</span>
 
-<div class="viewcode-block" id="Project.switch_unit_convention"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.switch_unit_convention">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">switch_unit_convention</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        switches the unit convention to cm or m. </span>
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def switch_unit_convention(cls, unit):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     switches the unit convention to cm or m. </span>
 
-<span class="sd">        Inputs:</span>
+    <span class="c1">#     Inputs:</span>
 
-<span class="sd">            unit: Project unit convention (&quot;cm&quot; or &quot;m&quot;)</span>
+    <span class="c1">#         unit: Project unit convention (&quot;cm&quot; or &quot;m&quot;)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
         
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Project unit convention should be &quot;cm&quot; or &quot;m&quot;.&#39;</span>
-             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
+    <span class="c1">#     if not isinstance(unit, str):</span>
+    <span class="c1">#         LOGGER.warning(&#39;Project unit convention should be &quot;cm&quot; or &quot;m&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
 
-        <span class="k">if</span> <span class="n">unit</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">]:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Project unit convention should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
-             <span class="s1">&#39; Command is ignored.&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
+    <span class="c1">#     if unit.lower() not in [&quot;cm&quot;, &quot;m&quot;]:</span>
+    <span class="c1">#         LOGGER.warning(&#39;Project unit convention should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
 
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">unit</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span><span class="p">:</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unit is already &quot;</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
-                <span class="k">return</span>
+    <span class="c1">#     if cls._instance.unit_convention:</span>
+    <span class="c1">#         if unit.lower() == cls._instance.unit_convention:</span>
+    <span class="c1">#             LOGGER.info(f&#39;Unit is already &quot;{unit}&quot;.&#39;)</span>
+    <span class="c1">#             return</span>
 
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">unit_convention</span> <span class="o">=</span> <span class="n">unit</span>
-        <span class="n">Record</span><span class="o">.</span><span class="n">unit_convention</span> <span class="o">=</span> <span class="n">unit</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unit convention is switched to </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span></div>
+    <span class="c1">#     cls._instance.unit_convention = unit</span>
+    <span class="c1">#     Record.unit_convention = unit</span>
+    <span class="c1">#     LOGGER.debug(f&#39;Unit convention is switched to {unit}.&#39;)</span>
 
     <span class="c1"># Incidents</span>
 <div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">):</span>
@@ -559,7 +556,8 @@
     <span class="c1"># processing labels</span>
 <div class="viewcode-block" id="Project.add_processing_label"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_processing_label">[docs]</a>    <span class="k">def</span> <span class="nf">add_processing_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">hyper_parameters</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Creates a processing label &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s2">&quot;rotate&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">label_type</span> <span class="ow">in</span>
+         <span class="p">[</span><span class="s2">&quot;rotate&quot;</span><span class="p">,</span> <span class="s2">&quot;set_unit&quot;</span><span class="p">,</span> <span class="s2">&quot;set_vertical_or&quot;</span><span class="p">,</span> <span class="s2">&quot;align_record&quot;</span><span class="p">]):</span>
             <span class="n">Record</span><span class="o">.</span><span class="n">_add_processing_label</span><span class="p">(</span><span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span>
             <span class="n">hyper_parameters</span><span class="p">)</span>
             <span class="k">return</span>            
@@ -570,10 +568,13 @@
         
 <div class="viewcode-block" id="Project.list_of_processing_labels"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_processing_labels">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_processing_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of available processing labels&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">item</span><span class="p">])</span></div>
+        <span class="k">if</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">item</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">item</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Project._is_processing_label_valid"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._is_processing_label_valid">[docs]</a>    <span class="k">def</span> <span class="nf">_is_processing_label_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">list_process</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Checks if the requested processing label is a valid lable</span>
@@ -597,7 +598,11 @@
 <div class="viewcode-block" id="Project.valid_processing_labels"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.valid_processing_labels">[docs]</a>    <span class="k">def</span> <span class="nf">valid_processing_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of valid processing labels &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">TimeSeries</span><span class="o">.</span><span class="n">label_types</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2"> - args: </span><span class="si">{</span><span class="n">TimeSeries</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2"> - args: </span><span class="si">{</span><span class="n">TimeSeries</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Record</span><span class="o">.</span><span class="n">label_types</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2"> - args: </span><span class="si">{</span><span class="n">Record</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     <span class="c1"># station filtering</span>
 <div class="viewcode-block" id="Project.add_station_filter"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_station_filter">[docs]</a>    <span class="k">def</span> <span class="nf">add_station_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station_filter_name</span><span class="p">,</span> <span class="n">station_filter_type</span><span class="p">,</span>
@@ -1134,12 +1139,62 @@
         <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>
         <span class="n">column_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">list_inc</span><span class="p">)</span> 
         <span class="n">table_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">record_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">table_df</span>       </div></div>
+        <span class="k">return</span> <span class="n">table_df</span>       </div>
 
         
 
 
-  
+<div class="viewcode-block" id="Project.records_orientation"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.records_orientation">[docs]</a>    <span class="k">def</span> <span class="nf">records_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+                             <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Outputs: </span>
+<span class="sd">            | stations_joint_table: as a pandas dataframe</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No record has been collected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1">#st_record: all records in one station.</span>
+        <span class="c1">#inc_record: records of different incident at one station.</span>
+
+        <span class="n">tmp_st_record</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">st_record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">tmp_record</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">inc_record</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st_record</span><span class="p">):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>                
+                <span class="k">if</span> <span class="n">inc_record</span><span class="p">:</span> 
+                   <span class="n">inc_name</span> <span class="o">=</span> <span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                   <span class="n">st_name</span> <span class="o">=</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="kc">None</span><span class="p">)</span>
+                   <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">inc_name</span><span class="p">,</span> <span class="n">st_name</span><span class="p">,</span> <span class="n">list_process</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                   <span class="n">inc_record</span><span class="o">.</span><span class="n">hc_or1</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">hc_or2</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">ver_or</span><span class="p">]</span>
+                   <span class="n">tmp_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">list_process</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+                    <span class="n">tmp_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+            <span class="n">tmp_st_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_record</span><span class="p">)</span>
+         
+        <span class="nb">print</span><span class="p">(</span><span class="n">tmp_st_record</span><span class="p">)</span></div></div>
+
+                    
+
+
 
 
     

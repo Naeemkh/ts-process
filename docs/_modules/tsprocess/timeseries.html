@@ -184,7 +184,7 @@
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">cal_acc_response</span><span class="p">,</span> <span class="n">get_period</span><span class="p">,</span> <span class="n">get_points</span><span class="p">,</span> <span class="n">FAS</span><span class="p">,</span> <span class="n">taper</span><span class="p">,</span>
-                       <span class="n">seism_appendzeros</span><span class="p">,</span> <span class="n">seism_cutting</span><span class="p">)</span>
+                       <span class="n">seism_appendzeros</span><span class="p">,</span> <span class="n">seism_cutting</span><span class="p">,</span> <span class="n">unit_convention_factor</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimeSeries"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries">[docs]</a><span class="k">class</span> <span class="nc">TimeSeries</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; TimeSeries Abstract Class &quot;&quot;&quot;</span>
@@ -374,7 +374,7 @@
             <span class="n">p</span> <span class="o">=</span> <span class="n">extract_params</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
             <span class="n">proc_data</span> <span class="o">=</span> <span class="n">seism_appendzeros</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">)</span>
-                         
+
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Disp&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
 

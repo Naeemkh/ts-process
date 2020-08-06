@@ -651,14 +651,14 @@
     <span class="c1"># Check rotation angle</span>
     <span class="k">if</span> <span class="n">rotation_angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Nothing to do!</span>
-        <span class="k">return</span> <span class="n">record</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     
     <span class="c1"># check if rotateion angle is valid.</span>
     <span class="k">if</span> <span class="n">rotation_angle</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rotation_angle</span> <span class="o">&gt;</span> <span class="mi">360</span><span class="p">:</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rotation angle is not valid </span><span class="si">{</span><span class="n">rotation_angle</span><span class="si">:</span><span class="s2">f</span><span class="si">}</span><span class="s2">.&quot;</span>
          <span class="s2">&quot;Command ignored.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">record</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># these info should be read from records:</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span>
@@ -669,7 +669,7 @@
         <span class="c1"># This should never happen.</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;there is a problem with orientaiton ordering.&quot;</span>
          <span class="s2">&quot;Command ignored.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">record</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Swap channels</span>
         <span class="c1"># I think swaping channels may cause unknown bugs in the longrun</span>
@@ -685,7 +685,7 @@
     <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">90</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">270</span><span class="p">:</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Rotation needs two orthogonal channels!&quot;</span>
          <span class="s2">&quot;Command ignored.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">record</span>
+        <span class="k">return</span> <span class="kc">None</span>
     
         <span class="c1"># Create rotation matrix</span>
     <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
@@ -953,14 +953,14 @@
     <span class="k">return</span> <span class="n">record_list</span><span class="p">,</span> <span class="n">station_metadata</span></div>
 
 
-<div class="viewcode-block" id="unit_convention_factor"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.unit_convention_factor">[docs]</a><span class="k">def</span> <span class="nf">unit_convention_factor</span><span class="p">(</span><span class="n">pr_unit</span><span class="p">,</span> <span class="n">inc_unit</span><span class="p">):</span>
+<div class="viewcode-block" id="unit_convention_factor"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.unit_convention_factor">[docs]</a><span class="k">def</span> <span class="nf">unit_convention_factor</span><span class="p">(</span><span class="n">r_unit</span><span class="p">,</span> <span class="n">inc_unit</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    controls project and incident units and returns multiplicaiton factor that</span>
-<span class="sd">    converts the incident&#39;s or record&#39;s unit into projects unit. Only</span>
+<span class="sd">    controls requested and incident units and returns multiplicaiton factor that</span>
+<span class="sd">    converts the incident&#39;s or record&#39;s unit into the requested unit. Only</span>
 <span class="sd">    m(meter) anc cm(centimeter) are supported.  </span>
 <span class="sd">    </span>
 <span class="sd">    Inputs: </span>
-<span class="sd">        | pr_unit: The project conventional unit</span>
+<span class="sd">        | r_unit: The requested conventional unit</span>
 <span class="sd">        | inc_unit: Incident or record unit</span>
 
 <span class="sd">    Output:</span>
@@ -977,17 +977,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">allowed_units</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">pr_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_units</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">inc_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_units</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">r_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_units</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">inc_unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_units</span><span class="p">):</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unit is not supported. Allowed units: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="n">pr_unit</span> <span class="o">==</span> <span class="n">inc_unit</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">r_unit</span> <span class="o">==</span> <span class="n">inc_unit</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">1</span>
 
-    <span class="k">if</span> <span class="n">pr_unit</span> <span class="o">==</span> <span class="s2">&quot;cm&quot;</span> <span class="ow">and</span> <span class="n">inc_unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">r_unit</span> <span class="o">==</span> <span class="s2">&quot;cm&quot;</span> <span class="ow">and</span> <span class="n">inc_unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">100</span>
 
-    <span class="k">if</span> <span class="n">pr_unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span> <span class="ow">and</span> <span class="n">inc_unit</span> <span class="o">==</span> <span class="s2">&quot;cm&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">r_unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span> <span class="ow">and</span> <span class="n">inc_unit</span> <span class="o">==</span> <span class="s2">&quot;cm&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="mf">0.01</span>
 
     <span class="c1"># should not get here. </span>
@@ -1085,6 +1085,47 @@
             <span class="k">return</span> <span class="kc">False</span>
                 
         <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="compute_rotation_angle"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.compute_rotation_angle">[docs]</a><span class="k">def</span> <span class="nf">compute_rotation_angle</span><span class="p">(</span><span class="n">a</span> <span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Computes angle to align vector b on to vector a.</span>
+<span class="sd">    North toward East is considered as a positive orientation (N10E = 10.) </span>
+<span class="sd">    All inputs should be positive. (N10W = 350) </span>
+<span class="sd">    The order of orientations are not important. </span>
+<span class="sd">    Inputs:</span>
+<span class="sd">        | a: [hr1, hr2] current orientation</span>
+<span class="sd">        | b: [hr1, hr2] target orientation</span>
+
+<span class="sd">    Outputs:</span>
+<span class="sd">        | rotation_angle: returns rotation angle</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rotation_angle</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">90</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Current orientation is not perpendicualr.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">90</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Target orientation is not perpendicualr.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">angles</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+            <span class="n">angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span>
+               
+    <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">angles</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">,</span><span class="n">abs_tol</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                <span class="n">rotation_angle</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">continue</span>
+        
+    <span class="k">if</span> <span class="n">rotation_angle</span><span class="p">:</span>
+        <span class="n">rotation_angle</span> <span class="o">=</span> <span class="p">(</span><span class="mi">360</span> <span class="o">+</span> <span class="n">rotation_angle</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span>
+
+    <span class="k">return</span> <span class="n">rotation_angle</span></div>
 </pre></div>
 
            </div>

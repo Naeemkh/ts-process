@@ -189,7 +189,7 @@
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span>
 <span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span>  <span class="n">Disp</span><span class="p">,</span> <span class="n">Vel</span><span class="p">,</span> <span class="n">Acc</span><span class="p">,</span> <span class="n">Raw</span><span class="p">,</span> <span class="n">Unitless</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">haversine</span><span class="p">,</span> <span class="n">compute_azimuth</span><span class="p">,</span> <span class="n">rotate_record</span><span class="p">,</span> <span class="n">read_smc_v2</span><span class="p">,</span>
-                       <span class="n">unit_convention_factor</span><span class="p">)</span>
+                       <span class="n">unit_convention_factor</span><span class="p">,</span> <span class="n">compute_rotation_angle</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Record"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record">[docs]</a><span class="k">class</span> <span class="nc">Record</span><span class="p">:</span>
@@ -200,14 +200,17 @@
     <span class="n">unit_convention</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">processing_labels</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">label_types</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;rotate&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;angle&#39;</span><span class="p">:</span> <span class="s1">&#39;rotation angle&#39;</span><span class="p">}</span>
+        <span class="s1">&#39;rotate&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;angle&#39;</span><span class="p">:</span> <span class="s1">&#39;rotation angle&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;set_unit&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;m, cm&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;set_vertical_or&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;ver_or&#39;</span><span class="p">:</span><span class="s1">&#39;up, down&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;align_record&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;hc_or1&#39;</span><span class="p">:</span><span class="s1">&#39;angle&#39;</span><span class="p">,</span><span class="s1">&#39;hc_or2&#39;</span><span class="p">:</span><span class="s1">&#39;angle&#39;</span><span class="p">,</span><span class="s1">&#39;ver_or&#39;</span><span class="p">:</span><span class="s1">&#39;up, down&#39;</span><span class="p">}</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_vec</span><span class="p">,</span> <span class="n">disp_h1</span><span class="p">,</span> <span class="n">disp_h2</span><span class="p">,</span> <span class="n">disp_ver</span><span class="p">,</span>
                 <span class="n">vel_h1</span><span class="p">,</span> <span class="n">vel_h2</span><span class="p">,</span> <span class="n">vel_ver</span><span class="p">,</span>
                 <span class="n">acc_h1</span><span class="p">,</span> <span class="n">acc_h2</span><span class="p">,</span> <span class="n">acc_ver</span><span class="p">,</span>
                 <span class="n">station</span><span class="p">,</span> <span class="n">source_params</span><span class="p">,</span>
-                <span class="n">hc_or1</span><span class="p">,</span> <span class="n">hc_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">):</span>
+                <span class="n">hc_or1</span><span class="p">,</span> <span class="n">hc_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">station</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_vec</span> <span class="o">=</span> <span class="n">time_vec</span>
@@ -225,6 +228,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hc_or1</span> <span class="o">=</span> <span class="n">hc_or1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hc_or2</span> <span class="o">=</span> <span class="n">hc_or2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ver_or</span> <span class="o">=</span> <span class="n">ver_or</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_1</span> <span class="o">=</span> <span class="kc">None</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_2</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -364,13 +368,12 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">st_name</span> <span class="o">=</span> <span class="n">station_obj</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_name</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="c1"># generate original record hash value.</span>
         <span class="n">hash_val</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">incident_name</span> <span class="o">+</span> <span class="n">st_name</span> <span class="o">+</span> <span class="n">Record</span><span class="o">.</span><span class="n">ver_orientation_conv</span> <span class="o">+</span>\
-             <span class="n">Record</span><span class="o">.</span><span class="n">unit_convention</span><span class="p">)</span><span class="o">.</span>\
+            <span class="p">(</span><span class="n">incident_name</span> <span class="o">+</span> <span class="n">st_name</span><span class="p">)</span><span class="o">.</span>\
             <span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 
         <span class="c1"># retrieve the record from database.</span>
@@ -487,6 +490,13 @@
         <span class="c1"># add the hash value to the processed attribute, and put the hash and</span>
         <span class="c1"># value into the database.</span>
         <span class="n">proc_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">pl</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">proc_record</span><span class="p">:</span>
+            <span class="c1"># if cannot process the record, return None. By this point</span>
+            <span class="c1"># other loggers reported the problem. </span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+
         <span class="n">proc_record</span><span class="o">.</span><span class="n">this_record_hash</span> <span class="o">=</span> <span class="n">proc_hash_val</span>
         
         <span class="c1"># put data in the database</span>
@@ -554,11 +564,152 @@
                  <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
                 <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">proc_record</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
                 <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">proc_record</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span>
+                <span class="n">n_unit</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">unit</span>
             
-                       
+            <span class="k">elif</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;set_unit&quot;</span><span class="p">:</span>
+                <span class="k">def</span> <span class="nf">extract_params</span><span class="p">(</span><span class="n">unit</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">unit</span>
+
+                <span class="n">label_kwargs</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># requested unit</span>
+                <span class="n">r_unit</span> <span class="o">=</span> <span class="n">extract_params</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
+                <span class="n">ucf</span> <span class="o">=</span> <span class="n">unit_convention_factor</span><span class="p">(</span><span class="n">r_unit</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+                
+                <span class="n">tmp_time_vector</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">time_vec</span>
+                <span class="n">tmp_disp_h1</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_disp_h2</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_disp_ver</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+
+                <span class="n">tmp_vel_h1</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_vel_h2</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_vel_ver</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+
+                <span class="n">tmp_acc_h1</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_acc_h2</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_acc_ver</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">ucf</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+
+                <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span>
+                <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or2</span>
+                <span class="n">n_ver_or</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">ver_or</span>
+
+                <span class="n">n_unit</span> <span class="o">=</span> <span class="n">r_unit</span>
+                
+            <span class="k">elif</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;set_vertical_or&quot;</span><span class="p">:</span>
+                <span class="k">def</span> <span class="nf">extract_params</span><span class="p">(</span><span class="n">ver_or</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">ver_or</span>
+
+                <span class="n">label_kwargs</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># requested unit</span>
+                <span class="n">rver_or</span> <span class="o">=</span> <span class="n">extract_params</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">rver_or</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid vertical orientattion: </span><span class="si">{</span><span class="n">rver_or</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                
+                <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">ver_or</span> <span class="o">==</span> <span class="n">rver_or</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">record</span>
+
+                <span class="n">tmp_time_vector</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">time_vec</span> 
+                <span class="n">tmp_disp_h1</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_disp_h2</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_disp_ver</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">value</span><span class="o">*-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+
+                <span class="n">tmp_vel_h1</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>  <span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_vel_h2</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>  <span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_vel_ver</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">value</span><span class="o">*-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+
+                <span class="n">tmp_acc_h1</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_acc_h2</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_acc_ver</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">value</span><span class="o">*-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+
+                <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span>
+                <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or2</span>
+                <span class="n">n_ver_or</span> <span class="o">=</span> <span class="n">rver_or</span>
+
+                <span class="n">n_unit</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">unit</span>
+               
+
+            <span class="k">elif</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;align_record&quot;</span><span class="p">:</span>
+                <span class="k">def</span> <span class="nf">extract_params</span><span class="p">(</span><span class="n">hc_or1</span><span class="p">,</span> <span class="n">hc_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">hc_or1</span><span class="p">,</span> <span class="n">hc_or2</span><span class="p">,</span> <span class="n">ver_or</span>
+                
+                <span class="n">label_kwargs</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        
+                <span class="n">rhc_or1</span><span class="p">,</span> <span class="n">rhc_or2</span><span class="p">,</span> <span class="n">rver_or</span> <span class="o">=</span> <span class="n">extract_params</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
+
+                <span class="n">current_h_or1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span>
+                <span class="n">current_h_or2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or2</span>
+                <span class="n">current_ver_or</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">ver_or</span>
+
+                <span class="n">rotation_angle</span> <span class="o">=</span> <span class="n">compute_rotation_angle</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">current_h_or1</span><span class="p">,</span> <span class="n">current_h_or2</span><span class="p">],[</span><span class="n">rhc_or1</span><span class="p">,</span> <span class="n">rhc_or2</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">rotation_angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Something went wrong with rotation angle.&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">))</span>
+                    <span class="k">return</span>
+
+                <span class="k">if</span> <span class="n">rotation_angle</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rver_or</span> <span class="o">==</span> <span class="n">current_ver_or</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">record</span>
+
+                <span class="n">vertical_coeff</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">rver_or</span> <span class="o">!=</span> <span class="n">current_ver_or</span><span class="p">:</span>
+                    <span class="n">vertical_coeff</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="n">n_vertical_or</span> <span class="o">=</span> <span class="n">rver_or</span>
+                                
+                <span class="c1">#TODO: following piece of code are repeated in both rotation</span>
+                <span class="c1"># and here. </span>
+
+                <span class="n">proc_record</span> <span class="o">=</span> <span class="n">rotate_record</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">rotation_angle</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">proc_record</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;A problem is happened with record rotation.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                
+                <span class="n">tmp_time_vector</span> <span class="o">=</span> <span class="n">proc_record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">tmp_disp_h1</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_disp_h2</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_disp_ver</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">vertical_coeff</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_vel_h1</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_vel_h2</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span><span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_vel_ver</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">*</span><span class="n">vertical_coeff</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_acc_h1</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span><span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_acc_h2</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span><span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">tmp_acc_ver</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">proc_record</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="o">*</span><span class="n">vertical_coeff</span><span class="p">,</span>
+                 <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
+                <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">proc_record</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
+                <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">proc_record</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span>
+                <span class="n">n_ver_or</span> <span class="o">=</span> <span class="n">rver_or</span>
+                <span class="n">n_unit</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">unit</span>
+            
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The processing lable is not defined.&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">record</span>
+                <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">else</span><span class="p">:</span> 
         
@@ -575,9 +726,10 @@
             <span class="n">tmp_acc_ver</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
             <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span>
             <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or2</span>
+            <span class="n">n_ver_or</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">ver_or</span>
+            <span class="n">n_unit</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">unit</span>
             
-    
-            
+                        
             <span class="c1"># TODO: check time vector</span>
             <span class="n">tmp_time_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmp_disp_h1</span><span class="o">.</span><span class="n">value</span><span class="p">)))</span><span class="o">*</span>\
                     <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">+</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">t_init_point</span>   
@@ -587,7 +739,7 @@
                                        <span class="n">tmp_vel_h1</span><span class="p">,</span> <span class="n">tmp_vel_h2</span><span class="p">,</span> <span class="n">tmp_vel_ver</span><span class="p">,</span>
                                        <span class="n">tmp_acc_h1</span><span class="p">,</span> <span class="n">tmp_acc_h2</span><span class="p">,</span> <span class="n">tmp_acc_ver</span><span class="p">,</span>
                                        <span class="n">record</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">source_params</span><span class="p">,</span>
-                                       <span class="n">n_hc_or1</span><span class="p">,</span> <span class="n">n_hc_or2</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">ver_or</span><span class="p">)</span></div>
+                                       <span class="n">n_hc_or1</span><span class="p">,</span> <span class="n">n_hc_or2</span><span class="p">,</span> <span class="n">n_ver_or</span><span class="p">,</span> <span class="n">n_unit</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Record._from_hercules"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._from_hercules">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_from_hercules</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">station_obj</span><span class="p">,</span><span class="n">source_hypocenter</span><span class="p">,</span> <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span>
@@ -672,8 +824,9 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">input_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="n">ucf</span> <span class="o">=</span> <span class="n">unit_convention_factor</span><span class="p">(</span><span class="n">Record</span><span class="o">.</span><span class="n">unit_convention</span><span class="p">,</span> <span class="n">inc_unit</span><span class="p">)</span>
-
+        <span class="c1"># ucf = unit_convention_factor(Record.unit_convention, inc_unit)</span>
+        <span class="n">ucf</span> <span class="o">=</span> <span class="mi">1</span>
+        
         <span class="c1"># Convert to NumPy Arrays</span>
         <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
         <span class="n">vel_h1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vel_h1</span><span class="p">)</span><span class="o">*</span><span class="n">ucf</span>
@@ -707,7 +860,7 @@
                     <span class="n">vel_h1</span><span class="p">,</span> <span class="n">vel_h2</span><span class="p">,</span> <span class="n">vel_ver</span><span class="p">,</span>
                     <span class="n">acc_h1</span><span class="p">,</span> <span class="n">acc_h2</span><span class="p">,</span> <span class="n">acc_ver</span><span class="p">,</span>
                     <span class="n">station_obj</span><span class="p">,</span> <span class="n">source_hypocenter</span><span class="p">,</span>
-                    <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">)</span></div>
+                    <span class="n">hr_or1</span><span class="p">,</span> <span class="n">hr_or2</span><span class="p">,</span> <span class="n">ver_or</span><span class="p">,</span> <span class="n">inc_unit</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Record._from_cesmdv2"><a class="viewcode-back" href="../../modules.html#tsprocess.record.Record._from_cesmdv2">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_from_cesmdv2</span><span class="p">(</span><span class="n">r_data</span><span class="p">,</span> <span class="n">r_metadata</span><span class="p">,</span> <span class="n">station_obj</span><span class="p">,</span><span class="n">source_hypocenter</span><span class="p">):</span>
@@ -774,7 +927,12 @@
         <span class="k">while</span> <span class="n">r_data</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">r_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> 
             <span class="n">ch_unit</span> <span class="o">=</span> <span class="n">channels_unit</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">ufc</span> <span class="o">=</span> <span class="n">unit_convention_factor</span><span class="p">(</span><span class="n">Record</span><span class="o">.</span><span class="n">unit_convention</span><span class="p">,</span> <span class="n">ch_unit</span><span class="p">)</span>
+
+            <span class="c1"># different channel units can be different, for now, I convert</span>
+            <span class="c1"># all CESMD data into cm. However, We need to better handle this </span>
+            <span class="c1"># situation. </span>
+
+            <span class="n">ufc</span> <span class="o">=</span> <span class="n">unit_convention_factor</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="n">ch_unit</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span><span class="s2">&quot;down&quot;</span><span class="p">]:</span>
                 <span class="c1"># it is a vertical component.</span>
@@ -782,18 +940,18 @@
                 <span class="n">tmp_disp_ver</span> <span class="o">=</span> <span class="n">Disp</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">ufc</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="n">tmp_vel_ver</span> <span class="o">=</span> <span class="n">Vel</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">ufc</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="n">tmp_acc_ver</span> <span class="o">=</span> <span class="n">Acc</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">ufc</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="k">continue</span>
 
             <span class="n">h_orient</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
             <span class="n">tmp_disp_h</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Disp</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">ufc</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
             <span class="n">tmp_vel_h</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vel</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">ufc</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
             <span class="n">tmp_acc_h</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Acc</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">ufc</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
-
         
         <span class="k">return</span> <span class="n">Record</span><span class="p">(</span><span class="n">time_vec</span><span class="p">,</span> <span class="n">tmp_disp_h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp_disp_h</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp_disp_ver</span><span class="p">,</span>
                     <span class="n">tmp_vel_h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp_vel_h</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp_vel_ver</span><span class="p">,</span>
                     <span class="n">tmp_acc_h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp_acc_h</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp_acc_ver</span><span class="p">,</span>
                     <span class="n">station_obj</span><span class="p">,</span> <span class="n">source_hypocenter</span><span class="p">,</span>
-                    <span class="n">h_orient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h_orient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ver_or</span><span class="p">)</span></div></div>
+                    <span class="n">h_orient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h_orient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ver_or</span><span class="p">,</span> <span class="s2">&quot;cm&quot;</span><span class="p">)</span></div></div>
 
 
 

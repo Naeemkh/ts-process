@@ -419,8 +419,8 @@ labels and it can be defined at any place before it is called.</p>
 <p>The following table shows different label types and their required arguments.</p>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 80%" />
+<col style="width: 16%" />
+<col style="width: 84%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Label Type</p></th>
@@ -452,6 +452,15 @@ labels and it can be defined at any place before it is called.</p>
 <tr class="row-odd"><td><p>zero_pad</p></td>
 <td><p>“m”: number of points, “flag”: “front”,”end”, “t_diff”:added time (s)</p></td>
 </tr>
+<tr class="row-even"><td><p>set_unit</p></td>
+<td><p>“unit”: requested unit “m”(meter) or “cm”(centimeter)</p></td>
+</tr>
+<tr class="row-odd"><td><p>set_vertical_or</p></td>
+<td><p>“ver_or”: vertical orientation “up” or “down”</p></td>
+</tr>
+<tr class="row-even"><td><p>align_record</p></td>
+<td><p>“hc_or1”, “hc_or2”, “ver_or”: horizontal components and vertical component orientation.</p></td>
+</tr>
 </tbody>
 </table>
 <ul class="simple">
@@ -469,10 +478,11 @@ argument, the default value is 4.</p>
 </div></blockquote>
 <ul>
 <li><p>rotation</p>
-<p>Rotating timeseries are done at the record level. The orientation of the
-records are provided by the user in the <strong>description.txt</strong> file. However,
-the command is applying a relative rotation. Records orientation will be
-adjusted.</p>
+<p>Rotating timeseries are done at the record level. In case of simulation
+incidents, the orientation of the records are provided by the user in the
+<strong>description.txt</strong> file. In case of observation (e.g., CESMD format), each
+record comes with different orientation. The command is applying a relative
+rotation. Records orientation will be adjusted.</p>
 </li>
 </ul>
 </div>
