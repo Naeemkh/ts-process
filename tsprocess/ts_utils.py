@@ -494,7 +494,6 @@ def rotate_record(record, rotation_angle):
     
     # Calculate angle between two components
     angle = round(y - x,2)
-    print(angle)
 
     # We need two orthogonal channels
     if abs(angle) != 90 and abs(angle) != 270:
@@ -507,24 +506,38 @@ def rotate_record(record, rotation_angle):
     # Ordering the channels should be checked upon creating a record. 
     # Write a function to double check it, if it has not ordered properly,
     # reject it. 
+    if x > y:
+        rc_dis_1 = record.disp_h2.value.copy()
+        rc_dis_2 = record.disp_h1.value.copy()
+        rc_dis_v = record.disp_ver.value.copy()
+        
+        rc_vel_1 = record.vel_h2.value.copy()
+        rc_vel_2 = record.vel_h1.value.copy()
+        rc_vel_v = record.vel_ver.value.copy()
+        
+        rc_acc_1 = record.acc_h2.value.copy()
+        rc_acc_2 = record.acc_h1.value.copy()
+        rc_acc_v = record.acc_ver.value.copy()
+        swapped = True
+    else:
+        rc_dis_1 = record.disp_h1.value.copy()
+        rc_dis_2 = record.disp_h2.value.copy()
+        rc_dis_v = record.disp_ver.value.copy()
+        
+        rc_vel_1 = record.vel_h1.value.copy()
+        rc_vel_2 = record.vel_h2.value.copy()
+        rc_vel_v = record.vel_ver.value.copy()
+        
+        rc_acc_1 = record.acc_h1.value.copy()
+        rc_acc_2 = record.acc_h2.value.copy()
+        rc_acc_v = record.acc_ver.value.copy()
 
-    rc_dis_1 = record.disp_h1.value.copy()
-    rc_dis_2 = record.disp_h2.value.copy()
-    rc_dis_v = record.disp_ver.value.copy()
-    
-    rc_vel_1 = record.vel_h1.value.copy()
-    rc_vel_2 = record.vel_h2.value.copy()
-    rc_vel_v = record.vel_ver.value.copy()
-    
-    rc_acc_1 = record.acc_h1.value.copy()
-    rc_acc_2 = record.acc_h2.value.copy()
-    rc_acc_v = record.acc_ver.value.copy()
 
     
-    matrix = np.array([(math.cos(math.radians(rotation_angle)),
-                    +math.sin(math.radians(rotation_angle))),
-                   (math.sin(math.radians(rotation_angle)),
-                    -math.cos(math.radians(rotation_angle)))])
+    # matrix = np.array([(math.cos(math.radians(rotation_angle)),
+    #                 +math.sin(math.radians(rotation_angle))),
+    #                (math.sin(math.radians(rotation_angle)),
+    #                 -math.cos(math.radians(rotation_angle)))])
  
 
     # # We need two orthogonal channels
@@ -535,17 +548,17 @@ def rotate_record(record, rotation_angle):
        
 
     # Create rotation matrix
-    # if angle == 90:
-    #     matrix = np.array([(math.cos(math.radians(rotation_angle)),
-    #                         -math.sin(math.radians(rotation_angle))),
-    #                        (math.sin(math.radians(rotation_angle)),
-    #                         math.cos(math.radians(rotation_angle)))])
-    # else:
-    #     # Angle is 270!
-    #     matrix = np.array([(math.cos(math.radians(rotation_angle)),
-    #                         +math.sin(math.radians(rotation_angle))),
-    #                        (math.sin(math.radians(rotation_angle)),
-    #                         -math.cos(math.radians(rotation_angle)))])
+    if angle == 90:
+        matrix = np.array([(math.cos(math.radians(rotation_angle)),
+                            -math.sin(math.radians(rotation_angle))),
+                           (math.sin(math.radians(rotation_angle)),
+                            math.cos(math.radians(rotation_angle)))])
+    else:
+        # Angle is 270!
+        matrix = np.array([(math.cos(math.radians(rotation_angle)),
+                            +math.sin(math.radians(rotation_angle))),
+                           (math.sin(math.radians(rotation_angle)),
+                            -math.cos(math.radians(rotation_angle)))])
 
 
     # Make sure they all have the same number of points
@@ -571,6 +584,11 @@ def rotate_record(record, rotation_angle):
     # Compute the record orientation        
     n_hc_or1 = ((record.hc_or1 - rotation_angle)+360)%360
     n_hc_or2 = ((record.hc_or2 - rotation_angle)+360)%360
+    
+    if swapped:
+        tmp_c = n_hc_or1
+        n_hc_or1 = n_hc_or2
+        n_hc_or2 = tmp_c
     
     return  (rcs[9],  rcs_dis_1, rcs_dis_2, rcs[2],
                         rcs_vel_1, rcs_vel_2, rcs[5],
