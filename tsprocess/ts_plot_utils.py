@@ -523,11 +523,14 @@ def plot_records_orientation_helper(st_item):
              scale=0.1, color=color_code[i], width = 0.004)
             axs.text(25,i*-20,f"{str(or_h1)}, {str(or_h2)}, {inc_item[8]}")
             axs.text(25,(i*-20)-6,f"List of processes: {inc_item[5]}")
-            axs.set_xlim([-20,200])
-            axs.set_ylim([-20*(1+n_inicident),20])
-            axs.set_aspect('equal', 'box')
-            axs.legend()
-
+    
+    axs.set_xlim([-20,200])
+    axs.set_ylim([-20*(1+n_inicident),20])
+    axs.set_aspect('equal', 'box')
+    axs.legend()
+    axs.set_xticks([])
+    axs.set_yticks([])
+    
     return fig
     
             
