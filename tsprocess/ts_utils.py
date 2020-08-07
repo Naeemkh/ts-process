@@ -469,17 +469,16 @@ def rotate_record(record, rotation_angle):
     Input:
         record: instance of Record class
         rotation_angle: rotation angle in degrees
-
     Output:
         rotated record instane        
     """
 
+    #TODO: channels of the record should be ordered during creating the record.
 
     # Check rotation angle
     if rotation_angle is None:
         # Nothing to do!
         return None
-
     
     # check if rotateion angle is valid.
     if rotation_angle < 0 or rotation_angle > 360:
@@ -491,78 +490,113 @@ def rotate_record(record, rotation_angle):
     x = record.hc_or1
     y = record.hc_or2
 
+    print(f"x: {str(x)}")
+    print(f"y: {str(y)}")
+
+    n_hc_or1 = x
+    n_hc_or2 = y
+
+    rc_dis_1 = record.disp_h1.value.copy()
+    rc_dis_2 = record.disp_h2.value.copy()
+    rc_dis_v = record.disp_ver.value.copy()
     
+    rc_vel_1 = record.vel_h1.value.copy()
+    rc_vel_2 = record.vel_h2.value.copy()
+    rc_vel_v = record.vel_ver.value.copy()
+    
+    rc_acc_1 = record.acc_h1.value.copy()
+    rc_acc_2 = record.acc_h2.value.copy()
+    rc_acc_v = record.acc_ver.value.copy()
+
+
+
+    # # Make sure channels are ordered properly
+    # if x > y:
+    #     # This should never happen.
+    #     # LOGGER.error("there is a problem with orientaiton ordering."
+    #     #  "Command ignored.")
+    #     # return None
+
+    #     rc_dis_1 = record.disp_h2.value.copy()
+    #     rc_dis_2 = record.disp_h1.value.copy()
+    #     rc_dis_v = record.disp_ver.value.copy()
+        
+    #     rc_vel_1 = record.vel_h2.value.copy()
+    #     rc_vel_2 = record.vel_h1.value.copy()
+    #     rc_vel_v = record.vel_ver.value.copy()
+        
+    #     rc_acc_1 = record.acc_h2.value.copy()
+    #     rc_acc_2 = record.acc_h1.value.copy()
+    #     rc_acc_v = record.acc_ver.value.copy()
+        
+    #     # n_hc_or1 = y
+    #     # n_hc_or2 = x
+
+
+    # else:
+
+    #     rc_dis_1 = record.disp_h1.value.copy()
+    #     rc_dis_2 = record.disp_h2.value.copy()
+    #     rc_dis_v = record.disp_ver.value.copy()
+        
+    #     rc_vel_1 = record.vel_h1.value.copy()
+    #     rc_vel_2 = record.vel_h2.value.copy()
+    #     rc_vel_v = record.vel_ver.value.copy()
+        
+    #     rc_acc_1 = record.acc_h1.value.copy()
+    #     rc_acc_2 = record.acc_h2.value.copy()
+    #     rc_acc_v = record.acc_ver.value.copy()
+    #     # n_hc_or1 = x
+    #     # n_hc_or2 = y
+
+    #     # Swap channels
+    #     # I think swaping channels may cause unknown bugs in the longrun
+    #     # temp = station[0]
+    #     # station[0] = station[1]
+    #     # station[1] = temp
+
     # Calculate angle between two components
     angle = round(y - x,2)
-
+    print(angle)
     # We need two orthogonal channels
     if abs(angle) != 90 and abs(angle) != 270:
         LOGGER.error("Rotation needs two orthogonal channels!"
-         " Command ignored.")
+         "Command ignored.")
         return None
-
-    swapped = False
-    # Make sure channels are ordered properly
-    # Ordering the channels should be checked upon creating a record. 
-    # Write a function to double check it, if it has not ordered properly,
-    # reject it. 
-    if x > y:
-        rc_dis_1 = record.disp_h2.value.copy()
-        rc_dis_2 = record.disp_h1.value.copy()
-        rc_dis_v = record.disp_ver.value.copy()
-        
-        rc_vel_1 = record.vel_h2.value.copy()
-        rc_vel_2 = record.vel_h1.value.copy()
-        rc_vel_v = record.vel_ver.value.copy()
-        
-        rc_acc_1 = record.acc_h2.value.copy()
-        rc_acc_2 = record.acc_h1.value.copy()
-        rc_acc_v = record.acc_ver.value.copy()
-        swapped = True
-    else:
-        rc_dis_1 = record.disp_h1.value.copy()
-        rc_dis_2 = record.disp_h2.value.copy()
-        rc_dis_v = record.disp_ver.value.copy()
-        
-        rc_vel_1 = record.vel_h1.value.copy()
-        rc_vel_2 = record.vel_h2.value.copy()
-        rc_vel_v = record.vel_ver.value.copy()
-        
-        rc_acc_1 = record.acc_h1.value.copy()
-        rc_acc_2 = record.acc_h2.value.copy()
-        rc_acc_v = record.acc_ver.value.copy()
-
-
     
-    # matrix = np.array([(math.cos(math.radians(rotation_angle)),
-    #                 +math.sin(math.radians(rotation_angle))),
-    #                (math.sin(math.radians(rotation_angle)),
-    #                 -math.cos(math.radians(rotation_angle)))])
- 
 
-    # # We need two orthogonal channels
-    # if abs(angle) != 90 and abs(angle) != 270:
-    #     LOGGER.error("Rotation needs two orthogonal channels!"
-    #      " Command ignored.")
-    #     return None
-       
-
-    # Create rotation matrix
-    if angle == 90:
-        matrix = np.array([(math.cos(math.radians(rotation_angle)),
-                            -math.sin(math.radians(rotation_angle))),
-                           (math.sin(math.radians(rotation_angle)),
-                            math.cos(math.radians(rotation_angle)))])
-    else:
-        # Angle is 270!
-        matrix = np.array([(math.cos(math.radians(rotation_angle)),
-                            +math.sin(math.radians(rotation_angle))),
-                           (math.sin(math.radians(rotation_angle)),
-                            -math.cos(math.radians(rotation_angle)))])
+    matrix = np.array([(math.cos(math.radians(rotation_angle)),
+                    -math.sin(math.radians(rotation_angle))),
+                   (math.sin(math.radians(rotation_angle)),
+                    math.cos(math.radians(rotation_angle)))])
 
 
-    # Make sure they all have the same number of points
-   
+        # Create rotation matrix
+    # if angle == 90:
+    #     matrix = np.array([(math.cos(math.radians(rotation_angle)),
+    #                         -math.sin(math.radians(rotation_angle))),
+    #                        (math.sin(math.radians(rotation_angle)),
+    #                         math.cos(math.radians(rotation_angle)))])
+    # else:
+    #     # Angle is 270!
+    #     matrix = np.array([(math.cos(math.radians(rotation_angle)),
+    #                         +math.sin(math.radians(rotation_angle))),
+    #                        (math.sin(math.radians(rotation_angle)),
+    #                         -math.cos(math.radians(rotation_angle)))])
+    
+    # rc_dis_1 = record.disp_h1.value.copy()
+    # rc_dis_2 = record.disp_h2.value.copy()
+    # rc_dis_v = record.disp_ver.value.copy()
+    
+    # rc_vel_1 = record.vel_h1.value.copy()
+    # rc_vel_2 = record.vel_h2.value.copy()
+    # rc_vel_v = record.vel_ver.value.copy()
+    
+    # rc_acc_1 = record.acc_h1.value.copy()
+    # rc_acc_2 = record.acc_h2.value.copy()
+    # rc_acc_v = record.acc_ver.value.copy()
+
+    # Make sure they all have the same number of points   
     # find the shortest timeseries and cut others based on that. 
 
     n_points = min(len(rc_dis_1), len(rc_dis_2), len(rc_dis_v),
@@ -582,14 +616,18 @@ def rotate_record(record, rotation_angle):
     [rcs_acc_1, rcs_acc_2] = matrix.dot([rcs[6], rcs[7]])
 
     # Compute the record orientation        
-    n_hc_or1 = ((record.hc_or1 - rotation_angle)+360)%360
-    n_hc_or2 = ((record.hc_or2 - rotation_angle)+360)%360
+    n_hc_or1 = n_hc_or1 - rotation_angle
+    n_hc_or2 = n_hc_or2 - rotation_angle
     
-    if swapped:
-        tmp_c = n_hc_or1
-        n_hc_or1 = n_hc_or2
-        n_hc_or2 = tmp_c
-    
+    if n_hc_or1 < 0:
+        n_hc_or1 = 360 + n_hc_or1
+
+    if n_hc_or2 < 0:
+        n_hc_or2 = 360 + n_hc_or2
+
+    print(f'n_hc_or1: {n_hc_or1}')
+    print(f'n_hc_or2: {n_hc_or2}')
+
     return  (rcs[9],  rcs_dis_1, rcs_dis_2, rcs[2],
                         rcs_vel_1, rcs_vel_2, rcs[5],
                         rcs_acc_1, rcs_acc_2, rcs[8],
