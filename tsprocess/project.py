@@ -441,7 +441,7 @@ class Project:
     def valid_station_filter_type(self):
         """ Returns a list of valid filters for selecting stations. """
         for i,item in enumerate(Station.station_filter_types):
-            print(f"{i}: {item}")
+            print(f"{i}: {item} - args: {Station.station_filter_types[item]}")
 
     def list_of_station_filters(self):
         """ Returns a list of available processing labels """

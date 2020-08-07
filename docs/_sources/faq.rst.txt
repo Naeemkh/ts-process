@@ -24,3 +24,15 @@ not sure how to pass a name to the saved figures.
     the problem by switching to *Jupyter Lab*. Please read more on 
     this Github `issue. <https://github.com/Naeemkh/tsprocess/issues/43>`_
 
+
+**Q.** Each incident has seismic source as an input value. Why we need to
+add source hypocenter (using add_source_hypocenter(lat, lon, depth)) to the
+project. 
+
+    **A.** Different incidents use different source models (sometimes extended
+    source models). Even they might be slightly different. In the project we
+    need a predifined hypocenter to compute distance between stations and the
+    source of earthquake. That's why we define a source hypocenter for the
+    project.  
+
+
