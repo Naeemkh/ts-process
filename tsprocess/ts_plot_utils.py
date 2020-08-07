@@ -3,6 +3,7 @@ ts_plot_utils.py
 ====================================
 The core module for timeseries plot helper functions.
 """
+import math
 import numpy as np
 import cartopy.crs as ccrs
 from datetime import datetime
@@ -13,6 +14,10 @@ from matplotlib.font_manager import FontProperties
 
 from .log import LOGGER
 from .ts_utils import check_opt_param_minmax, query_opt_params, list2message
+
+
+color_code  = ['k', 'r', 'b', 'm', 'g', 'c', 'y', 'brown',
+                   'gold', 'blueviolet', 'grey', 'pink']
 
 
 def plot_displacement_helper(record, color_code, opt_params, list_inc,
@@ -477,3 +482,57 @@ def plot_scatter_on_basemap(llcrnrlatlon, urcrnrlatlon, data):
     ax.legend()
 
     return fig
+
+def plot_records_orientation_helper(st_item):
+    """
+
+    """
+
+    continue_processing = False
+    for item in st_item:
+        if item[0]:
+            continue_processing = True
+            break
+
+    if not continue_processing:
+        return None
+        
+    n_inicident = len(st_item)
+
+    # for st_item in st_orientation_list:
+        
+    title_is_set = False
+    title1 = None
+    fig, axs = plt.subplots(1, 1, figsize=(12,8))
+    for i,inc_item in enumerate(st_item):
+        if (inc_item[0] is not None) and (not title_is_set): 
+            title1 = f"Location: {inc_item[0]}, {inc_item[1]}, {inc_item[2]}"
+            title_is_set = True
+            axs.set_title(title1, fontsize=10)
+        if (inc_item[0]) is not None:
+            l1 = inc_item[3] + " - " + inc_item[4] 
+            or_h1 = round(inc_item[6],4)
+            or_h2 = round(inc_item[7],4)
+            u1 = math.sin(or_h1*(math.pi/180))
+            v1 = math.cos(or_h1*(math.pi/180))
+            u2 = math.sin(or_h2*(math.pi/180))
+            v2 = math.cos(or_h2*(math.pi/180))
+            axs.quiver(0,i*-20,u1,v1, angles='xy', scale_units='xy',
+             scale=0.1, color=color_code[i], width = 0.004, label=l1)
+            axs.quiver(0,i*-20,u2,v2, angles='xy', scale_units='xy',
+             scale=0.1, color=color_code[i], width = 0.004)
+            axs.text(25,i*-20,f"{str(or_h1)}, {str(or_h2)}, {inc_item[8]}")
+            axs.text(25,(i*-20)-6,f"List of processes: {inc_item[5]}")
+            axs.set_xlim([-20,200])
+            axs.set_ylim([-20*(1+n_inicident),20])
+            axs.set_aspect('equal', 'box')
+            axs.legend()
+
+    return fig
+    
+            
+        
+        
+
+
+

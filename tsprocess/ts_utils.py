@@ -945,7 +945,7 @@ def compute_rotation_angle(a , b):
     for item in angles:
         for ii in tmp:
             if math.isclose(item,ii, rel_tol=1e-06,abs_tol=0):
-                rotation_angle = round(item,6)
+                rotation_angle = round(item,4)
         tmp.append(item)
         continue
         

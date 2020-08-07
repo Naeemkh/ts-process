@@ -27,10 +27,11 @@ from .timeseries import TimeSeries
 from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
                       list2message, is_lat_valid, is_lon_valid, is_depth_valid,
-                      is_incident_description_valid)
+                      is_incident_description_valid)                      
 from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
                             plot_acceleration_helper, plot_recordsection_helper,
-                            plot_scatter_on_basemap)
+                            plot_scatter_on_basemap,
+                            plot_records_orientation_helper, color_code)
 
 
 class Project:
@@ -38,8 +39,7 @@ class Project:
     p1 = Project('myproject')
     """
 
-    color_code  = ['k', 'r', 'b', 'm', 'g', 'c', 'y', 'brown',
-                   'gold', 'blueviolet', 'grey', 'pink']
+    # color_code = color_code
 
     valid_vertical_orientation = ["up", "down"]
     valid_incident_unit = ["m", "cm"]
@@ -488,7 +488,7 @@ class Project:
 
 
         # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
+        if len(records[0]) > len(color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
@@ -497,7 +497,7 @@ class Project:
 
             try:
                 fig, message, f_name_save = plot_displacement_helper(record,
-                 self.color_code,opt_params, list_inc, list_process, list_filters)
+                 color_code,opt_params, list_inc, list_process, list_filters)
             
             except TypeError as e:
                 continue
@@ -547,7 +547,7 @@ class Project:
             return
 
         # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
+        if len(records[0]) > len(color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
@@ -556,7 +556,7 @@ class Project:
 
             try:
                 fig, message, f_name_save = plot_velocity_helper(record,
-                self.color_code,opt_params, list_inc, list_process, list_filters)
+                color_code,opt_params, list_inc, list_process, list_filters)
             
             except TypeError as e:
                 continue
@@ -620,7 +620,7 @@ class Project:
             return
 
         # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
+        if len(records[0]) > len(color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
@@ -629,7 +629,7 @@ class Project:
 
             try: 
                 fig, message, f_name_save = plot_acceleration_helper(record,
-                self.color_code,opt_params,
+                color_code,opt_params,
                  list_inc, list_process, list_filters)
             except TypeError as e:
                 continue
@@ -675,7 +675,7 @@ class Project:
             return
 
         fig, message, f_name_save = plot_recordsection_helper(records,
-            self.color_code,opt_params,list_inc, list_process, list_filters)
+            color_code,opt_params,list_inc, list_process, list_filters)
 
         if query_opt_params(opt_params, 'save_figure'):
             
@@ -754,13 +754,11 @@ class Project:
         tmp_inc_list.append(list_inc[0])
         
         records = self._extract_records(list_inc, list_process, list_filters)
-        
-        
+                
         if not records:
             LOGGER.warning("No record has been collected.")
             return
-        
-        
+                
         # extract stations location from records.
         lat,lon = [], []
         
@@ -806,8 +804,6 @@ class Project:
             # save item.
             plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
              format='pdf',transparent=False, dpi=300)  
-        
-
 
     def which_records(self, list_inc,list_process,list_filters, opt_params):
         """ Print outs all records that pass the given filters 
@@ -895,7 +891,6 @@ class Project:
 
         for key, item in self.pr_db.db.items():
             print(key," : ", item)
-
     
     def summary(self):
         """
@@ -909,8 +904,6 @@ class Project:
 
         # project vertical orientation
         print("Vertical component positive orientation: " , self.ver_orientation_conv)
-
-
 
     def stations_joint_table(self, list_inc,list_process,list_filters,
                              opt_params):
@@ -971,7 +964,7 @@ class Project:
         
 
 
-    def records_orientation(self, list_inc,list_process,list_filters,
+    def plot_records_orientation(self, list_inc,list_process,list_filters,
                              opt_params):
         """ 
 
@@ -1009,15 +1002,42 @@ class Project:
                 if inc_record: 
                    inc_name = list_inc[i]
                    st_name = inc_record.station.inc_st_name.get(list_inc[i],None)
-                   tmp = [inc_name, st_name, list_process[i],
+                   st_location = [inc_record.station.lat,
+                    inc_record.station.lon, inc_record.station.depth]
+                   tmp = [st_location[0],st_location[1], st_location[2],
+                   inc_name, st_name, list_process[i],
                    inc_record.hc_or1, inc_record.hc_or2, inc_record.ver_or]
                    tmp_record.append(tmp)
                 else:
-                    tmp = [None, None, list_process[i], None, None, None]
+                    tmp = [None, None, None, 
+                    None, None, list_process[i], None, None, None]
                     tmp_record.append(tmp)
             tmp_st_record.append(tmp_record)
          
-        print(tmp_st_record)
+
+        # n_inicident = len(st_orientation_list[0])
+        for st_item in tmp_st_record:
+            
+            if st_item[0] is None:
+                continue
+
+            fig = plot_records_orientation_helper(st_item)
+            
+            if query_opt_params(opt_params, 'save_figure'):
+                f_name_save = "f_records_orientation_plot_" +\
+                 datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+                
+                details = [f_name_save, list_inc, list_process, list_filters,
+                 {}]
+                message = list2message(details)
+                
+                message = message + "\n----------------------------\n"
+                write_into_file(os.path.join(self.path_to_output_dir,
+                "output_item_description.txt"),message)
+                # save item.
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+                 format='pdf',transparent=False, dpi=300)  
+
 
                     
 
