@@ -535,6 +535,24 @@ not modified.</div>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.project.Project.plot_peak_velocity_vs_distance">
+<code class="sig-name descname">plot_peak_velocity_vs_distance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_peak_velocity_vs_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_peak_velocity_vs_distance" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.project.Project.plot_record_section">
 <code class="sig-name descname">plot_record_section</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_record_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_record_section" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots seismic record section</p>
@@ -567,7 +585,7 @@ modified.</div>
 </div>
 </dd>
 <dt>Outputs:</dt><dd><div class="line-block">
-<div class="line">stations_joint_table: as a pandas dataframe</div>
+<div class="line"><br /></div>
 </div>
 </dd>
 </dl>
@@ -1447,6 +1465,27 @@ should not be directly used by the end users.</p>
 amplitude for 3 components. It is an internal function for
 plot_displacement_records methods in the Project class.
 should not be directly used by the end users.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_plot_utils.plot_peak_velocity_vs_distance_helper">
+<code class="sig-prename descclassname">tsprocess.ts_plot_utils.</code><code class="sig-name descname">plot_peak_velocity_vs_distance_helper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st_records</span></em>, <em class="sig-param"><span class="n">list_inc</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_plot_utils.html#plot_peak_velocity_vs_distance_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_plot_utils.plot_peak_velocity_vs_distance_helper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots scatter data points for comparing peak ground velocity vs
+distance.</p>
+<dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">st_records: nested list, each nested list contains one station’s
+location. First elemenet is distance, second, third, fourth elements
+are peak ground velocity of h1, h2, and ver. There is one list for
+each incident provided in list_inc.</div>
+<div class="line">list_inc: list of incidents.</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">fig: matplotlib figure handle.</div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
