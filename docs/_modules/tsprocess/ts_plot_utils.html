@@ -176,6 +176,7 @@
 <span class="sd">====================================</span>
 <span class="sd">The core module for timeseries plot helper functions.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
@@ -186,6 +187,10 @@
 
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="n">check_opt_param_minmax</span><span class="p">,</span> <span class="n">query_opt_params</span><span class="p">,</span> <span class="n">list2message</span>
+
+
+<span class="n">color_code</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;brown&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;blueviolet&#39;</span><span class="p">,</span> <span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="s1">&#39;pink&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="plot_displacement_helper"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_plot_utils.plot_displacement_helper">[docs]</a><span class="k">def</span> <span class="nf">plot_displacement_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">color_code</span><span class="p">,</span> <span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span>
@@ -650,6 +655,63 @@
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="plot_records_orientation_helper"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_plot_utils.plot_records_orientation_helper">[docs]</a><span class="k">def</span> <span class="nf">plot_records_orientation_helper</span><span class="p">(</span><span class="n">st_item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">continue_processing</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">st_item</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">continue_processing</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">continue_processing</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+        
+    <span class="n">n_inicident</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">st_item</span><span class="p">)</span>
+
+    <span class="c1"># for st_item in st_orientation_list:</span>
+        
+    <span class="n">title_is_set</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">title1</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">inc_item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st_item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">title_is_set</span><span class="p">):</span> 
+            <span class="n">title1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Location: </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">title_is_set</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">l1</span> <span class="o">=</span> <span class="n">inc_item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">inc_item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> 
+            <span class="n">or_h1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">or_h2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">u1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">or_h1</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">v1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">or_h1</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">u2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">or_h2</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">v2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">or_h2</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">,</span><span class="n">u1</span><span class="p">,</span><span class="n">v1</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span>
+             <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">width</span> <span class="o">=</span> <span class="mf">0.004</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">l1</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">,</span><span class="n">u2</span><span class="p">,</span><span class="n">v2</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span>
+             <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">width</span> <span class="o">=</span> <span class="mf">0.004</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">,</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">or_h1</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">or_h2</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">25</span><span class="p">,(</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">)</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span><span class="sa">f</span><span class="s2">&quot;List of processes: </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="mi">200</span><span class="p">])</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">20</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">n_inicident</span><span class="p">),</span><span class="mi">20</span><span class="p">])</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    
+    <span class="k">return</span> <span class="n">fig</span></div>
+    
+            
+        
+        
+
+
+
 </pre></div>
 
            </div>

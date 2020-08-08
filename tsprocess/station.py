@@ -65,7 +65,8 @@ class Station:
         if filter_name in cls.station_filters:
             #TODO probably customize exception should be a better option
             #  to handle this.
-            LOGGER.warning("Filter name is already used. Has not been added.")
+            LOGGER.warning(f"Filter name: {filter_name} has been already used."
+             " Try another name.")
             return
 
         if filter_type not in cls.station_filter_types:

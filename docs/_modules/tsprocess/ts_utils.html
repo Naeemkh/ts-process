@@ -642,64 +642,30 @@
 <span class="sd">    Input:</span>
 <span class="sd">        record: instance of Record class</span>
 <span class="sd">        rotation_angle: rotation angle in degrees</span>
-
 <span class="sd">    Output:</span>
 <span class="sd">        rotated record instane        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1">#TODO: channels of the record should be ordered during creating the record.</span>
 
     <span class="c1"># Check rotation angle</span>
     <span class="k">if</span> <span class="n">rotation_angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Nothing to do!</span>
         <span class="k">return</span> <span class="kc">None</span>
-
     
     <span class="c1"># check if rotateion angle is valid.</span>
     <span class="k">if</span> <span class="n">rotation_angle</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rotation_angle</span> <span class="o">&gt;</span> <span class="mi">360</span><span class="p">:</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rotation angle is not valid </span><span class="si">{</span><span class="n">rotation_angle</span><span class="si">:</span><span class="s2">f</span><span class="si">}</span><span class="s2">.&quot;</span>
-         <span class="s2">&quot;Command ignored.&quot;</span><span class="p">)</span>
+         <span class="s2">&quot; Command ignored.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># these info should be read from records:</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or2</span>
 
-    <span class="c1"># Make sure channels are ordered properly</span>
-    <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span><span class="p">:</span>
-        <span class="c1"># This should never happen.</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;there is a problem with orientaiton ordering.&quot;</span>
-         <span class="s2">&quot;Command ignored.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">y</span>
 
-        <span class="c1"># Swap channels</span>
-        <span class="c1"># I think swaping channels may cause unknown bugs in the longrun</span>
-        <span class="c1"># temp = station[0]</span>
-        <span class="c1"># station[0] = station[1]</span>
-        <span class="c1"># station[1] = temp</span>
-
-    <span class="c1"># Calculate angle between two components</span>
-    <span class="n">angle</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-
-
-    <span class="c1"># We need two orthogonal channels</span>
-    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">90</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">270</span><span class="p">:</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Rotation needs two orthogonal channels!&quot;</span>
-         <span class="s2">&quot;Command ignored.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    
-        <span class="c1"># Create rotation matrix</span>
-    <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
-        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)),</span>
-                            <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">))),</span>
-                           <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)),</span>
-                            <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)))])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Angle is 270!</span>
-        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)),</span>
-                            <span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">))),</span>
-                           <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)),</span>
-                            <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)))])</span>
-    
     <span class="n">rc_dis_1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_h1</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">rc_dis_2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_h2</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">rc_dis_v</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">disp_ver</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -711,10 +677,20 @@
     <span class="n">rc_acc_1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h1</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">rc_acc_2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_h2</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">rc_acc_v</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">acc_ver</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+      
+    <span class="c1"># Calculate angle between two components</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># We need two orthogonal channels</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">90</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">270</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Rotation needs two orthogonal channels!&quot;</span>
+         <span class="s2">&quot;Command ignored.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    
 
-    <span class="c1"># Make sure they all have the same number of points</span>
-   
-    <span class="c1"># find the shortest timeseries and cut others based on that. </span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)),</span>
+                    <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">))),</span>
+                   <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)),</span>
+                    <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">)))])</span>
 
     <span class="n">n_points</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rc_dis_1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc_dis_2</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc_dis_v</span><span class="p">),</span>
                    <span class="nb">len</span><span class="p">(</span><span class="n">rc_vel_1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc_vel_2</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc_vel_v</span><span class="p">),</span>
@@ -733,8 +709,8 @@
     <span class="p">[</span><span class="n">rcs_acc_1</span><span class="p">,</span> <span class="n">rcs_acc_2</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">([</span><span class="n">rcs</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">rcs</span><span class="p">[</span><span class="mi">7</span><span class="p">]])</span>
 
     <span class="c1"># Compute the record orientation        </span>
-    <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or1</span> <span class="o">-</span> <span class="n">rotation_angle</span>
-    <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">hc_or2</span> <span class="o">-</span> <span class="n">rotation_angle</span>
+    <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="n">n_hc_or1</span> <span class="o">-</span> <span class="n">rotation_angle</span>
+    <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="n">n_hc_or2</span> <span class="o">-</span> <span class="n">rotation_angle</span>
     
     <span class="k">if</span> <span class="n">n_hc_or1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">n_hc_or1</span> <span class="o">=</span> <span class="mi">360</span> <span class="o">+</span> <span class="n">n_hc_or1</span>
@@ -742,12 +718,12 @@
     <span class="k">if</span> <span class="n">n_hc_or2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">n_hc_or2</span> <span class="o">=</span> <span class="mi">360</span> <span class="o">+</span> <span class="n">n_hc_or2</span>
 
-    
     <span class="k">return</span>  <span class="p">(</span><span class="n">rcs</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span>  <span class="n">rcs_dis_1</span><span class="p">,</span> <span class="n">rcs_dis_2</span><span class="p">,</span> <span class="n">rcs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
                         <span class="n">rcs_vel_1</span><span class="p">,</span> <span class="n">rcs_vel_2</span><span class="p">,</span> <span class="n">rcs</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
                         <span class="n">rcs_acc_1</span><span class="p">,</span> <span class="n">rcs_acc_2</span><span class="p">,</span> <span class="n">rcs</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
                         <span class="n">record</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">source_params</span><span class="p">,</span>
                         <span class="n">n_hc_or1</span><span class="p">,</span> <span class="n">n_hc_or2</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="read_data"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_utils.read_data">[docs]</a><span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">signal</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1118,7 +1094,7 @@
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">angles</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">,</span><span class="n">abs_tol</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-                <span class="n">rotation_angle</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+                <span class="n">rotation_angle</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">continue</span>
         

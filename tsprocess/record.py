@@ -391,6 +391,7 @@ class Record:
                  record.acc_ver.t_init_point)
                 n_hc_or1 = proc_record[12]
                 n_hc_or2 = proc_record[13]
+                n_ver_or = record.ver_or
                 n_unit = record.unit
             
             elif Record.processing_labels[label_name][0] == "set_unit":

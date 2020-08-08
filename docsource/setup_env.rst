@@ -31,13 +31,27 @@ Type 'y' (yes) for popup questions.
 
     $ conda activate your_venv
 
-- Step 3: Navigate to the downloaded ``tsprocess`` folder and install the package requirements.
+Install **tsprocess** (Step 3 or Step 4)
+
+- Step 3: Directly from PyPI
+You can install the package either directly from
+`PyPI <https://pypi.org/project/tsprocess/>`_ through the following command:
+
+.. code-block:: console
+
+    $ pip3 install tsprocess
+
+- Step 4: Install from Github package in developement mode
+You can install the package in a developement mode according to the
+following commands: 
+
+Navigate to the downloaded ``tsprocess`` folder and install the package requirements.
 
 .. code-block:: console
 
     $ pip3 install -r requirements.txt
 
-- Step 4: Navigate one folder up and install the package.
+Navigate one folder up and install the package.
 
 .. code-block:: console
 
@@ -45,7 +59,7 @@ Type 'y' (yes) for popup questions.
 
 That's it. You should be able to *import tsprocess* and use it. However, if you 
 want to use the code inside `Jupyter Notebook <https://jupyter.org>`_ 
-please follow the next steps.
+(or Jupyter Lab) please follow the next steps.
 
 - Step 5: Register the kernel on Jupyter Notebook:
 
@@ -71,7 +85,7 @@ open terminal and fire up notebook:
 
 .. code-block:: console
 
-    $ jupyter notebook
+    $ jupyter notebook (or jupyter lab)
 
 At the top right corner, there is a button labeled `New` key. Choose your 
 recently created kernel (in this example: your_venv_name). Choosing a kernel 

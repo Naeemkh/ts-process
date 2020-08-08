@@ -556,6 +556,24 @@ modified.</div>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tsprocess.project.Project.plot_records_orientation">
+<code class="sig-name descname">plot_records_orientation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_records_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_records_orientation" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Inputs:</dt><dd><div class="line-block">
+<div class="line">list_inc: list of incidents</div>
+<div class="line">list_process: list of processes, one list per incident</div>
+<div class="line">list filters: list of filters defined for stations</div>
+<div class="line">opt_params: optional parameters (dictionary)</div>
+</div>
+</dd>
+<dt>Outputs:</dt><dd><div class="line-block">
+<div class="line">stations_joint_table: as a pandas dataframe</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tsprocess.project.Project.plot_velocity_records">
 <code class="sig-name descname">plot_velocity_records</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.plot_velocity_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.plot_velocity_records" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots 3 velocity timeseries one page per station and their
@@ -575,24 +593,6 @@ modified.</div>
 <div class="line">zoom_in_freq : [freq_min, freq_max] in Hertz</div>
 <div class="line">Horizontal zoom in period axis for better presentation. Data is
 not modified.</div>
-</div>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="tsprocess.project.Project.records_orientation">
-<code class="sig-name descname">records_orientation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_inc</span></em>, <em class="sig-param"><span class="n">list_process</span></em>, <em class="sig-param"><span class="n">list_filters</span></em>, <em class="sig-param"><span class="n">opt_params</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/project.html#Project.records_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.project.Project.records_orientation" title="Permalink to this definition">¶</a></dt>
-<dd><dl>
-<dt>Inputs:</dt><dd><div class="line-block">
-<div class="line">list_inc: list of incidents</div>
-<div class="line">list_process: list of processes, one list per incident</div>
-<div class="line">list filters: list of filters defined for stations</div>
-<div class="line">opt_params: optional parameters (dictionary)</div>
-</div>
-</dd>
-<dt>Outputs:</dt><dd><div class="line-block">
-<div class="line">stations_joint_table: as a pandas dataframe</div>
 </div>
 </dd>
 </dl>
@@ -1448,6 +1448,11 @@ amplitude for 3 components. It is an internal function for
 plot_displacement_records methods in the Project class.
 should not be directly used by the end users.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt id="tsprocess.ts_plot_utils.plot_records_orientation_helper">
+<code class="sig-prename descclassname">tsprocess.ts_plot_utils.</code><code class="sig-name descname">plot_records_orientation_helper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st_item</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tsprocess/ts_plot_utils.html#plot_records_orientation_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsprocess.ts_plot_utils.plot_records_orientation_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt id="tsprocess.ts_plot_utils.plot_recordsection_helper">

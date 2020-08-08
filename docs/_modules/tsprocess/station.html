@@ -238,7 +238,8 @@
         <span class="k">if</span> <span class="n">filter_name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">station_filters</span><span class="p">:</span>
             <span class="c1">#TODO probably customize exception should be a better option</span>
             <span class="c1">#  to handle this.</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Filter name is already used. Has not been added.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filter name: </span><span class="si">{</span><span class="n">filter_name</span><span class="si">}</span><span class="s2"> has been already used.&quot;</span>
+             <span class="s2">&quot; Try another name.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">filter_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">:</span>

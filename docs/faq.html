@@ -223,6 +223,27 @@ figure.</p>
 the problem by switching to <em>Jupyter Lab</em>. Please read more on
 this Github <a class="reference external" href="https://github.com/Naeemkh/tsprocess/issues/43">issue.</a></p>
 </div></blockquote>
+<p><strong>Q.</strong> Each incident has seismic source as an input value. Why we need to
+add source hypocenter (using add_source_hypocenter(lat, lon, depth)) to the
+project.</p>
+<blockquote>
+<div><p><strong>A.</strong> Different incidents use different source models (sometimes extended
+source models). Even they might be slightly different. In the project we
+need a predifined hypocenter to compute distance between stations and the
+source of earthquake. That’s why we define a source hypocenter for the
+project.</p>
+</div></blockquote>
+<p><strong>Q.</strong> I used a name for a processing label and did some processing, then I
+changed the parameters and rerun the jupyter lab. However, it seems the new
+parameters do not take effect. I think there is a bug in the code.</p>
+<blockquote>
+<div><p><strong>A.</strong> Whenever you are looking for a record, the program uses the incident
+name, station name, and later on, processing labels to generate a hash
+value. If that hash value exist in the database, it will be retrieved.
+Althought, you have changed the parameters, it is not changed in the
+database. This is a rare situation. The easiest way is to remvoe the database
+and rerun the project.</p>
+</div></blockquote>
 </div>
 
 
