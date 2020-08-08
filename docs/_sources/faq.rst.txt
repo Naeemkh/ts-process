@@ -35,4 +35,16 @@ project.
     source of earthquake. That's why we define a source hypocenter for the
     project.  
 
+**Q.** I used a name for a processing label and did some processing, then I
+changed the parameters and rerun the jupyter lab. However, it seems the new
+parameters do not take effect. I think there is a bug in the code. 
+
+    **A.** Whenever you are looking for a record, the program uses the incident
+    name, station name, and later on, processing labels to generate a hash
+    value. If that hash value exist in the database, it will be retrieved. 
+    Althought, you have changed the parameters, it is not changed in the
+    database. This is a rare situation. The easiest way is to remvoe the database
+    and rerun the project.
+    
+
 

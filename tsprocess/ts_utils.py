@@ -483,7 +483,7 @@ def rotate_record(record, rotation_angle):
     # check if rotateion angle is valid.
     if rotation_angle < 0 or rotation_angle > 360:
         LOGGER.error(f"Rotation angle is not valid {rotation_angle:f}."
-         "Command ignored.")
+         " Command ignored.")
         return None
 
     # these info should be read from records:
@@ -507,7 +507,6 @@ def rotate_record(record, rotation_angle):
       
     # Calculate angle between two components
     angle = round(y - x,2)
-    print(angle)
     # We need two orthogonal channels
     if abs(angle) != 90 and abs(angle) != 270:
         LOGGER.error("Rotation needs two orthogonal channels!"
