@@ -498,9 +498,7 @@ def plot_records_orientation_helper(st_item):
         return None
         
     n_inicident = len(st_item)
-
-    # for st_item in st_orientation_list:
-        
+    
     title_is_set = False
     title1 = None
     fig, axs = plt.subplots(1, 1, figsize=(12,8))
@@ -534,8 +532,81 @@ def plot_records_orientation_helper(st_item):
     return fig
     
             
-        
-        
+def plot_peak_velocity_vs_distance_helper(st_records, list_inc):
+    """
+    Plots scatter data points for comparing peak ground velocity vs 
+    distance. 
+
+    Inputs:
+        | st_records: nested list, each nested list contains one station's
+          location. First elemenet is distance, second, third, fourth elements
+          are peak ground velocity of h1, h2, and ver. There is one list for 
+          each incident provided in list_inc.
+        | list_inc: list of incidents.
+
+    Outputs:
+        | fig: matplotlib figure handle.
+    """    
+    
+    if not st_records:
+        LOGGER.warning('Records are not provided.')
+        return
+
+    fig, axs = plt.subplots(3, 1, figsize=(12,8))
+    h_comp_1 = []
+    h_comp_2 = []
+    h_comp_ver = []
+
+    for item in st_records:
+        hc1 = []
+        hc2 = []
+        hcv = []
+        if item[0]:
+            for i,val in enumerate(item):
+                if i == 0:
+                    hc1.append(val)
+                    hc2.append(val)
+                    hcv.append(val)
+                    continue
+
+                hc1.append(val[0])
+                hc2.append(val[1])
+                hcv.append(val[2])
+                
+        h_comp_1.append(hc1)
+        h_comp_2.append(hc2)
+        h_comp_ver.append(hcv)
+
+    dist = [item[0] for item in h_comp_1 if item]
+
+    for i, inc in enumerate(list_inc):
+        tmp_pv = [item[i+1] for item in h_comp_1 if item]
+        axs[0].scatter(dist,tmp_pv,s=10, c=color_code[i], label = list_inc[i])
+
+    for i, inc in enumerate(list_inc):
+        tmp_pv = [item[i+1] for item in h_comp_2 if item]
+        axs[1].scatter(dist,tmp_pv,s=10, c=color_code[i], label = list_inc[i])
+   
+    for i, inc in enumerate(list_inc):
+        tmp_pv = [item[i+1] for item in h_comp_ver if item]
+        axs[2].scatter(dist,tmp_pv,s=10, c=color_code[i], label = list_inc[i])
+
+
+    for ax in axs:
+        ax.set_yscale('log')
+        ax.set_xscale('log')
+        ax.grid(True)
+
+    axs[0].legend()
+    axs[0].set_ylabel('h_comp_1')
+    axs[1].set_ylabel('h_comp_2')
+    axs[2].set_ylabel('ver_comp')
+
+    axs[0].set_title("Peak Ground Velocity vs Epicentral Distance")
+    axs[2].set_xlabel('Epicentral Distance (km)')
+
+    return fig
+    
 
 
 

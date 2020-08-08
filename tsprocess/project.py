@@ -28,10 +28,11 @@ from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
                       list2message, is_lat_valid, is_lon_valid, is_depth_valid,
                       is_incident_description_valid)                      
-from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
-                            plot_acceleration_helper, plot_recordsection_helper,
-                            plot_scatter_on_basemap,
-                            plot_records_orientation_helper, color_code)
+from .ts_plot_utils import (color_code,plot_displacement_helper,
+                            plot_velocity_helper, plot_acceleration_helper,
+                            plot_recordsection_helper, plot_scatter_on_basemap,
+                            plot_records_orientation_helper, 
+                            plot_peak_velocity_vs_distance_helper)
 
 
 class Project:
@@ -297,6 +298,7 @@ class Project:
                 incident_metadata = self.incidents[incident_item].metadata
 
                 try:
+                    st_name_inc = None
                     st_name_inc = station.inc_st_name[incident_item]
                     list_process_cp = list_process[i].copy()
                     tmp_record = Record.get_record(station, incident_metadata,
@@ -974,7 +976,7 @@ class Project:
             | opt_params: optional parameters (dictionary)
 
         Outputs: 
-            | stations_joint_table: as a pandas dataframe
+            | 
 
         """
 
@@ -1039,7 +1041,71 @@ class Project:
 
 
                     
+    def plot_peak_velocity_vs_distance(self, list_inc,list_process,list_filters,
+                             opt_params):
+        """ 
 
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Outputs: 
+            | 
+
+        """
+
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+        if not records:
+            LOGGER.warning("No record has been collected.")
+            return
+
+                #st_record: all records in one station.
+        #inc_record: records of different incident at one station.
+
+        tmp_st_record = []
+        for st_record in records:
+            tmp_record = [None]
+            dist_set = False
+            for i,inc_record in enumerate(st_record):
+                if inc_record and not dist_set:
+                    tmp_record.pop(0)
+                    tmp_record.insert(0, inc_record.epicentral_distance)
+                    dist_set = True
+
+                if inc_record: 
+                   tmp_peak_vel = [inc_record.vel_h1.peak_vv,
+                    inc_record.vel_h2.peak_vv, inc_record.vel_ver.peak_vv]
+                   tmp_record.append(tmp_peak_vel)
+                
+                else:
+                    tmp_record.append([None, None, None]) 
+
+            tmp_st_record.append(tmp_record)
+
+        fig = plot_peak_velocity_vs_distance_helper(tmp_st_record, list_inc)
+        if query_opt_params(opt_params, 'save_figure'):
+            f_name_save = "f_peak_velocity_vs_distance_plot_" +\
+             datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+            
+            details = [f_name_save, list_inc, list_process, list_filters,
+             {}]
+            message = list2message(details)
+            
+            message = message + "\n----------------------------\n"
+            write_into_file(os.path.join(self.path_to_output_dir,
+            "output_item_description.txt"),message)
+            # save item.
+            plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+             format='pdf',transparent=False, dpi=300)  
 
 
 
