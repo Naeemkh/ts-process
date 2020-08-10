@@ -717,6 +717,8 @@ class Project:
         )
 
         for i in records:
+            if not i[0]:
+                continue
             lat = i[0].station.lat
             lon = i[0].station.lon
             marker = Marker(location=(lat, lon), draggable=False,
