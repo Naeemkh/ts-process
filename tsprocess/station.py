@@ -152,7 +152,7 @@ class Station:
         if station_filter_name not in self.station_filters.keys():
             # this should never be invoked. I have checked the labels before. 
             print("Filter is not supported, ignored.")
-            return
+            return None
         
         filter_type = self.station_filters[station_filter_name][0]
         filter_kwargs = self.station_filters[station_filter_name][1]

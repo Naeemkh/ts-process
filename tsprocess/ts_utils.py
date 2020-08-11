@@ -595,8 +595,8 @@ def read_smc_v2(input_file):
     try:
         fp = open(input_file, 'r')
     except IOError as e:
-        LOGGER.debug(f"opening input file {input_file}")
-        return False
+        LOGGER.warning(f"{input_file} file not found.")
+        return None, None
 
     # Print status message
     LOGGER.debug(f"Reading {input_file} file.")
@@ -623,8 +623,8 @@ def read_smc_v2(input_file):
         # Check this is the corrected acceleration data
         ctype = (tmp[0] + " " + tmp[1]).lower()
         if ctype != "corrected accelerogram":
-            LOGGER.error("[ERROR]: processing corrected accelerogram ONLY.")
-            return False
+            LOGGER.error("Processing corrected accelerogram ONLY.")
+            return None, None
         
         # detect unit of the record
         acc_unit = channels[i][17].split()[4]
@@ -690,7 +690,8 @@ def read_smc_v2(input_file):
             seconds, fraction = tmp[2].split('.')
             # Works for both newer and older V2 files
             tzone = channels[i][4].split()[5]
-        except IndexError:
+        except (IndexError, ValueError) as e:
+            LOGGER.debug(e)
             date = '00/00/00'
             hour = '00'
             minute = '00'

@@ -244,18 +244,26 @@ class Record:
                 try:
                     
                     # load cesmdv2 file
+                    
                     tmp_loaded_data, tmp_meta_data = read_smc_v2(station_file)
-
-                    # create a record object
-                    record_org = Record._from_cesmdv2(tmp_loaded_data, 
-                     tmp_meta_data, station_obj, Station.pr_source_loc)
-
-                    record_org.this_record_hash = hash_val
+                    
+                    if tmp_loaded_data is None:
+                        record_org = None
+                    else:
+                        # create a record object
+                        record_org = Record._from_cesmdv2(tmp_loaded_data, 
+                         tmp_meta_data, station_obj, Station.pr_source_loc, st_name)
     
-                    # put the record in the database.
-                    Record.pr_db.set_value(hash_val,record_org)
-                    Record.pr_inc_tracker.track_incident_hash(incident_name,
-                     hash_val)
+                        if record_org is None:
+                            pass
+                        else:
+                            record_org.this_record_hash = hash_val
+            
+                            # put the record in the database.
+                            Record.pr_db.set_value(hash_val,record_org)
+                            Record.pr_inc_tracker.track_incident_hash(
+                                incident_name, hash_val
+                                )
                 
                 except Exception as e:
                     record_org = None
@@ -691,7 +699,8 @@ class Record:
                     hr_or1, hr_or2, ver_or, inc_unit)
 
     @staticmethod
-    def _from_cesmdv2(r_data, r_metadata, station_obj,source_hypocenter):
+    def _from_cesmdv2(r_data, r_metadata, station_obj, source_hypocenter,
+     st_name):
         """ Loads an instance of Hercules simulation results at one station.
         Returns a Record object.
         
@@ -702,6 +711,7 @@ class Record:
               ts_utils.read_smc_v2 functions second return value
             | station_obj: a station object corresponding that filename
             | source_hypocenter: project source location
+            | st_name: station name
 
         Outputs:
             | Record object 
@@ -712,10 +722,9 @@ class Record:
         
         if len(r_data) != 3:
             LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
-            "and type cesmdv2 record has missing component(s)."
+            " and type cesmdv2 record has missing component(s)."
             " Handling this situation is not implemented.")
 
-        
         # generate the common dt and timevector
         dt_vector = []
         n_s = []
@@ -726,15 +735,15 @@ class Record:
             orient.append(item[2])
 
         if len(set(dt_vector)) != 1 or len(set(n_s)) !=1:
-            LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
-            "and type cesmdv2 record has different dt or number of samples."
+            LOGGER.warning(f"Station {st_name}"
+            " with type cesmdv2 record has different dt or number of samples."
             " Handling this situation is not implemented.")
             return None
 
         channels_unit = r_metadata['channels_unit']
         if "unknown" in channels_unit:
-            LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
-            "and type cesmdv2 record has at least one channel with unknown"
+            LOGGER.warning(f"Station {st_name}"
+            " with type cesmdv2 record has at least one channel with unknown"
             " unit. Handling this situation is not implemented.")
             return None
               
