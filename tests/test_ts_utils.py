@@ -28,9 +28,9 @@ class TestCESMDV2(unittest.TestCase):
         self.metadata = metadata
 
     def test_read_non_existing_cesmdv2_file(self):
-        self.assertFalse(tsu.read_smc_v2(
+        self.assertEqual(tsu.read_smc_v2(
             os.path.join(os.path.dirname(os.path.realpath(__file__)),
-             'sample_test_files','NotCE12502.V2')))
+             'sample_test_files','NotCE12502.V2')),(None, None))
 
     def test_meta_data(self):
         self.assertEqual(self.metadata['network'],'CE')
