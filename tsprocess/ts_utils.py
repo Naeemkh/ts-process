@@ -690,8 +690,10 @@ def read_smc_v2(input_file):
             seconds, fraction = tmp[2].split('.')
             # Works for both newer and older V2 files
             tzone = channels[i][4].split()[5]
+            
         except (IndexError, ValueError) as e:
-            LOGGER.debug(e)
+            LOGGER.debug(f"Problem with timing in the file. Default values are" 
+            f" used. " + str(e) + f" See ==> {input_file}")
             date = '00/00/00'
             hour = '00'
             minute = '00'
@@ -738,6 +740,16 @@ def read_smc_v2(input_file):
         dis_data = read_data(d_signal)
         vel_data = read_data(v_signal)
         acc_data = read_data(a_signal)
+
+        if ((len(dis_data) != samples) or 
+            (len(vel_data) != samples) or
+            (len(acc_data) != samples)):
+            LOGGER.warning(f"Number of data samples: {str(samples)} (at Channel"
+             f" {str(i+1)}) is not compatible with {str(len(dis_data))},"
+             f"{str(len(vel_data))}, {str(len(acc_data))} for dis, vel, acc." 
+             f" This record requires users to investigate the file."
+             f" See ==> {input_file}.") 
+            return None, None
 
         record_list.append([samples, delta_t, orientation,
                                                 [dis_data, vel_data, acc_data]])

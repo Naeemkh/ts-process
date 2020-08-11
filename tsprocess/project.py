@@ -582,6 +582,10 @@ class Project:
                 color_code,opt_params, list_inc, list_process, list_filters)
             
             except TypeError as e:
+                LOGGER.debug(e)
+                continue
+            except ValueError as e:
+                LOGGER.debug(e)
                 continue
 
 
