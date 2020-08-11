@@ -595,8 +595,8 @@ def read_smc_v2(input_file):
     try:
         fp = open(input_file, 'r')
     except IOError as e:
-        LOGGER.debug(f"opening input file {input_file}")
-        return False
+        LOGGER.warning(f"{input_file} file not found.")
+        return None, None
 
     # Print status message
     LOGGER.debug(f"Reading {input_file} file.")
@@ -623,8 +623,8 @@ def read_smc_v2(input_file):
         # Check this is the corrected acceleration data
         ctype = (tmp[0] + " " + tmp[1]).lower()
         if ctype != "corrected accelerogram":
-            LOGGER.error("[ERROR]: processing corrected accelerogram ONLY.")
-            return False
+            LOGGER.error("Processing corrected accelerogram ONLY.")
+            return None, None
         
         # detect unit of the record
         acc_unit = channels[i][17].split()[4]
@@ -690,7 +690,10 @@ def read_smc_v2(input_file):
             seconds, fraction = tmp[2].split('.')
             # Works for both newer and older V2 files
             tzone = channels[i][4].split()[5]
-        except IndexError:
+            
+        except (IndexError, ValueError) as e:
+            LOGGER.debug(f"Problem with timing in the file. Default values are" 
+            f" used. " + str(e) + f" See ==> {input_file}")
             date = '00/00/00'
             hour = '00'
             minute = '00'
@@ -737,6 +740,16 @@ def read_smc_v2(input_file):
         dis_data = read_data(d_signal)
         vel_data = read_data(v_signal)
         acc_data = read_data(a_signal)
+
+        if ((len(dis_data) != samples) or 
+            (len(vel_data) != samples) or
+            (len(acc_data) != samples)):
+            LOGGER.warning(f"Number of data samples: {str(samples)} (at Channel"
+             f" {str(i+1)}) is not compatible with {str(len(dis_data))},"
+             f"{str(len(vel_data))}, {str(len(acc_data))} for dis, vel, acc." 
+             f" This record requires users to investigate the file."
+             f" See ==> {input_file}.") 
+            return None, None
 
         record_list.append([samples, delta_t, orientation,
                                                 [dis_data, vel_data, acc_data]])

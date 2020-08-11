@@ -140,14 +140,18 @@ class Incident:
                                                  'station.'+str(i))] 
                                         )
                                     LOGGER.debug(
-                                        f"station.{str(i)} location added.")
+                                        f"station.{str(i)} location"
+                                        f"({tmp_line[0].strip()},"
+                                        f"{tmp_line[1].strip()},"
+                                        f"{tmp_line[2].strip()}) added.")
                                     i = i + 1
                                 elif len(tmp_line) == 0:
                                     # empty line, ignore it.
                                     pass
                                 else:
-                                    LOGGER.debug(
-                                        f"station.{str(i)}'s location is not valid."
+                                    LOGGER.warning(
+                                        f"station.{str(i)}'s location is not"
+                                        f" valid. ==> {tmp_line}"
                                         )
                                     i = i + 1
                             break

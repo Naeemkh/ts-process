@@ -423,6 +423,23 @@ class Project:
         
         return True
 
+
+    def _is_station_filter_valid(self,list_filters):
+        """ Checks if the requested station filter is a valid filter
+        
+        Input:
+            list_filters: List of station filters
+        
+        """
+        for fl in list_filters:
+            if (fl not in Station.station_filters):
+                LOGGER.error(
+                    f"{fl} is not a valid processing label. Command ignored."
+                    )
+                return False
+        
+        return True
+
     def valid_processing_labels(self):
         """ Returns a list of valid processing labels """
         for i,item in enumerate(TimeSeries.label_types):
@@ -540,6 +557,11 @@ class Project:
             LOGGER.warning("At least one processing label is not valid.")
             return
 
+        if not self._is_station_filter_valid(list_filters):
+            LOGGER.warning("At least one station filter is not valid.")
+            return
+
+
         records = self._extract_records(list_inc, list_process, list_filters)
         
         if not records:
@@ -560,6 +582,10 @@ class Project:
                 color_code,opt_params, list_inc, list_process, list_filters)
             
             except TypeError as e:
+                LOGGER.debug(e)
+                continue
+            except ValueError as e:
+                LOGGER.debug(e)
                 continue
 
 
@@ -717,6 +743,8 @@ class Project:
         )
 
         for i in records:
+            if not i[0]:
+                continue
             lat = i[0].station.lat
             lon = i[0].station.lon
             marker = Marker(location=(lat, lon), draggable=False,

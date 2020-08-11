@@ -6,7 +6,7 @@ The core module for the Station class.
 
 from math import radians, cos, sin, asin, sqrt
 
-from .ts_utils import compute_azimuth
+from .ts_utils import compute_azimuth, haversine
 from .log import LOGGER
 
 # this should follow object pool design pattern 
@@ -16,7 +16,7 @@ from .log import LOGGER
 class Station:
     """ Class Station """
     list_of_stations = []
-    vicinity_estimations = 10 
+    vicinity_estimations = 100 
 
     station_filter_types = {
         "epi_dist_lt": {'distance': 'in km'},
@@ -98,7 +98,7 @@ class Station:
         # messing up with records. 
         # I keep both sides, to see which method works better.
         source_lat, source_lon, source_depth = self.pr_source_loc
-        tmp_dist = self._haversine(source_lat,source_lon,self.lat, self.lon)/1000
+        tmp_dist = haversine(source_lat,source_lon,self.lat, self.lon)
         if tmp_dist < distance:
             return True
         else:
@@ -110,8 +110,7 @@ class Station:
         # messing up with records. 
         # I keep both sides, to see which method works better.
         source_lat, source_lon, source_depth = self.pr_source_loc
-        tmp_dist = (self._haversine(source_lat,source_lon,self.lat,
-         self.lon))/1000
+        tmp_dist = haversine(source_lat,source_lon,self.lat,self.lon)
         if tmp_dist > distance:
             return True
         else:
@@ -153,7 +152,7 @@ class Station:
         if station_filter_name not in self.station_filters.keys():
             # this should never be invoked. I have checked the labels before. 
             print("Filter is not supported, ignored.")
-            return
+            return None
         
         filter_type = self.station_filters[station_filter_name][0]
         filter_kwargs = self.station_filters[station_filter_name][1]
@@ -191,28 +190,47 @@ class Station:
         if filter_type == 'exclude_stlist_by_incident':
             return not self._include_stlist_by_incident(**filter_kwargs)
 
-    @staticmethod
-    def _haversine(lat1, lon1, lat2, lon2):
-        # convert decimal degrees to radians 
-        try:
-            lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-        except Exception:
-            return None
-        # haversine formula 
-        dlon = lon2 - lon1 
-        dlat = lat2 - lat1 
-        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-        c = 2 * asin(sqrt(a)) 
-        r = 6371000 # in meters
-        return c * r
+    # @staticmethod
+    # def _haversine(lat1, lon1, lat2, lon2):
+    #     # convert decimal degrees to radians 
+    #     try:
+    #         lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    #     except Exception:
+    #         return None
+    #     # haversine formula 
+    #     dlon = lon2 - lon1 
+    #     dlat = lat2 - lat1 
+    #     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    #     c = 2 * asin(sqrt(a)) 
+    #     r = 6371000 # in meters
+    #     return c * r
 
     @classmethod
     def add_station(cls, lat, lon, depth,incident_name,station_name):
    
-        for st_item in cls.list_of_stations:           
-            if (cls._haversine(lat,lon,st_item.lat,st_item.lon) < 
-            cls.vicinity_estimations and abs(depth - st_item.depth) < 1):
+        for st_item in cls.list_of_stations:
+            d_st = haversine(lat,lon,st_item.lat,st_item.lon) * 1000            
+            
+            if (d_st < cls.vicinity_estimations and
+               abs(depth - st_item.depth) < 1):
+               
                # this station is available
+               LOGGER.debug(f"Incident: {incident_name},"
+               f" station: {station_name}, with ({lat},{lon},{depth}) has"
+               f" distance= {d_st} m from available station item at"
+               f" ({st_item.lat},{st_item.lon},{st_item.depth})."
+               f" vc_dist is set to {cls.vicinity_estimations} m. Considered "
+               f" the same location.")
+
+               if st_item.inc_st_name.get(incident_name, None):
+                   LOGGER.debug(f"Incident: {incident_name},"
+                    f" station: {station_name}, with ({lat},{lon},{depth}) has"
+                    f" an station ({st_item.inc_st_name[incident_name]}) at"
+                    f" this location (distance = {d_st}). Make vicinity"
+                    f" estimation distance smaller or make sure there is no"
+                    f" mistake in stations location. The old station will be"
+                    f" substitude with this station.")
+
                st_item.inc_st_name[incident_name] = station_name
                return st_item
         
