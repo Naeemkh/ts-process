@@ -31,7 +31,7 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         conda install -c conda-forge cartopy
-        
+        pip install -e ../tsprocess
     # - name: Lint with flake8
     #   run: |
     #     # stop the build if there are Python syntax errors or undefined names
