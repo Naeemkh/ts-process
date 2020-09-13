@@ -10,7 +10,7 @@ from math import radians, cos, sin, asin, sqrt, atan2
 
 import numpy as np
 from scipy.signal import kaiser
-from rsp import calc_response
+from .fsc.rsp import calc_response
 
 from .log import LOGGER
 

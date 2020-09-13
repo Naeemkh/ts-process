@@ -3,6 +3,8 @@ from numpy.distutils.core import setup, Extension
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+ext1 = Extension(name='tsprocess.fsc.rsp', sources=['tsprocess/fsc/rsp.f95'])
+
 setup(
     name="tsprocess", 
     version="0.0.2",
@@ -16,7 +18,7 @@ setup(
     url="https://github.com/Naeemkh/ts-process",
     license="BSD 3-Clause",
     packages=setuptools.find_packages(exclude=['docs*', 'tests*']),
-    ext_modules = [Extension( 'rsp', ['tsprocess/fsc/rsp.f95'])],
+    ext_modules = [ext1],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
