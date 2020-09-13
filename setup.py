@@ -3,7 +3,7 @@ from numpy.distutils.core import setup, Extension
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-ext1 = Extension(name='tsprocess.fsc.rsp', sources=['tsprocess/fsc/rsp.f95'])
+ext1 = Extension(name='fsc.rsp', sources=['fsc/rsp.f95'])
 
 setup(
     name="tsprocess", 
