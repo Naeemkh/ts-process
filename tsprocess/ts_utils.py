@@ -10,6 +10,7 @@ from math import radians, cos, sin, asin, sqrt, atan2
 
 import numpy as np
 from scipy.signal import kaiser
+from rsp import calc_response
 
 from .log import LOGGER
 
@@ -26,7 +27,7 @@ def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
         | ini_vel: initial velocity
 
         | Originial version is writting by: Leonardo Ramirez-Guzman
-        | TODO: this function is very slow requires some attention. 
+        | Fortran kernel extension is added for speed up.  
 
     """
     signal_size = acc.size
@@ -77,7 +78,9 @@ def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
 
 def cal_acc_response(period, data, delta_t):
     """
-    Returns the response for acceleration only
+    Returns the response for acceleration only.
+    First tries fortran extenstion, if not found, uses python implementation,
+    which is slower.  
 
     Inputs:
         | period: osilator's period
@@ -85,10 +88,17 @@ def cal_acc_response(period, data, delta_t):
         | delta_ts: time step
 
     """
-    rsp = np.zeros(len(period))
-    for i,p in enumerate(period):
-        rsp[i] = max_osc_response(data, delta_t, 0.05, p, 0, 0)[-1]
-    return rsp
+    try:
+        (rsp_disp, rsp_vel, rsp_acc) = calc_response(data, delta_t, period,
+         0.05)
+        return rsp_acc
+    except:
+        rsp_vec = np.zeros(len(period))
+        for i,p in enumerate(period):
+            rsp_vec[i] = max_osc_response(data, delta_t, 0.05, p, 0, 0)[-1]
+        
+        return rsp_vec
+
 
 
 def get_period(tmin, tmax):

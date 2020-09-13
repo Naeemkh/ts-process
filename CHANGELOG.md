@@ -17,6 +17,7 @@ See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 - processing label: set_vertical_or
 - processing label: align_record
 - plot peak ground velocity vs distance
+- Fortran extension to compute response spectra
 
 
 ### Changed

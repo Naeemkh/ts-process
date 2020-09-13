@@ -1,9 +1,9 @@
-import setuptools
+from numpy.distutils.core import setup, Extension
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name="tsprocess", 
     version="0.0.2",
     author="Naeem Khoshnevis",
@@ -16,6 +16,7 @@ setuptools.setup(
     url="https://github.com/Naeemkh/ts-process",
     license="BSD 3-Clause",
     packages=setuptools.find_packages(exclude=['docs*', 'tests*']),
+    ext_modules = [Extension( 'rsp', ['tsprocess/fsc/rsp.f95'])],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
