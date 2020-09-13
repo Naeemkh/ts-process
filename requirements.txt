@@ -72,7 +72,6 @@ pytest==5.4.3
 python-dateutil==2.8.1
 pytz==2020.1
 pyzmq==19.0.1
-Proj==4.9.0
 readme-renderer==26.0
 recommonmark==0.6.0
 requests==2.24.0
