@@ -87,7 +87,6 @@ class TimeSeries:
                  f" {list(cls.label_types[label_type].keys())}")
                 return 
 
-
         cls.processing_labels[label_name] = [label_type, argument_dict]
 
     def _lowpass_filter(self, fc, N = 4):

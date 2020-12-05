@@ -606,7 +606,3 @@ def plot_peak_velocity_vs_distance_helper(st_records, list_inc):
     axs[2].set_xlabel('Epicentral Distance (km)')
 
     return fig
-    
-
-
-
