@@ -10,6 +10,7 @@ from math import radians, cos, sin, asin, sqrt, atan2
 
 import numpy as np
 from scipy.signal import kaiser
+from .fsc.rsp import calc_response
 
 from .log import LOGGER
 
@@ -26,7 +27,7 @@ def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
         | ini_vel: initial velocity
 
         | Originial version is writting by: Leonardo Ramirez-Guzman
-        | TODO: this function is very slow requires some attention. 
+        | Fortran kernel extension is added for speed up.  
 
     """
     signal_size = acc.size
@@ -77,7 +78,9 @@ def max_osc_response(acc, dt, csi, period, ini_disp, ini_vel):
 
 def cal_acc_response(period, data, delta_t):
     """
-    Returns the response for acceleration only
+    Returns the response for acceleration only.
+    First tries fortran extenstion, if not found, uses python implementation,
+    which is slower.  
 
     Inputs:
         | period: osilator's period
@@ -85,10 +88,17 @@ def cal_acc_response(period, data, delta_t):
         | delta_ts: time step
 
     """
-    rsp = np.zeros(len(period))
-    for i,p in enumerate(period):
-        rsp[i] = max_osc_response(data, delta_t, 0.05, p, 0, 0)[-1]
-    return rsp
+    try:
+        (rsp_disp, rsp_vel, rsp_acc) = calc_response(data, delta_t, period,
+         0.05)
+        return rsp_acc
+    except:
+        rsp_vec = np.zeros(len(period))
+        for i,p in enumerate(period):
+            rsp_vec[i] = max_osc_response(data, delta_t, 0.05, p, 0, 0)[-1]
+        
+        return rsp_vec
+
 
 
 def get_period(tmin, tmax):
@@ -213,9 +223,7 @@ def taper(flag, m, ts_vec):
             window = np.append(window, 1)
     
         if window.size != samples:
-            # print(window.size)
-            # print(samples)
-            print("[ERROR]: taper and data do not have the same number of\
+            LOGGER.error("[ERROR]: taper and data do not have the same number of\
                  samples.")
             window = np.ones(samples)
     
@@ -277,7 +285,7 @@ def seism_cutting(flag, t_diff, m, timeseries, delta_t):
     num = int(t_diff / delta_t)
 
     if num >= len(ts_vec):
-        print("[ERROR]: fail to cut timeseries.")
+        LOGGER.error("[ERROR]: fail to cut timeseries.")
         return timeseries
 
     if flag == 'front' and num != 0:
@@ -471,64 +479,30 @@ def rotate_record(record, rotation_angle):
     Input:
         record: instance of Record class
         rotation_angle: rotation angle in degrees
-
     Output:
         rotated record instane        
     """
 
+    #TODO: channels of the record should be ordered during creating the record.
 
     # Check rotation angle
     if rotation_angle is None:
         # Nothing to do!
-        return record
-
+        return None
     
     # check if rotateion angle is valid.
     if rotation_angle < 0 or rotation_angle > 360:
         LOGGER.error(f"Rotation angle is not valid {rotation_angle:f}."
-         "Command ignored.")
-        return record
+         " Command ignored.")
+        return None
 
     # these info should be read from records:
     x = record.hc_or1
     y = record.hc_or2
 
-    # Make sure channels are ordered properly
-    if x > y:
-        # This should never happen.
-        LOGGER.error("there is a problem with orientaiton ordering."
-         "Command ignored.")
-        return record
+    n_hc_or1 = x
+    n_hc_or2 = y
 
-        # Swap channels
-        # I think swaping channels may cause unknown bugs in the longrun
-        # temp = station[0]
-        # station[0] = station[1]
-        # station[1] = temp
-
-    # Calculate angle between two components
-    angle = round(y - x,2)
-
-
-    # We need two orthogonal channels
-    if abs(angle) != 90 and abs(angle) != 270:
-        LOGGER.error("Rotation needs two orthogonal channels!"
-         "Command ignored.")
-        return record
-    
-        # Create rotation matrix
-    if angle == 90:
-        matrix = np.array([(math.cos(math.radians(rotation_angle)),
-                            -math.sin(math.radians(rotation_angle))),
-                           (math.sin(math.radians(rotation_angle)),
-                            math.cos(math.radians(rotation_angle)))])
-    else:
-        # Angle is 270!
-        matrix = np.array([(math.cos(math.radians(rotation_angle)),
-                            +math.sin(math.radians(rotation_angle))),
-                           (math.sin(math.radians(rotation_angle)),
-                            -math.cos(math.radians(rotation_angle)))])
-    
     rc_dis_1 = record.disp_h1.value.copy()
     rc_dis_2 = record.disp_h2.value.copy()
     rc_dis_v = record.disp_ver.value.copy()
@@ -540,10 +514,20 @@ def rotate_record(record, rotation_angle):
     rc_acc_1 = record.acc_h1.value.copy()
     rc_acc_2 = record.acc_h2.value.copy()
     rc_acc_v = record.acc_ver.value.copy()
+      
+    # Calculate angle between two components
+    angle = round(y - x,2)
+    # We need two orthogonal channels
+    if abs(angle) != 90 and abs(angle) != 270:
+        LOGGER.error("Rotation needs two orthogonal channels!"
+         "Command ignored.")
+        return None
+    
 
-    # Make sure they all have the same number of points
-   
-    # find the shortest timeseries and cut others based on that. 
+    matrix = np.array([(math.cos(math.radians(rotation_angle)),
+                    -math.sin(math.radians(rotation_angle))),
+                   (math.sin(math.radians(rotation_angle)),
+                    math.cos(math.radians(rotation_angle)))])
 
     n_points = min(len(rc_dis_1), len(rc_dis_2), len(rc_dis_v),
                    len(rc_vel_1), len(rc_vel_2), len(rc_vel_v),
@@ -562,8 +546,8 @@ def rotate_record(record, rotation_angle):
     [rcs_acc_1, rcs_acc_2] = matrix.dot([rcs[6], rcs[7]])
 
     # Compute the record orientation        
-    n_hc_or1 = record.hc_or1 - rotation_angle
-    n_hc_or2 = record.hc_or2 - rotation_angle
+    n_hc_or1 = n_hc_or1 - rotation_angle
+    n_hc_or2 = n_hc_or2 - rotation_angle
     
     if n_hc_or1 < 0:
         n_hc_or1 = 360 + n_hc_or1
@@ -571,9 +555,400 @@ def rotate_record(record, rotation_angle):
     if n_hc_or2 < 0:
         n_hc_or2 = 360 + n_hc_or2
 
-    
     return  (rcs[9],  rcs_dis_1, rcs_dis_2, rcs[2],
                         rcs_vel_1, rcs_vel_2, rcs[5],
                         rcs_acc_1, rcs_acc_2, rcs[8],
                         record.station, record.source_params,
                         n_hc_or1, n_hc_or2)
+
+
+def read_data(signal):
+    """
+        The function is to convert signal data into an numpy array of float
+        numbers
+
+        Inputs:
+            | string of numbers
+        
+        Outputs:
+            | numpy array of numbers
+    
+    """
+    # avoid negative number being stuck
+    signal = signal.replace('-', ' -')
+    signal = signal.split()
+    
+    data = []
+    for s in signal:
+        data.append(float(s))
+    data = np.array(data)
+    return data
+
+
+def read_smc_v2(input_file):
+    """
+    Reads and processes a COSMOS V2 file
+
+    Inputes:
+        | input_file: Input file path
+
+    Outputs:
+
+        | record_list: Includes list of records. Each item in this list includes
+        | number of samples, delta t, orientation, and [disp, vel, acc] records.
+        | station_metadata: Please see the end of this function for keys in the 
+        | metadata attribute.
+    """
+    record_list = []
+
+    # Loads station into a string
+    try:
+        fp = open(input_file, 'r')
+    except IOError as e:
+        LOGGER.warning(f"{input_file} file not found.")
+        return None, None
+
+    # Print status message
+    LOGGER.debug(f"Reading {input_file} file.")
+
+    # Read data
+    channels = fp.read()
+    fp.close()
+
+    # Splits the string by channels
+    channels = channels.split('/&')
+    del(channels[len(channels)-1])
+
+    # Splits the channels
+    for i in range(len(channels)):
+        channels[i] = channels[i].split('\n')
+
+    # Clean the first row in all but the first channel
+    for i in range(1, len(channels)):
+        del channels[i][0]
+    
+    channels_unit = []
+    for i in range(len(channels)):
+        tmp = channels[i][0].split()
+        # Check this is the corrected acceleration data
+        ctype = (tmp[0] + " " + tmp[1]).lower()
+        if ctype != "corrected accelerogram":
+            LOGGER.error("Processing corrected accelerogram ONLY.")
+            return None, None
+        
+        # detect unit of the record
+        acc_unit = channels[i][17].split()[4]
+        vel_unit = channels[i][18].split()[4]
+        disp_unit = channels[i][19].split()[4]
+
+        if (acc_unit == "cm/sec/sec" and vel_unit == "cm/sec" and
+         disp_unit == "cm"):
+            record_unit = "cm"
+        elif (acc_unit == "m/sec/sec" and vel_unit == "m/sec" and
+         disp_unit == "m"):
+            record_unit = "m"
+        else:
+            record_unit = "unknown"
+        
+        channels_unit.append(record_unit)
+        
+        # Get network code and station id
+        network = input_file.split('/')[-1].split('.')[0][0:2].upper()
+        station_id = input_file.split('/')[-1].split('.')[0][2:].upper()
+
+        # Get location's latitude and longitude
+        tmp = channels[i][5].split()
+        latitude = tmp[3][:-1]
+        longitude = tmp[4]
+
+        # Make sure we captured the right values
+        if latitude[-1].upper() != "N" and latitude.upper() != "S":
+            # Maybe it is an old file, let's try to get the values again...
+            latitude = (float(tmp[3]) +
+                        (float(tmp[4]) / 60.0) +
+                        (float(tmp[5][:-2]) / 3600.0))
+            latitude = "%s%s" % (str(latitude), tmp[5][-2])
+            longitude = (float(tmp[6]) +
+                         (float(tmp[7]) / 60.0) +
+                         (float(tmp[8][:-1]) / 3600.0))
+            longitude = "%s%s" % (str(longitude), tmp[8][-1])
+
+        # Get orientation from integer header
+        orientation = float(int(channels[i][26][50:55]))
+        if orientation == 360:
+            orientation = 0.0
+        elif orientation == 500:
+            orientation = "up"
+        elif orientation == 600:
+            orientation = "down"
+
+        # Get filtering information
+        tmp = channels[i][14].split()
+        high_pass = float(tmp[8])
+        low_pass = float(tmp[10])
+
+        # Get station name
+        station_name = channels[i][6][0:40].strip()
+
+        # Get date and time; set to fixed format
+        start_time = channels[i][4][37:80].split()
+        try:
+            date = start_time[2][:-1]
+            tmp = start_time[3].split(':')
+            hour = tmp[0]
+            minute = tmp[1]
+            seconds, fraction = tmp[2].split('.')
+            # Works for both newer and older V2 files
+            tzone = channels[i][4].split()[5]
+            
+        except (IndexError, ValueError) as e:
+            LOGGER.debug(f"Problem with timing in the file. Default values are" 
+            f" used. " + str(e) + f" See ==> {input_file}")
+            date = '00/00/00'
+            hour = '00'
+            minute = '00'
+            seconds = '00'
+            fraction = '0'
+            tzone = '---'
+
+        # Put it all together
+        time = "%s:%s:%s.%s %s" % (hour, minute, seconds, fraction, tzone)
+
+        # Get number of samples and dt
+        tmp = channels[i][45].split()
+        samples = int(tmp[0])
+        delta_t = float(tmp[8])
+
+        # Get signals' data
+        tmp = channels[i][45:]
+        a_signal = str()
+        v_signal = str()
+        d_signal = str()
+
+        for s in tmp:
+            # Detecting separate line and get data type
+            if "points" in s.lower():
+                line = s.split()
+                if line[3].lower() == "accel" or line[3].lower() == "acc":
+                    dtype = 'a'
+                elif line[3].lower() == "veloc" or line[3].lower() == "vel":
+                    dtype = 'v'
+                elif line[3].lower() == "displ" or line[3].lower() == "dis":
+                    dtype = 'd'
+                else:
+                    dtype = "unknown"
+
+            # Processing data
+            else:
+                if dtype == 'a':
+                    a_signal += s
+                elif dtype == 'v':
+                    v_signal += s
+                elif dtype == 'd':
+                    d_signal += s
+        
+        dis_data = read_data(d_signal)
+        vel_data = read_data(v_signal)
+        acc_data = read_data(a_signal)
+
+        if ((len(dis_data) != samples) or 
+            (len(vel_data) != samples) or
+            (len(acc_data) != samples)):
+            LOGGER.warning(f"Number of data samples: {str(samples)} (at Channel"
+             f" {str(i+1)}) is not compatible with {str(len(dis_data))},"
+             f"{str(len(vel_data))}, {str(len(acc_data))} for dis, vel, acc." 
+             f" This record requires users to investigate the file."
+             f" See ==> {input_file}.") 
+            return None, None
+
+        record_list.append([samples, delta_t, orientation,
+                                                [dis_data, vel_data, acc_data]])
+
+    station_metadata = {}
+    station_metadata['network'] = network
+    station_metadata['station_id'] = station_id
+    station_metadata['type'] = "V2"
+    station_metadata['date'] = date
+    station_metadata['time'] = time
+    station_metadata['longitude'] = longitude
+    station_metadata['latitude'] = latitude
+    station_metadata['high_pass'] = high_pass
+    station_metadata['low_pass'] = low_pass
+    station_metadata['channels_unit'] = channels_unit
+
+    return record_list, station_metadata
+
+
+def unit_convention_factor(r_unit, inc_unit):
+    """
+    controls requested and incident units and returns multiplicaiton factor that
+    converts the incident's or record's unit into the requested unit. Only
+    m(meter) anc cm(centimeter) are supported.  
+    
+    Inputs: 
+        | r_unit: The requested conventional unit
+        | inc_unit: Incident or record unit
+
+    Output:
+        | multiplication factor
+
+    Example:
+    >>> unit_convention_factor("cm", "cm")
+    1
+    >>> unit_convention_factor("m", "cm")
+    0.01
+    >>> unit_convention_factor("cm", "m")
+    100
+
+    """
+    
+    allowed_units = ["cm", "m"]
+    if (r_unit not in allowed_units) or (inc_unit not in allowed_units):
+        LOGGER.error("Unit is not supported. Allowed units: "+str(a))
+        return None
+
+    if r_unit == inc_unit:
+        return 1
+
+    if r_unit == "cm" and inc_unit == "m":
+        return 100
+
+    if r_unit == "m" and inc_unit == "cm":
+        return 0.01
+
+    # should not get here. 
+    LOGGER.debug('Code logic does not sound right. DOUBLE CHECK.')
+
+def is_incident_description_valid(inc_des, valid_incidents, current_incidents,
+    valid_vertical_orientation, valid_incident_unit):
+        """
+        checks incident description and if it follows incident description 
+        format, returns True, otherwise returns False.
+
+        Inputs:
+            | inc_des: Incident description key-value dictionary
+            | valid_incidents: List of valid incidents type
+            | current_incidents: List of current incidents name
+            | valid_vertical_orientation: valid vertical orientation
+            | valid_incident_unit: valid units for incidents
+
+        Outputs:
+            | True or False
+        """
+        try: 
+            if "incident_name" not in inc_des.keys():
+                LOGGER.warning("incident name is not provided in the"
+                " description.txt file.")
+                return False
+    
+            if "incident_type" not in inc_des.keys():
+                LOGGER.warning("incident type is not provided in the"
+                " description.txt file.")
+                return False
+    
+            if inc_des["incident_type"] not in valid_incidents:
+                LOGGER.warning(f"The incident type is not supported (valid "
+                 f"incidents: {valid_incidents})")
+                return False
+    
+            if inc_des["incident_name"] in current_incidents:
+                LOGGER.warning(f"The provided incident name" 
+                  f" ({inc_des['incident_name']}) has been used before.\n"
+                  "The incident name should be a unique name. Current incidents: "
+                 f"{current_incidents} ")
+                return False
+    
+            
+            # checks for hercules
+            if inc_des["incident_type"] == "hercules":
+    
+                if "incident_unit" not in inc_des.keys():
+                    LOGGER.warning("incident unit is not provided in the"
+                     " description.txt file.")
+                    return False
+    
+                if "ver_comp_orientation" not in inc_des.keys():
+                    LOGGER.warning("incident vertical orientation is not provided"
+                     " in the description.txt file.")
+                    return False
+    
+                if (("hr_comp_orientation_1" not in inc_des.keys()) or
+                    ("hr_comp_orientation_2" not in inc_des.keys())):
+                    LOGGER.warning("At least one horizontal orientation is not"
+                     " provided in the description.txt file.")
+                    return False
+    
+                if "inputfiles_parameters" not in inc_des.keys():
+                    LOGGER.warning("inputfiles_parameters is not provided"
+                     " in the description.txt file.")
+                    return False
+    
+                if inc_des["incident_unit"] not in valid_incident_unit:
+                    LOGGER.warning(f"incident unit is not valid. "
+                     f" List of valid units: {valid_incident_unit}")
+                    return False
+    
+                if (inc_des["ver_comp_orientation"] not in
+                 valid_vertical_orientation):
+                    LOGGER.warning(f"incident vertical orientation is not valid. "
+                     f" List of valid units: {valid_vertical_orientation}")
+                    return False
+    
+                if (abs(float(inc_des["hr_comp_orientation_1"])) < 0 or 
+                    abs(float(inc_des["hr_comp_orientation_1"])) > 360 or 
+                    abs(float(inc_des["hr_comp_orientation_2"])) < 0 or 
+                    abs(float(inc_des["hr_comp_orientation_2"])) > 360):
+                    LOGGER.warning("At least one horizontal orientation is not a "
+                     "valid number in the description.txt file. Valid range:"
+                     "[0,360]")
+                    return False
+
+                # TODO: add check for perpendicular horizontal components.
+
+        
+        except Exception as e:
+            LOGGER.error("description.txt: " + str(e))
+            return False
+                
+        return True
+
+
+def compute_rotation_angle(a , b):
+    """ Computes angle to align vector b on to vector a.
+    North toward East is considered as a positive orientation (N10E = 10.) 
+    All inputs should be positive. (N10W = 350) 
+    The order of orientations are not important. 
+    Inputs:
+        | a: [hr1, hr2] current orientation
+        | b: [hr1, hr2] target orientation
+
+    Outputs:
+        | rotation_angle: returns rotation angle
+    
+    """
+    rotation_angle = None
+    if abs(a[0] - a[1]) != 90:
+        LOGGER.error('Current orientation is not perpendicualr.')
+        return None
+    
+    if abs(b[0] - b[1]) != 90:
+        LOGGER.error('Target orientation is not perpendicualr.')
+        return None
+
+    angles = []
+    for i in a:
+        for j in b:
+            angles.append(i - j)
+               
+    tmp = []
+    for item in angles:
+        for ii in tmp:
+            if math.isclose(item,ii, rel_tol=1e-06,abs_tol=0):
+                rotation_angle = round(item,4)
+        tmp.append(item)
+        continue
+        
+    if rotation_angle:
+        rotation_angle = (360 + rotation_angle) % 360
+
+    return rotation_angle

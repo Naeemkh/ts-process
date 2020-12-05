@@ -184,21 +184,25 @@
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DataBase</span> <span class="k">as</span> <span class="n">db</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">cal_acc_response</span><span class="p">,</span> <span class="n">get_period</span><span class="p">,</span> <span class="n">get_points</span><span class="p">,</span> <span class="n">FAS</span><span class="p">,</span> <span class="n">taper</span><span class="p">,</span>
-                       <span class="n">seism_appendzeros</span><span class="p">,</span> <span class="n">seism_cutting</span><span class="p">)</span>
+                       <span class="n">seism_appendzeros</span><span class="p">,</span> <span class="n">seism_cutting</span><span class="p">,</span> <span class="n">unit_convention_factor</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimeSeries"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries">[docs]</a><span class="k">class</span> <span class="nc">TimeSeries</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; TimeSeries Abstract Class &quot;&quot;&quot;</span>
     <span class="n">processing_labels</span> <span class="o">=</span> <span class="p">{}</span>
+
     <span class="n">label_types</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;lowpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fc: corner freq (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;highpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fc: corner freq (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">:</span><span class="s1">&#39;fcs: corner freqs (Hz); N: order (default:4)&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;scale&#39;</span><span class="p">:</span><span class="s1">&#39;factor&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;taper&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end, all; m: number of samples for tapering&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;cut&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end; m: number of samples for tapering,</span><span class="se">\</span>
-<span class="s1">        t_diff: time to cut&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;zero_pad&#39;</span><span class="p">:</span><span class="s1">&#39;flag: front, end; m: number of samples for tapering,</span><span class="se">\</span>
-<span class="s1">        t_diff: time to add&#39;</span>
+        <span class="s1">&#39;lowpass_filter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;fc&#39;</span><span class="p">:</span> <span class="s1">&#39;corner freq (Hz)&#39;</span><span class="p">,</span><span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;order (default:4)&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;highpass_filter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;fc&#39;</span><span class="p">:</span> <span class="s1">&#39;corner freq (Hz)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;order (default:4)&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;bandpass_filter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;fcs&#39;</span><span class="p">:</span> <span class="s1">&#39;corner freqs (Hz)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;order (default:4)&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;scale&#39;</span><span class="p">:{</span><span class="s1">&#39;factor&#39;</span><span class="p">:</span> <span class="s1">&#39;scaling factor&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;taper&#39;</span><span class="p">:{</span><span class="s1">&#39;flag&#39;</span><span class="p">:</span> <span class="s1">&#39;front, end, all&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;m&#39;</span> <span class="p">:</span> <span class="s1">&#39;number of samples for tapering&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;cut&#39;</span><span class="p">:{</span><span class="s1">&#39;flag&#39;</span><span class="p">:</span> <span class="s1">&#39;front, end&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;number of samples for tapering&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;t_diff&#39;</span><span class="p">:</span> <span class="s1">&#39;time to cut&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;zero_pad&#39;</span><span class="p">:{</span><span class="s1">&#39;flag&#39;</span><span class="p">:</span> <span class="s1">&#39;front, end&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;number of samples for tapering&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;t_diff&#39;</span><span class="p">:</span> <span class="s1">&#39;time to add&#39;</span><span class="p">}</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -212,7 +216,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">f_init_point</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_vv</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vt</span> <span class="o">=</span> <span class="kc">None</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_vt</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Timeseries abstract class&quot;</span>        
 
     <span class="k">def</span> <span class="nf">add_note</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -238,6 +245,22 @@
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Label type is not supported. Command is ignored.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         
+        <span class="k">for</span> <span class="n">ak</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">ak</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">ak</span><span class="si">}</span><span class="s2">&#39; is not a valid argument for&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2">. Command ignored.&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; List of argumets:&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+        
+        <span class="k">for</span> <span class="n">rak</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">rak</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">rak</span><span class="si">}</span><span class="s2">&#39; is not provided. Command ignored.&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; List of argumets:&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">label_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> 
+
+
         <span class="bp">cls</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">label_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="TimeSeries._lowpass_filter"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.TimeSeries._lowpass_filter">[docs]</a>    <span class="k">def</span> <span class="nf">_lowpass_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
@@ -351,7 +374,7 @@
             <span class="n">p</span> <span class="o">=</span> <span class="n">extract_params</span><span class="p">(</span><span class="o">**</span><span class="n">label_kwargs</span><span class="p">)</span>
             <span class="n">proc_data</span> <span class="o">=</span> <span class="n">seism_appendzeros</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">)</span>
-                         
+
         <span class="k">if</span> <span class="n">ts_type</span> <span class="o">==</span> <span class="s2">&quot;Disp&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Disp</span><span class="p">(</span><span class="n">proc_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="p">)</span>
 
@@ -390,9 +413,18 @@
     <span class="sd">&quot;&quot;&quot; Disp Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span> <span class="o">=</span> <span class="n">t_init_point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Disp&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_fft_value</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Disp signal, #points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">, dt:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="si">}</span><span class="s2">,&quot;</span>
+         <span class="sa">f</span><span class="s2">&quot;init point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Disp(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="si">}</span><span class="s2">)&quot;</span>
         
 <div class="viewcode-block" id="Disp.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Disp.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>
@@ -402,9 +434,18 @@
     <span class="sd">&quot;&quot;&quot; Vel Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span> <span class="o">=</span> <span class="n">t_init_point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Vel&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_fft_value</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vel signal, #points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">, dt:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="si">}</span><span class="s2">,&quot;</span>
+         <span class="sa">f</span><span class="s2">&quot;init point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Vel(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="si">}</span><span class="s2">)&quot;</span>
 
 <div class="viewcode-block" id="Vel.compute_diff"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Vel.compute_diff">[docs]</a>    <span class="k">def</span> <span class="nf">compute_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns ACC instance &quot;&quot;&quot;</span>
@@ -418,11 +459,19 @@
     <span class="sd">&quot;&quot;&quot; Acc Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span> <span class="o">=</span> <span class="n">t_init_point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;Acc&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_values</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t_init_point</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_fft_value</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_response_spectra</span><span class="p">()</span>
         
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Acc signal, #points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">, dt:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="si">}</span><span class="s2">,&quot;</span>
+         <span class="sa">f</span><span class="s2">&quot;init point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Acc(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t_init_point</span><span class="si">}</span><span class="s2">)&quot;</span>
 
 <div class="viewcode-block" id="Acc.compute_integral"><a class="viewcode-back" href="../../modules.html#tsprocess.timeseries.Acc.compute_integral">[docs]</a>    <span class="k">def</span> <span class="nf">compute_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns Vel instance &quot;&quot;&quot;</span>

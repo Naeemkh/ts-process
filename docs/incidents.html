@@ -96,6 +96,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#hercules">Hercules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rwg">RWG</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#awp">AWP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cesmd">CESMD</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#vol1">Vol1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vol2">Vol2</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api_ref.html">API Reference</a></li>
@@ -210,12 +215,20 @@
 <h2>Hercules<a class="headerlink" href="#hercules" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/CMU-Quake/hercules/wiki/Hercules">Hercules</a> is a simulation software for anelastic wave propagation in highly heterogeneous media due to kinematic faulting. The following figure shows the required files and folders and their arrangements.</p>
 <a class="reference internal image-reference" href="_images/hercules_folder_arrangment.png"><img alt="hercules folder arrangement" class="align-center" src="_images/hercules_folder_arrangment.png" style="width: 600px;" /></a>
-<p>The only extra file is <strong>description.txt</strong> that has two mandatory keys and values. These keys are <em>incident_name</em> and <em>incident_type</em>. The former should be a unique name and the latter, in this case, is <em>hercules</em>.</p>
+<p>The only extra file is <strong>description.txt</strong> that has several mandatory keys and
+values. These keys are shown below. The incident name should be a unique name.
+Incident type is one of the supported incidents, which in this case, is
+<em>hercules</em>.  Horizontal orientations should be perpendecular, and vertical
+orientation shows the direction that records are considered positive.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> description.txt
 <span class="go">incident_name         =  hercules_1</span>
 <span class="go">incident_type         =  hercules</span>
 <span class="go">inputfiles_parameters =  inputfiles/parameters.in</span>
 <span class="go">source_hypocenter     =  lat, lon, depth(km)</span>
+<span class="go">hr_comp_orientation_1 =  degree</span>
+<span class="go">hr_comp_orientation_2 =  degree</span>
+<span class="go">ver_comp_orientation  =  up or down</span>
+<span class="go">incident_unit         =  cm or m</span>
 </pre></div>
 </div>
 </div>
@@ -226,6 +239,56 @@
 <div class="section" id="awp">
 <h2>AWP<a class="headerlink" href="#awp" title="Permalink to this headline">¶</a></h2>
 <p>TBD</p>
+</div>
+<div class="section" id="cesmd">
+<h2>CESMD<a class="headerlink" href="#cesmd" title="Permalink to this headline">¶</a></h2>
+<p>Center for Engineering Strong Motion Data (CESMD) is a cooperative center
+established by the US Geological Survey and the California Geological Survey
+(CGS) to monitor earthquake strong-motion data. Read more
+<a class="reference external" href="https://strongmotioncenter.org">here</a>. CESMD provides data in different
+formats. In this section, we explain Consortium of Organizations for
+Strong-Motion Observation Systems (<a class="reference external" href="https://www.strongmotion.org">COSMOS</a> )
+format. COSMOS has 3 different volumes including V1, V2, V3. V1 is raw
+, unprocessed acceleration data. V2 is processed and corrected acceleration,
+velocity and displacement records. V3 includes spectra files.</p>
+<div class="section" id="vol1">
+<h3>Vol1<a class="headerlink" href="#vol1" title="Permalink to this headline">¶</a></h3>
+<p>TBD</p>
+</div>
+<div class="section" id="vol2">
+<h3>Vol2<a class="headerlink" href="#vol2" title="Permalink to this headline">¶</a></h3>
+<p>As mentioned earlier, Vol2 format is the corrected and processed version. So we
+do not need to deal with normal proprocessing (e.g., removing instrument
+response and baseline correction.) One can download strong-motion data from
+<a class="reference external" href="https://strongmotioncenter.org">strongmotioncenter.org</a> .</p>
+<p>The following figure shows the required files and folders and their arrangements.</p>
+<a class="reference internal image-reference" href="_images/CESMDV2.png"><img alt="CESMDV2 folder arrangement" class="align-center" src="_images/CESMDV2.png" style="width: 400px;" /></a>
+<p><code class="docutils literal notranslate"><span class="pre">stations_list.txt</span></code> includes station name, lat, lon, depth of stations that
+are located in <code class="docutils literal notranslate"><span class="pre">seismic_records</span></code> folder. Here is an example of
+<code class="docutils literal notranslate"><span class="pre">stations_list.txt</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> stations_list.txt
+<span class="go">CIOLI              33.945   -117.924        0</span>
+<span class="go">CE13873            33.933   -117.896        0</span>
+<span class="go">CE13880            33.909   -117.931        0</span>
+<span class="go">CE13881            33.931   -117.956        0</span>
+</pre></div>
+</div>
+<p><strong>description.txt</strong> file requires several mandatory keys and
+values. These keys are shown below. The incident name should be a unique name.
+It can be any name, however, we would suggest a very short name, because, you
+will use the name frequently during the processing, and also it will appear as
+legends in the figures. Incident type should be one of the supported incidents,
+which in this case, is <em>cesmdv2</em>. Orientations of different components are read
+from each seismic record file.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> description.txt
+<span class="go">incident_name         =  cesmdv2_1</span>
+<span class="go">incident_type         =  cesmdv2</span>
+</pre></div>
+</div>
+<p>You can add any key-value metadata to this file. They will be accessible in the
+incident metadata attribute. Note that each record unit will be extracted from
+the record’s file.</p>
+</div>
 </div>
 </div>
 

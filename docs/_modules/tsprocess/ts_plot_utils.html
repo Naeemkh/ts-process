@@ -176,12 +176,21 @@
 <span class="sd">====================================</span>
 <span class="sd">The core module for timeseries plot helper functions.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">cartopy.feature</span> <span class="k">as</span> <span class="nn">cfeature</span>
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
 <span class="kn">from</span> <span class="nn">matplotlib.font_manager</span> <span class="kn">import</span> <span class="n">FontProperties</span>
 
+<span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="n">check_opt_param_minmax</span><span class="p">,</span> <span class="n">query_opt_params</span><span class="p">,</span> <span class="n">list2message</span>
+
+
+<span class="n">color_code</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;brown&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;blueviolet&#39;</span><span class="p">,</span> <span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="s1">&#39;pink&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="plot_displacement_helper"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_plot_utils.plot_displacement_helper">[docs]</a><span class="k">def</span> <span class="nf">plot_displacement_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">color_code</span><span class="p">,</span> <span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span>
@@ -191,6 +200,10 @@
 <span class="sd">     plot_displacement_records methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">record</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;record does not have any data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
     
     <span class="n">with_details</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>  
@@ -290,7 +303,11 @@
 <span class="sd">     plot_velocity_records methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">record</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;record does not have any data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
     <span class="n">with_details</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>  
         <span class="n">nrs</span> <span class="o">=</span> <span class="mi">7</span>          
@@ -352,6 +369,7 @@
 
     <span class="n">f_name_save</span> <span class="o">=</span> <span class="s2">&quot;f_velocity_plot_&quot;</span> <span class="o">+</span>\
          <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
+    
     <span class="n">details</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_name_save</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">,</span>
      <span class="n">temp_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">]</span>
     <span class="n">message</span> <span class="o">=</span> <span class="n">list2message</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
@@ -389,6 +407,10 @@
 <span class="sd">     plot_acceleration_records methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">record</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;record does not have any data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
     
     <span class="n">with_details</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>  
@@ -490,6 +512,7 @@
 <span class="sd">     plot_record_section methods in the Project class.</span>
 <span class="sd">     should not be directly used by the end users.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Check number of input incidents</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">color_code</span><span class="p">):</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
@@ -502,12 +525,14 @@
         <span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="n">nrs</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
         <span class="n">rspan</span> <span class="o">=</span> <span class="mi">6</span>
         <span class="n">with_details</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="n">nrs</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="n">rspan</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
     <span class="k">else</span><span class="p">:</span>
         <span class="n">nrs</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="n">nrs</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
         <span class="n">rspan</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="n">nrs</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="n">rspan</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     
-    <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="n">nrs</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="n">rspan</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">with_details</span><span class="p">:</span>
         <span class="n">axarr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="n">nrs</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">rowspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -542,18 +567,35 @@
                 <span class="n">legend_label</span><span class="o">=</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">legend_label</span><span class="o">=</span><span class="kc">None</span>
-            <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span> <span class="n">tmp_data</span><span class="p">,</span> <span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> 
-            <span class="n">label</span><span class="o">=</span><span class="n">legend_label</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-        
-    <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
-    <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Epicentral Distance (km)&#39;</span><span class="p">)</span>        
-    <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_t</span><span class="p">)</span>
-    <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
-     <span class="sa">f</span><span class="s2">&quot;Normalized Seismic Record Section -&quot;</span>
-     <span class="sa">f</span><span class="s2">&quot;Number of stations/incident: </span><span class="si">{</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
-     <span class="sa">f</span><span class="s2">&quot;- Component: </span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>    
+
+            <span class="k">if</span> <span class="n">with_details</span><span class="p">:</span>    
+                <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span> <span class="n">tmp_data</span><span class="p">,</span> <span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> 
+                <span class="n">label</span><span class="o">=</span><span class="n">legend_label</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">axarr</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">time_vec</span><span class="p">,</span> <span class="n">tmp_data</span><span class="p">,</span> <span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> 
+                <span class="n">label</span><span class="o">=</span><span class="n">legend_label</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">with_details</span><span class="p">:</span>    
+        <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
+        <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Epicentral Distance (km)&#39;</span><span class="p">)</span>        
+        <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_t</span><span class="p">)</span>
+        <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+         <span class="sa">f</span><span class="s2">&quot;Normalized Seismic Record Section -&quot;</span>
+         <span class="sa">f</span><span class="s2">&quot;Number of stations/incident: </span><span class="si">{</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+         <span class="sa">f</span><span class="s2">&quot;- Component: </span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axarr</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
+        <span class="n">axarr</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Epicentral Distance (km)&#39;</span><span class="p">)</span>        
+        <span class="n">axarr</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lim_t</span><span class="p">)</span>
+        <span class="n">axarr</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">axarr</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+         <span class="sa">f</span><span class="s2">&quot;Normalized Seismic Record Section -&quot;</span>
+         <span class="sa">f</span><span class="s2">&quot;Number of stations/incident: </span><span class="si">{</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+         <span class="sa">f</span><span class="s2">&quot;- Component: </span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+            
 
     <span class="n">f_name_save</span> <span class="o">=</span> <span class="s2">&quot;f_recordsection_plot_&quot;</span> <span class="o">+</span>\
     <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
@@ -575,6 +617,172 @@
     <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span> 
 
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span>        </div>
+
+<div class="viewcode-block" id="plot_scatter_on_basemap"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_plot_utils.plot_scatter_on_basemap">[docs]</a><span class="k">def</span> <span class="nf">plot_scatter_on_basemap</span><span class="p">(</span><span class="n">llcrnrlatlon</span><span class="p">,</span> <span class="n">urcrnrlatlon</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots scatter datapoints provided by data on the basemap plot.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+  
+    <span class="n">land_f</span> <span class="o">=</span> <span class="n">cfeature</span><span class="o">.</span><span class="n">NaturalEarthFeature</span><span class="p">(</span><span class="s1">&#39;physical&#39;</span><span class="p">,</span> <span class="s1">&#39;land&#39;</span><span class="p">,</span> <span class="s1">&#39;50m&#39;</span><span class="p">,</span>
+                                        <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+                                        <span class="n">facecolor</span><span class="o">=</span><span class="n">cfeature</span><span class="o">.</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;land&#39;</span><span class="p">])</span>
+    
+    <span class="n">ocean_f</span> <span class="o">=</span> <span class="n">cfeature</span><span class="o">.</span><span class="n">NaturalEarthFeature</span><span class="p">(</span><span class="s1">&#39;physical&#39;</span><span class="p">,</span> <span class="s1">&#39;ocean&#39;</span><span class="p">,</span> <span class="s1">&#39;50m&#39;</span><span class="p">,</span>
+                                        <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+                                        <span class="n">facecolor</span><span class="o">=</span><span class="n">cfeature</span><span class="o">.</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;water&#39;</span><span class="p">])</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">Mercator</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_extent</span><span class="p">([</span><span class="n">llcrnrlatlon</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">urcrnrlatlon</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llcrnrlatlon</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+     <span class="n">urcrnrlatlon</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">land_f</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">ocean_f</span><span class="p">)</span>
+    
+    
+    <span class="c1"># TODO: marker size should be dependent on the size of map</span>
+    <span class="c1"># (a fraction of max distannce between corner points.)</span>
+    <span class="c1"># also parallels and meridians should be provided by the user </span>
+    <span class="c1"># or dependent on the figure size. </span>
+
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:],</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:],</span><span class="s1">&#39;k+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;station&#39;</span><span class="p">,</span>
+     <span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;r*&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;source&#39;</span><span class="p">,</span>
+     <span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">gridlines</span><span class="p">(</span><span class="n">draw_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="plot_records_orientation_helper"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_plot_utils.plot_records_orientation_helper">[docs]</a><span class="k">def</span> <span class="nf">plot_records_orientation_helper</span><span class="p">(</span><span class="n">st_item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">continue_processing</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">st_item</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">continue_processing</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">continue_processing</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+        
+    <span class="n">n_inicident</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">st_item</span><span class="p">)</span>
+    
+    <span class="n">title_is_set</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">title1</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">inc_item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st_item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">title_is_set</span><span class="p">):</span> 
+            <span class="n">title1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Location: </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">title_is_set</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">l1</span> <span class="o">=</span> <span class="n">inc_item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">inc_item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> 
+            <span class="n">or_h1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">or_h2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">u1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">or_h1</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">v1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">or_h1</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">u2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">or_h2</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">v2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">or_h2</span><span class="o">*</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">,</span><span class="n">u1</span><span class="p">,</span><span class="n">v1</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span>
+             <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">width</span> <span class="o">=</span> <span class="mf">0.004</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">l1</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">,</span><span class="n">u2</span><span class="p">,</span><span class="n">v2</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span>
+             <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">width</span> <span class="o">=</span> <span class="mf">0.004</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">,</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">or_h1</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">or_h2</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">25</span><span class="p">,(</span><span class="n">i</span><span class="o">*-</span><span class="mi">20</span><span class="p">)</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span><span class="sa">f</span><span class="s2">&quot;List of processes: </span><span class="si">{</span><span class="n">inc_item</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="mi">200</span><span class="p">])</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">20</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">n_inicident</span><span class="p">),</span><span class="mi">20</span><span class="p">])</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    
+    <span class="k">return</span> <span class="n">fig</span></div>
+    
+            
+<div class="viewcode-block" id="plot_peak_velocity_vs_distance_helper"><a class="viewcode-back" href="../../modules.html#tsprocess.ts_plot_utils.plot_peak_velocity_vs_distance_helper">[docs]</a><span class="k">def</span> <span class="nf">plot_peak_velocity_vs_distance_helper</span><span class="p">(</span><span class="n">st_records</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots scatter data points for comparing peak ground velocity vs </span>
+<span class="sd">    distance. </span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">        | st_records: nested list, each nested list contains one station&#39;s</span>
+<span class="sd">          location. First elemenet is distance, second, third, fourth elements</span>
+<span class="sd">          are peak ground velocity of h1, h2, and ver. There is one list for </span>
+<span class="sd">          each incident provided in list_inc.</span>
+<span class="sd">        | list_inc: list of incidents.</span>
+
+<span class="sd">    Outputs:</span>
+<span class="sd">        | fig: matplotlib figure handle.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">st_records</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Records are not provided.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+    <span class="n">h_comp_1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">h_comp_2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">h_comp_ver</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">st_records</span><span class="p">:</span>
+        <span class="n">hc1</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hc2</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hcv</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">hc1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="n">hc2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="n">hcv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="n">hc1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">hc2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">hcv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                
+        <span class="n">h_comp_1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hc1</span><span class="p">)</span>
+        <span class="n">h_comp_2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hc2</span><span class="p">)</span>
+        <span class="n">h_comp_ver</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hcv</span><span class="p">)</span>
+
+    <span class="n">dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">h_comp_1</span> <span class="k">if</span> <span class="n">item</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+        <span class="n">tmp_pv</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">h_comp_1</span> <span class="k">if</span> <span class="n">item</span><span class="p">]</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="n">tmp_pv</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span> <span class="o">=</span> <span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+        <span class="n">tmp_pv</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">h_comp_2</span> <span class="k">if</span> <span class="n">item</span><span class="p">]</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="n">tmp_pv</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span> <span class="o">=</span> <span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+   
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+        <span class="n">tmp_pv</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">h_comp_ver</span> <span class="k">if</span> <span class="n">item</span><span class="p">]</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="n">tmp_pv</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color_code</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span> <span class="o">=</span> <span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+
+    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;h_comp_1&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;h_comp_2&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;ver_comp&#39;</span><span class="p">)</span>
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Peak Ground Velocity vs Epicentral Distance&quot;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Epicentral Distance (km)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+    
+
+
+
 </pre></div>
 
            </div>

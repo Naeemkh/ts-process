@@ -19,6 +19,7 @@ section.
 :ref:`plot_velocity_label`
 :ref:`plot_acceleration_label`
 :ref:`show_stations_on_map_label`
+:ref:`show_stations_on_map_label_2`
 ====================================  =
 
 .. _create_project_label:
@@ -183,9 +184,9 @@ labels and it can be defined at any place before it is called.
   
 The following table shows different label types and their required arguments. 
 
-=================  ======================================================================  
+=================  ========================================================================================  
    Label Type      Required Arguments                   
-=================  ======================================================================  
+=================  ========================================================================================  
  lowpass_filter     "N":order, "fc": corner frequency    
  highpass_filter    "N":order, "fc": corner frequency    
  bandpass_filter    "N":order, "fcs": [fc1, fc2] corner frequencies.
@@ -194,7 +195,10 @@ The following table shows different label types and their required arguments.
  taper              "m": number of points, "flag": "front","end","all" 
  cut                "m": number of points, "flag": "front","end", "t_diff":cut time (s)
  zero_pad           "m": number of points, "flag": "front","end", "t_diff":added time (s)  
-=================  ======================================================================
+ set_unit           "unit": requested unit "m"(meter) or "cm"(centimeter)
+ set_vertical_or    "ver_or": vertical orientation "up" or "down"
+ align_record       "hc_or1", "hc_or2", "ver_or": horizontal components and vertical component orientation.
+=================  ========================================================================================
 
 - filters
 
@@ -211,10 +215,11 @@ The following table shows different label types and their required arguments.
   
 - rotation
 
-  Rotating timeseries are done at the record level. The orientation of the
-  records are provided by the user in the **description.txt** file. However, 
-  the command is applying a relative rotation. Records orientation will be
-  adjusted.
+  Rotating timeseries are done at the record level. In case of simulation
+  incidents, the orientation of the records are provided by the user in the
+  **description.txt** file. In case of observation (e.g., CESMD format), each
+  record comes with different orientation. The command is applying a relative
+  rotation. Records orientation will be adjusted.
 
 
 
@@ -360,6 +365,27 @@ popups shows station names.
     $ p1.show_stations_on_map(['hercules101'],[[]],['lesst30','moret25'])
 
 .. image:: images/png/quick_ref_leaflet.png
+   :alt: leaflet image of stations
+   :width: 600px
+   :align: center 
+
+
+.. _show_stations_on_map_label_2:
+
+Show stations on the map (cartopy)
+----------------------------------
+Shows stations and source on the map using 
+`cartopy <https://scitools.org.uk/cartopy/docs/latest/#>`_ package. The
+following command shows the stations in azimuth between 0 and 90 degrees
+from 2014 5.1 La Habra, CA, earthquake. 
+
+.. code-block:: console
+    
+    $ p1.add_station_filter("az090","azimuth_bt",{"azmth":[0,90]})
+    $ p1.show_stations_on_map2(['hercules101'],[[]],['az090'])
+
+
+.. image:: images/png/f_stations_location_plot_20200802_222319_888072.png
    :alt: leaflet image of stations
    :width: 600px
    :align: center 

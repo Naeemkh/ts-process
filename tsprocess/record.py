@@ -15,23 +15,29 @@ from .log import LOGGER
 from .station import Station
 from .database import DataBase
 from .timeseries import  Disp, Vel, Acc, Raw, Unitless
-from .ts_utils import haversine, compute_azimuth, rotate_record
+from .ts_utils import (haversine, compute_azimuth, rotate_record, read_smc_v2,
+                       unit_convention_factor, compute_rotation_angle)
 
 
 class Record:
     """ Record Class """
 
     pr_db = None
+    ver_orientation_conv = None
+    unit_convention = None
     processing_labels = {}
     label_types = {
-        'rotate': 'angle: rotation angle'
+        'rotate': {'angle': 'rotation angle'},
+        'set_unit': {'unit': 'm, cm'},
+        'set_vertical_or': {'ver_or':'up, down'},
+        'align_record': {'hc_or1':'angle','hc_or2':'angle','ver_or':'up, down'}
     }
 
     def __init__(self, time_vec, disp_h1, disp_h2, disp_ver,
                 vel_h1, vel_h2, vel_ver,
                 acc_h1, acc_h2, acc_ver,
                 station, source_params,
-                hc_or1, hc_or2):
+                hc_or1, hc_or2, ver_or, unit):
 
         self.station = station
         self.time_vec = time_vec
@@ -48,6 +54,8 @@ class Record:
         self.source_params = source_params
         self.hc_or1 = hc_or1
         self.hc_or2 = hc_or2
+        self.ver_or = ver_or
+        self.unit = unit
         self.unique_id_1 = None 
         self.unique_id_2 = None
         self.notes = []
@@ -65,11 +73,12 @@ class Record:
                f"{self.epicentral_distance:.2f} km distance from source."    
 
     def __repr__(self):
-        return f"Record({self.time_vec},"\
-               f"{self.disp_h1},{self.disp_h2},{self.disp_ver}"\
-               f"{self.vel_h1},{self.vel_h2},{self.vel_ver}"\
-               f"{self.acc_h1},{self.acc_h2},{self.acc_ver}"\
-               f"{self.station}.{self.source_params})"
+        return (f"Record({self.time_vec},"
+               f"{self.disp_h1},{self.disp_h2},{self.disp_ver},"
+               f"{self.vel_h1},{self.vel_h2},{self.vel_ver},"
+               f"{self.acc_h1},{self.acc_h2},{self.acc_ver},"
+               f"{self.station},{self.source_params},"
+               f"{self.hc_or1},{self.hc_or2},{self.ver_or})")
                         
     @classmethod
     def _add_processing_label(cls, label_name, label_type, argument_dict):
@@ -91,6 +100,21 @@ class Record:
         if label_type not in cls.label_types:
             LOGGER.warning("Label type is not supported. Command is ignored.")
             return
+
+        for ak in argument_dict.keys():
+            if ak not in list(cls.label_types[label_type].keys()):
+                LOGGER.warning(f" '{ak}' is not a valid argument for"
+                 f" {label_type}. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.label_types[label_type].keys())}")
+                return
+        
+        for rak in list(cls.label_types[label_type].keys()):
+            if rak not in argument_dict.keys():
+                LOGGER.warning(f" '{rak}' is not provided. Command ignored."
+                 f" List of argumets:"
+                 f" {list(cls.label_types[label_type].keys())}")
+                return 
         
         cls.processing_labels[label_name] = [label_type, argument_dict]
 
@@ -166,15 +190,17 @@ class Record:
         incident_name = incident_metadata["incident_name"]
         incident_type = incident_metadata["incident_type"]
        
+       
         # extract station name:
         try:
             st_name = station_obj.inc_st_name[incident_name]
         except KeyError as e:
-            print(e)
+            LOGGER.error(e)
             return
 
         # generate original record hash value.
-        hash_val = hashlib.sha256((incident_name+st_name).\
+        hash_val = hashlib.sha256(
+            (incident_name + st_name).\
             encode('utf-8')).hexdigest()
 
         # retrieve the record from database.
@@ -186,14 +212,19 @@ class Record:
               " to the database. Loading ... " )
             # we need to load the data 
             if incident_type == "hercules":
+
                 station_folder = incident_metadata["output_stations_directory"]
                 hr_or1 = float(incident_metadata["hr_comp_orientation_1"])
                 hr_or2 = float(incident_metadata["hr_comp_orientation_2"])
+                ver_or = incident_metadata["ver_comp_orientation"]
+                inc_unit = incident_metadata["incident_unit"]
+
                 station_file = os.path.join(incident_metadata[
                     "incident_folder"],station_folder,st_name)
                 try:
                     record_org = Record._from_hercules(station_file,
-                        station_obj, Station.pr_source_loc, hr_or1, hr_or2)
+                        station_obj, Station.pr_source_loc, hr_or1, hr_or2,
+                         ver_or, inc_unit)
                     record_org.this_record_hash = hash_val
     
                     # put the record in the database.
@@ -206,6 +237,39 @@ class Record:
                     LOGGER.warning(f"{st_name} from {incident_name} could not"
                      " load. " + str(e))
                
+            if incident_type == "cesmdv2":
+                station_file = os.path.join(incident_metadata[
+                    "incident_folder"],'seismic_records',st_name)
+
+                try:
+                    
+                    # load cesmdv2 file
+                    
+                    tmp_loaded_data, tmp_meta_data = read_smc_v2(station_file)
+                    
+                    if tmp_loaded_data is None:
+                        record_org = None
+                    else:
+                        # create a record object
+                        record_org = Record._from_cesmdv2(tmp_loaded_data, 
+                         tmp_meta_data, station_obj, Station.pr_source_loc, st_name)
+    
+                        if record_org is None:
+                            pass
+                        else:
+                            record_org.this_record_hash = hash_val
+            
+                            # put the record in the database.
+                            Record.pr_db.set_value(hash_val,record_org)
+                            Record.pr_inc_tracker.track_incident_hash(
+                                incident_name, hash_val
+                                )
+                
+                except Exception as e:
+                    record_org = None
+                    LOGGER.warning(f"{st_name} from {incident_name} could not"
+                     " load. " + str(e))
+            
             if incident_type == "awp":
                 print("AWP method is not implemented.")
 
@@ -261,6 +325,13 @@ class Record:
         # add the hash value to the processed attribute, and put the hash and
         # value into the database.
         proc_record = Record._apply(record, pl)
+
+        if not proc_record:
+            # if cannot process the record, return None. By this point
+            # other loggers reported the problem. 
+            return None
+
+
         proc_record.this_record_hash = proc_hash_val
         
         # put data in the database
@@ -328,11 +399,153 @@ class Record:
                  record.acc_ver.t_init_point)
                 n_hc_or1 = proc_record[12]
                 n_hc_or2 = proc_record[13]
+                n_ver_or = record.ver_or
+                n_unit = record.unit
             
-                       
+            elif Record.processing_labels[label_name][0] == "set_unit":
+                def extract_params(unit):
+                    return unit
+
+                label_kwargs = Record.processing_labels[label_name][1]
+                # requested unit
+                r_unit = extract_params(**label_kwargs)
+                ucf = unit_convention_factor(r_unit, record.unit)
+                
+                tmp_time_vector = record.time_vec
+                tmp_disp_h1 = Disp(record.disp_h1.value*ucf,
+                 record.disp_h1.delta_t, record.disp_h1.t_init_point)
+                tmp_disp_h2 = Disp(record.disp_h2.value*ucf,
+                 record.disp_h2.delta_t, record.disp_h2.t_init_point)
+                tmp_disp_ver = Disp(record.disp_ver.value*ucf,
+                 record.disp_ver.delta_t, record.disp_ver.t_init_point)
+
+                tmp_vel_h1 = Vel(record.vel_h1.value*ucf,
+                 record.vel_h1.delta_t, record.vel_h1.t_init_point)
+                tmp_vel_h2 = Vel(record.vel_h2.value*ucf,
+                 record.vel_h2.delta_t, record.vel_h2.t_init_point)
+                tmp_vel_ver = Vel(record.vel_ver.value*ucf,
+                 record.vel_ver.delta_t, record.vel_ver.t_init_point)
+
+                tmp_acc_h1 = Acc(record.acc_h1.value*ucf,
+                 record.acc_h1.delta_t, record.acc_h1.t_init_point)
+                tmp_acc_h2 = Acc(record.acc_h2.value*ucf,
+                 record.acc_h2.delta_t, record.acc_h2.t_init_point)
+                tmp_acc_ver = Acc(record.acc_ver.value*ucf,
+                 record.acc_ver.delta_t, record.acc_ver.t_init_point)
+
+                n_hc_or1 = record.hc_or1
+                n_hc_or2 = record.hc_or2
+                n_ver_or = record.ver_or
+
+                n_unit = r_unit
+                
+            elif Record.processing_labels[label_name][0] == "set_vertical_or":
+                def extract_params(ver_or):
+                    return ver_or
+
+                label_kwargs = Record.processing_labels[label_name][1]
+                # requested unit
+                rver_or = extract_params(**label_kwargs)
+
+                if rver_or not in ["up", "down"]:
+                    LOGGER.error(f"Invalid vertical orientattion: {rver_or}")
+                    return None
+                
+                if record.ver_or == rver_or:
+                    return record
+
+                tmp_time_vector = record.time_vec 
+                tmp_disp_h1 = Disp(record.disp_h1.value, record.disp_h1.delta_t,
+                 record.disp_h1.t_init_point)
+                tmp_disp_h2 = Disp(record.disp_h2.value, record.disp_h2.delta_t,
+                 record.disp_h2.t_init_point)
+                tmp_disp_ver = Disp(record.disp_ver.value*-1,
+                 record.disp_ver.delta_t, record.disp_ver.t_init_point)
+
+                tmp_vel_h1 = Vel(record.vel_h1.value,  record.vel_h1.delta_t,
+                 record.vel_h1.t_init_point)
+                tmp_vel_h2 = Vel(record.vel_h2.value,  record.vel_h2.delta_t,
+                 record.vel_h2.t_init_point)
+                tmp_vel_ver = Vel(record.vel_ver.value*-1,
+                 record.vel_ver.delta_t, record.vel_ver.t_init_point)
+
+                tmp_acc_h1 = Acc(record.acc_h1.value, record.acc_h1.delta_t,
+                 record.acc_h1.t_init_point)
+                tmp_acc_h2 = Acc(record.acc_h2.value, record.acc_h2.delta_t,
+                 record.acc_h2.t_init_point)
+                tmp_acc_ver = Acc(record.acc_ver.value*-1,
+                 record.acc_ver.delta_t, record.acc_ver.t_init_point)
+
+                n_hc_or1 = record.hc_or1
+                n_hc_or2 = record.hc_or2
+                n_ver_or = rver_or
+
+                n_unit = record.unit
+               
+
+            elif Record.processing_labels[label_name][0] == "align_record":
+                def extract_params(hc_or1, hc_or2, ver_or):
+                    return hc_or1, hc_or2, ver_or
+                
+                label_kwargs = Record.processing_labels[label_name][1]
+        
+                rhc_or1, rhc_or2, rver_or = extract_params(**label_kwargs)
+
+                current_h_or1 = record.hc_or1
+                current_h_or2 = record.hc_or2
+                current_ver_or = record.ver_or
+
+                rotation_angle = compute_rotation_angle(
+                    [current_h_or1, current_h_or2],[rhc_or1, rhc_or2])
+
+                if rotation_angle is None:
+                    LOGGER.error("Something went wrong with rotation angle." + str(rotation_angle))
+                    return
+
+                if rotation_angle == 0 and rver_or == current_ver_or:
+                    return record
+
+                vertical_coeff = 1
+                if rver_or != current_ver_or:
+                    vertical_coeff = -1
+                    n_vertical_or = rver_or
+                                
+                #TODO: following piece of code are repeated in both rotation
+                # and here. 
+
+                proc_record = rotate_record(record, rotation_angle)
+
+                if not proc_record:
+                    LOGGER.error("A problem is happened with record rotation.")
+                    return None
+                
+                tmp_time_vector = proc_record[0]
+                tmp_disp_h1 = Disp(proc_record[1],record.disp_h1.delta_t,
+                 record.disp_h1.t_init_point)
+                tmp_disp_h2 = Disp(proc_record[2],record.disp_h2.delta_t,
+                 record.disp_h2.t_init_point)
+                tmp_disp_ver = Disp(proc_record[3]*vertical_coeff,
+                 record.disp_ver.delta_t, record.disp_ver.t_init_point)
+                tmp_vel_h1 = Vel(proc_record[4],record.vel_h1.delta_t,
+                 record.vel_h1.t_init_point)
+                tmp_vel_h2 = Vel(proc_record[5],record.vel_h2.delta_t,
+                 record.vel_h2.t_init_point)
+                tmp_vel_ver = Vel(proc_record[6]*vertical_coeff,
+                 record.vel_ver.delta_t, record.vel_ver.t_init_point)
+                tmp_acc_h1 = Acc(proc_record[7],record.acc_h1.delta_t,
+                 record.acc_h1.t_init_point)
+                tmp_acc_h2 = Acc(proc_record[8],record.acc_h2.delta_t,
+                 record.acc_h2.t_init_point)
+                tmp_acc_ver = Acc(proc_record[9]*vertical_coeff,
+                 record.acc_ver.delta_t, record.acc_ver.t_init_point)
+                n_hc_or1 = proc_record[12]
+                n_hc_or2 = proc_record[13]
+                n_ver_or = rver_or
+                n_unit = record.unit
+            
             else:
                 LOGGER.warning("The processing lable is not defined.")
-                return record
+                return None
 
         else: 
         
@@ -349,10 +562,12 @@ class Record:
             tmp_acc_ver = record.acc_ver._apply(label_name)
             n_hc_or1 = record.hc_or1
             n_hc_or2 = record.hc_or2
-    
+            n_ver_or = record.ver_or
+            n_unit = record.unit
             
+                        
             # TODO: check time vector
-            tmp_time_vector = range(len(tmp_disp_h1.value))*\
+            tmp_time_vector = np.array(range(len(tmp_disp_h1.value)))*\
                     record.acc_h1.delta_t + record.acc_h1.t_init_point   
     
 
@@ -360,10 +575,11 @@ class Record:
                                        tmp_vel_h1, tmp_vel_h2, tmp_vel_ver,
                                        tmp_acc_h1, tmp_acc_h2, tmp_acc_ver,
                                        record.station, record.source_params,
-                                       n_hc_or1, n_hc_or2)
+                                       n_hc_or1, n_hc_or2, n_ver_or, n_unit)
 
     @staticmethod
-    def _from_hercules(filename,station_obj,source_hypocenter, hr_or1, hr_or2):
+    def _from_hercules(filename,station_obj,source_hypocenter, hr_or1, hr_or2,
+     ver_or, inc_unit):
         """ Loads an instance of Hercules simulation results at one station.
         Returns a Record object.
         
@@ -371,6 +587,10 @@ class Record:
             | filename: station file name (e.g., station.10)
             | station_obj: a station object corresponding that filename
             | source_hypocenter: project source location
+            | hr_or1: first horizontal component's orientation
+            | hr_or2: second horizontal component's orientation
+            | ver_or: vertical component's orientation
+            | inc_unit: Incident unit
 
         Outputs:
             | Record object 
@@ -414,38 +634,46 @@ class Record:
                 pieces = line.split()
                 pieces = [float(piece) for piece in pieces]
                 
-                # Write timeseries to files. Please note that Hercules files 
-                # have the vertical component positive pointing down so we have
-                # to flip it here to match the BBP format in which vertical
-                # component points up
+                if ver_or not in ["up", "down"]:
+                    LOGGER.error("should not get here. Something is wrong with"
+                    " vertical component orientation")
+                    return
+
+                if ver_or == Record.ver_orientation_conv:
+                    ver_or_switch_factor = 1
+                else:
+                    ver_or_switch_factor = -1
 
                 times.append(pieces[0])
                 dis_h1.append(pieces[1])
                 dis_h2.append(pieces[2])
-                dis_ver.append(-1 * pieces[3])
+                dis_ver.append(ver_or_switch_factor * pieces[3])
                 vel_h1.append(pieces[4])
                 vel_h2.append(pieces[5])
-                vel_ver.append(-1 * pieces[6])
+                vel_ver.append(ver_or_switch_factor * pieces[6])
                 acc_h1.append(pieces[7])
                 acc_h2.append(pieces[8])
-                acc_ver.append(-1 * pieces[9])
+                acc_ver.append(ver_or_switch_factor * pieces[9])
 
         except IOError as e:
             LOGGER.debug(str(e))            
         finally:
             input_fp.close()
-            
+
+        # ucf = unit_convention_factor(Record.unit_convention, inc_unit)
+        ucf = 1
+        
         # Convert to NumPy Arrays
         times = np.array(times)
-        vel_h1 = np.array(vel_h1)
-        vel_h2 = np.array(vel_h2)
-        vel_ver = np.array(vel_ver)
-        acc_h1 = np.array(acc_h1)
-        acc_h2 = np.array(acc_h2)
-        acc_ver = np.array(acc_ver)
-        dis_h1 = np.array(dis_h1)
-        dis_h2 = np.array(dis_h2)
-        dis_ver = np.array(dis_ver)
+        vel_h1 = np.array(vel_h1)*ucf
+        vel_h2 = np.array(vel_h2)*ucf
+        vel_ver = np.array(vel_ver)*ucf
+        acc_h1 = np.array(acc_h1)*ucf
+        acc_h2 = np.array(acc_h2)*ucf
+        acc_ver = np.array(acc_ver)*ucf
+        dis_h1 = np.array(dis_h1)*ucf
+        dis_h2 = np.array(dis_h2)*ucf
+        dis_ver = np.array(dis_ver)*ucf
 
         dt = times[1] - times[0]
 
@@ -468,4 +696,109 @@ class Record:
                     vel_h1, vel_h2, vel_ver,
                     acc_h1, acc_h2, acc_ver,
                     station_obj, source_hypocenter,
-                    hr_or1, hr_or2)
+                    hr_or1, hr_or2, ver_or, inc_unit)
+
+    @staticmethod
+    def _from_cesmdv2(r_data, r_metadata, station_obj, source_hypocenter,
+     st_name):
+        """ Loads an instance of Hercules simulation results at one station.
+        Returns a Record object.
+        
+        Inputs:
+            | r_data: nested list of data. See ts_utils.read_smc_v2 funtions first
+              return value
+            | r_metadata: dictionary of metadata regarding the loaded record. See
+              ts_utils.read_smc_v2 functions second return value
+            | station_obj: a station object corresponding that filename
+            | source_hypocenter: project source location
+            | st_name: station name
+
+        Outputs:
+            | Record object 
+        """
+         
+        # TODO:if number of data samples and dt for different records are 
+        # different, we need create a common dt and time vecotr.
+        
+        if len(r_data) != 3:
+            LOGGER.warning(f"Station with id: {r_metadata.get('station_id','')}"
+            " and type cesmdv2 record has missing component(s)."
+            " Handling this situation is not implemented.")
+
+        # generate the common dt and timevector
+        dt_vector = []
+        n_s = []
+        orient = []
+        for item in r_data:
+            n_s.append(item[0])
+            dt_vector.append(item[1])
+            orient.append(item[2])
+
+        if len(set(dt_vector)) != 1 or len(set(n_s)) !=1:
+            LOGGER.warning(f"Station {st_name}"
+            " with type cesmdv2 record has different dt or number of samples."
+            " Handling this situation is not implemented.")
+            return None
+
+        channels_unit = r_metadata['channels_unit']
+        if "unknown" in channels_unit:
+            LOGGER.warning(f"Station {st_name}"
+            " with type cesmdv2 record has at least one channel with unknown"
+            " unit. Handling this situation is not implemented.")
+            return None
+              
+        
+        # choosing the smalles dt, and longest record.
+        dt = dt_vector[0]
+        n_sample = n_s[0]
+        time_vec = np.arange(0,n_sample)*dt
+        
+        # show different combination of orientation for future improvement.
+        LOGGER.debug(str(orient))
+        
+        tmp_disp_h = []
+        tmp_vel_h  = []
+        tmp_acc_h  = []
+        h_orient = []
+
+        while r_data:
+            item = r_data.pop(0) 
+            ch_unit = channels_unit.pop(0)
+
+            # different channel units can be different, for now, I convert
+            # all CESMD data into cm. However, We need to better handle this 
+            # situation. 
+
+            ufc = unit_convention_factor("cm", ch_unit)
+
+            if item[2] in ["up","down"]:
+                # it is a vertical component.
+                ver_or = item[2].lower()
+                tmp_disp_ver = Disp(item[3][0]*ufc, item[1], 0)
+                tmp_vel_ver = Vel(item[3][1]*ufc, item[1], 0)
+                tmp_acc_ver = Acc(item[3][2]*ufc, item[1], 0)
+                continue
+
+            h_orient.append(item[2])
+            tmp_disp_h.append(Disp(item[3][0]*ufc, item[1], 0))
+            tmp_vel_h.append(Vel(item[3][1]*ufc, item[1], 0))
+            tmp_acc_h.append(Acc(item[3][2]*ufc, item[1], 0))
+        
+        return Record(time_vec, tmp_disp_h[0], tmp_disp_h[1], tmp_disp_ver,
+                    tmp_vel_h[0], tmp_vel_h[1], tmp_vel_ver,
+                    tmp_acc_h[0], tmp_acc_h[1], tmp_acc_ver,
+                    station_obj, source_hypocenter,
+                    h_orient[0], h_orient[1], ver_or, "cm")
+
+
+
+
+        
+
+
+        
+
+
+
+
+

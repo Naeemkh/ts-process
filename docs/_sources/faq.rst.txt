@@ -18,5 +18,33 @@ not sure how to pass a name to the saved figures.
     record went through. These details are also added to the bottom of each 
     figure. 
 
+**Q.** ``show_stations_on_map`` command does not render any map. 
+
+    **A.** This is a longlasting problem with *Jupyter Notebook*. You can fix
+    the problem by switching to *Jupyter Lab*. Please read more on 
+    this Github `issue. <https://github.com/Naeemkh/tsprocess/issues/43>`_
+
+
+**Q.** Each incident has seismic source as an input value. Why we need to
+add source hypocenter (using add_source_hypocenter(lat, lon, depth)) to the
+project. 
+
+    **A.** Different incidents use different source models (sometimes extended
+    source models). Even they might be slightly different. In the project we
+    need a predifined hypocenter to compute distance between stations and the
+    source of earthquake. That's why we define a source hypocenter for the
+    project.  
+
+**Q.** I used a name for a processing label and did some processing, then I
+changed the parameters and rerun the jupyter lab. However, it seems the new
+parameters do not take effect. I think there is a bug in the code. 
+
+    **A.** Whenever you are looking for a record, the program uses the incident
+    name, station name, and later on, processing labels to generate a hash
+    value. If that hash value exist in the database, it will be retrieved. 
+    Althought, you have changed the parameters, it is not changed in the
+    database. This is a rare situation. The easiest way is to remvoe the database
+    and rerun the project.
+    
 
 

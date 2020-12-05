@@ -3,6 +3,29 @@
 See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
 
 
+## [Unreleased]
+### Added
+- Record: Vertical orientation 
+- Doc: description.txt to include vertical orientation. 
+- Setup steps for jupyter lab.
+- Doc: CESMDV2 incident documentation 
+- load CESMDV2 record
+- test: CESMDV2 read file
+- plot stations on basemap
+- stations joint table
+- processing label: set_unit
+- processing label: set_vertical_or
+- processing label: align_record
+- plot peak ground velocity vs distance
+
+
+### Changed
+- processing labels and station filters arguments are checked at the adding stage. 
+
+### Fixed 
+
+### Removed
+
 ## [0.0.2] - 2020-07-26
 ### Added
 - doc: index: pypi version

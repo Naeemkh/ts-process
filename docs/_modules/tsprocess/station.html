@@ -190,15 +190,18 @@
     <span class="sd">&quot;&quot;&quot; Class Station &quot;&quot;&quot;</span>
     <span class="n">list_of_stations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">vicinity_estimations</span> <span class="o">=</span> <span class="mi">10</span> 
-    <span class="n">station_filter_types</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;epi_dist_lt&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;epi_dist_gt&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;epi_dist_lte&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;epi_dist_gte&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;azimuth_bt&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;include_stlist_by_incident&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;exclude_stlist_by_incident&quot;</span>
-    <span class="p">]</span>
+
+    <span class="n">station_filter_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;epi_dist_lt&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;distance&#39;</span><span class="p">:</span> <span class="s1">&#39;in km&#39;</span><span class="p">},</span>
+        <span class="s2">&quot;epi_dist_gt&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;distance&#39;</span><span class="p">:</span> <span class="s1">&#39;in km&#39;</span><span class="p">},</span>
+        <span class="s2">&quot;epi_dist_lte&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;distance&#39;</span><span class="p">:</span> <span class="s1">&#39;in km&#39;</span><span class="p">},</span>
+        <span class="s2">&quot;epi_dist_gte&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;distance&#39;</span><span class="p">:</span> <span class="s1">&#39;in km&#39;</span><span class="p">},</span>
+        <span class="s2">&quot;azimuth_bt&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;azmth&#39;</span><span class="p">:</span> <span class="s1">&#39;[az1, az2]&#39;</span><span class="p">},</span>
+        <span class="s2">&quot;include_stlist_by_incident&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;incident_name&quot;</span><span class="p">:</span><span class="s2">&quot;name of incident&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;stations&quot;</span><span class="p">:</span><span class="s1">&#39;list of stations&#39;</span><span class="p">},</span>
+        <span class="s2">&quot;exclude_stlist_by_incident&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;incident_name&quot;</span><span class="p">:</span><span class="s2">&quot;name of incident&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;stations&quot;</span><span class="p">:</span><span class="s1">&#39;list of stations&#39;</span><span class="p">}</span>
+    <span class="p">}</span>
 
     <span class="n">station_filters</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -209,6 +212,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vs_1d</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inc_st_name</span><span class="o">=</span><span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Station located at : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Incident records at the station:&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Station(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="si">}</span><span class="s2">)&quot;</span>
 
     <span class="k">def</span> <span class="nf">add_vs_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -227,14 +238,30 @@
         <span class="k">if</span> <span class="n">filter_name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">station_filters</span><span class="p">:</span>
             <span class="c1">#TODO probably customize exception should be a better option</span>
             <span class="c1">#  to handle this.</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter name is already used. Has not been added.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filter name: </span><span class="si">{</span><span class="n">filter_name</span><span class="si">}</span><span class="s2"> has been already used.&quot;</span>
+             <span class="s2">&quot; Try another name.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">filter_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">:</span>
             <span class="c1">#TODO probably customize exception should be a better option</span>
             <span class="c1">#  to handle this.</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter type is not supported. Has not been added.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Filter type is not supported. Has not been added.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">ak</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">ak</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">[</span><span class="n">filter_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">ak</span><span class="si">}</span><span class="s2">&#39; is not a valid argument for&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">filter_type</span><span class="si">}</span><span class="s2">. Command ignored.&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; List of argumets:&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">[</span><span class="n">filter_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+        
+        <span class="k">for</span> <span class="n">rak</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">[</span><span class="n">filter_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">rak</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">rak</span><span class="si">}</span><span class="s2">&#39; is not provided. Command ignored.&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; List of argumets:&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">[</span><span class="n">filter_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> 
         
         <span class="bp">cls</span><span class="o">.</span><span class="n">station_filters</span><span class="p">[</span><span class="n">filter_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">filter_type</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">]</span>
     
@@ -282,14 +309,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">tmp_azimuth</span> <span class="o">&gt;=</span> <span class="n">azmth</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">tmp_azimuth</span> <span class="o">&lt;=</span> <span class="n">azmth</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">tmp_azimuth</span> <span class="o">&gt;=</span> <span class="n">azmth</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">tmp_azimuth</span> <span class="o">&lt;=</span> <span class="n">azmth</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
   
     <span class="k">def</span> <span class="nf">_include_stlist_by_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_name</span><span class="p">,</span> <span class="n">stations</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_name</span><span class="p">]</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_st_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">incident_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>

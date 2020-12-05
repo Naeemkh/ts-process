@@ -17,6 +17,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.font_manager import FontProperties
 from ipyleaflet import Map, Marker, basemaps, basemap_to_tiles, AwesomeIcon, Popup
 
+
 from .log import LOGGER
 from .record import Record
 from .station import Station
@@ -25,9 +26,13 @@ from .database import DataBase
 from .timeseries import TimeSeries
 from .db_tracker import DataBaseTracker
 from .ts_utils import (check_opt_param_minmax, query_opt_params, write_into_file,
-                      list2message, is_lat_valid, is_lon_valid, is_depth_valid)
-from .ts_plot_utils import (plot_displacement_helper, plot_velocity_helper,
-                            plot_acceleration_helper, plot_recordsection_helper)
+                      list2message, is_lat_valid, is_lon_valid, is_depth_valid,
+                      is_incident_description_valid)                      
+from .ts_plot_utils import (color_code,plot_displacement_helper,
+                            plot_velocity_helper, plot_acceleration_helper,
+                            plot_recordsection_helper, plot_scatter_on_basemap,
+                            plot_records_orientation_helper, 
+                            plot_peak_velocity_vs_distance_helper)
 
 
 class Project:
@@ -35,8 +40,10 @@ class Project:
     p1 = Project('myproject')
     """
 
-    color_code  = ['k', 'r', 'b', 'm', 'g', 'c', 'y', 'brown',
-                   'gold', 'blueviolet', 'grey', 'pink']
+    # color_code = color_code
+
+    valid_vertical_orientation = ["up", "down"]
+    valid_incident_unit = ["m", "cm"]
 
     _instance = None
 
@@ -51,6 +58,7 @@ class Project:
             cls._instance._connect_to_database()
             cls._instance._make_output_dir()
             cls._instance.metadata = {}
+
             return cls._instance
         else:
             LOGGER.warning(f"Project named {cls._instance.name} "
@@ -58,6 +66,15 @@ class Project:
              "This command will be ignored.")
             return cls._instance
          
+    def __str__(self):
+        return (f"Project: {self.name} "
+        f"\nDatabase: {self.pr_db}"
+        f"\nIncidents: {list(self.incidents.keys())}"
+        )
+
+    def __repr__(self):
+        return f"Project({self.name})"
+
     # database
     @classmethod
     def _connect_to_database(cls):
@@ -97,6 +114,67 @@ class Project:
         except OSError:
             LOGGER.warning(f"Failed to create {path_to_output} folder.")
   
+
+    # @classmethod
+    # def switch_ver_orientation_convention(cls, ver_or):
+    #     """
+    #     switches the vertical orientation convention to up or down. 
+
+    #     Inputs:
+
+    #         ver_or: Vertical orientation ("up" or "down")
+
+    #     """
+        
+    #     if not isinstance(ver_or, str):
+    #         LOGGER.warning('Vertical orientation should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
+
+    #     if ver_or.lower() not in ["up", "down"]:
+    #         LOGGER.warning('Vertical orientation should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
+
+    #     if cls._instance.ver_orientation_conv:
+    #         if ver_or.lower() == cls._instance.ver_orientation_conv:
+    #             LOGGER.info(f'Vertical orientation is already "{ver_or}".')
+    #             return
+
+    #     cls._instance.ver_orientation_conv = ver_or
+    #     Record.ver_orientation_conv = ver_or
+    #     LOGGER.debug(f'Vertical orientation is switched to {ver_or}.')
+
+    # @classmethod
+    # def switch_unit_convention(cls, unit):
+    #     """
+    #     switches the unit convention to cm or m. 
+
+    #     Inputs:
+
+    #         unit: Project unit convention ("cm" or "m")
+
+    #     """
+        
+    #     if not isinstance(unit, str):
+    #         LOGGER.warning('Project unit convention should be "cm" or "m".'
+    #          ' Command is ignored.')
+    #         return
+
+    #     if unit.lower() not in ["cm", "m"]:
+    #         LOGGER.warning('Project unit convention should be "up" or "down".'
+    #          ' Command is ignored.')
+    #         return
+
+    #     if cls._instance.unit_convention:
+    #         if unit.lower() == cls._instance.unit_convention:
+    #             LOGGER.info(f'Unit is already "{unit}".')
+    #             return
+
+    #     cls._instance.unit_convention = unit
+    #     Record.unit_convention = unit
+    #     LOGGER.debug(f'Unit convention is switched to {unit}.')
+
     # Incidents
     def add_incident(self, incident_folder):
         """ Adds a new incident to the project.
@@ -120,27 +198,12 @@ class Project:
         # read the description file of incident
         inc_des = self._read_incident_description(incident_folder)
         
-        #TODO these checks do not follow EAFP
-        if "incident_name" not in inc_des.keys():
-            LOGGER.warning("incident name is not provided in the"
-            " description.txt file.")
-            return
+        # These checks do not follow EAFP, however, it is better to catch any 
+        # problem while the user has not started working on the data. 
 
-        if "incident_type" not in inc_des.keys():
-            LOGGER.warning("incident name is not provided in the"
-            " description.txt file.")
-            return
-
-        if inc_des["incident_type"] not in Incident.valid_incidents:
-            LOGGER.warning(f"The incident type is not supported (valid "
-             f"incidents: {Incident.valid_incidents})")
-            return
-
-        if inc_des["incident_name"] in self.incidents.keys():
-            LOGGER.warning(f"The provided incident name" 
-              f" ({inc_des['incident_name']}) has been used before.\n"
-              "The incident name should be a unique name. Current incidents: "
-             f"{list(self.incidents.keys())} ")
+        if not is_incident_description_valid(inc_des, Incident.valid_incidents,
+         list(self.incidents.keys()), Project.valid_vertical_orientation,
+         Project.valid_incident_unit):
             return
 
         # load incident
@@ -157,18 +220,21 @@ class Project:
 
          """
 
-        if incident_description["incident_type"] == "hercules":
+        if incident_description["incident_type"] in  ["hercules", "cesmdv2"]:
             self.incidents[incident_description["incident_name"]] = \
             Incident(incident_folder, incident_description)
             return
 
         if incident_description["incident_type"] == "awp":
-            print("AWP incident loading methods have not been added yet.")
+            LOGGER.warning("AWP incident loading methods have not been added"
+             " yet.")
             return 
 
         if incident_description["incident_type"] == "rwg":
-            print("RWG incident loading methods have not been added yet.")
+            LOGGER.warning("RWG incident loading methods have not been added"
+             " yet.")
             return 
+
 
     @staticmethod
     def _read_incident_description(incident_folder):
@@ -176,7 +242,8 @@ class Project:
         
         Inputs:
 
-            incident_folder: path to incident folder.
+            | incident_folder: path to incident folder.
+            
          """
         incident_description = {}
         incident_description["incident_folder"] = incident_folder
@@ -185,8 +252,17 @@ class Project:
                 line = fp.readline()
                 if not line:
                     break
-                key, value = tuple(line.strip().split("="))
-                incident_description[key.strip()] = value.strip()
+
+                if line == "\n":
+                    continue
+                
+                try:
+                    key, value = tuple(line.strip().split("="))
+                    incident_description[key.strip()] = value.strip()
+                except ValueError as ve:
+                    LOGGER.warning("description.txt does not follow the format."
+                    + str(ve))
+
         return incident_description
 
     def _extract_records(self, list_inc, list_process, list_filters):
@@ -200,7 +276,7 @@ class Project:
 
         if len(list_inc) != len(list_process):
             LOGGER.error("Number of incidents, and number of nested lists of"
-             "processing labels should be the same.")
+             " processing labels should be the same.")
             return
 
         records = []
@@ -221,10 +297,17 @@ class Project:
                 # choose the equivalent station for that incident.
                 incident_metadata = self.incidents[incident_item].metadata
 
-                st_name_inc = station.inc_st_name[incident_item]
-                list_process_cp = list_process[i].copy()
-                tmp_record = Record.get_record(station, incident_metadata,
-                 list_process_cp)
+                try:
+                    st_name_inc = None
+                    st_name_inc = station.inc_st_name[incident_item]
+                    list_process_cp = list_process[i].copy()
+                    tmp_record = Record.get_record(station, incident_metadata,
+                     list_process_cp)
+                except KeyError as e:
+                    LOGGER.debug(f' {str(e)} does not have any record at' 
+                    f' the location of station {st_name_inc}')
+                    tmp_record = None
+
                 st_records.append(tmp_record)
 
             records.append(st_records)
@@ -301,7 +384,8 @@ class Project:
     # processing labels
     def add_processing_label(self, label_name, label_type, hyper_parameters):
         """ Creates a processing label """
-        if label_type == "rotate":
+        if (label_type in
+         ["rotate", "set_unit", "set_vertical_or", "align_record"]):
             Record._add_processing_label(label_name, label_type,
             hyper_parameters)
             return            
@@ -312,10 +396,13 @@ class Project:
         
     def list_of_processing_labels(self):
         """ Returns a list of available processing labels"""
-        if not TimeSeries.processing_labels:
-            return
-        for item in TimeSeries.processing_labels:
-            print(item, '-->', TimeSeries.processing_labels[item])
+        if TimeSeries.processing_labels:
+            for item in TimeSeries.processing_labels:
+                print(item, '-->', TimeSeries.processing_labels[item])
+
+        if Record.processing_labels:
+            for item in Record.processing_labels:
+                print(item, '-->', Record.processing_labels[item])
 
     def _is_processing_label_valid(self,list_process):
         """ Checks if the requested processing label is a valid lable
@@ -336,10 +423,31 @@ class Project:
         
         return True
 
+
+    def _is_station_filter_valid(self,list_filters):
+        """ Checks if the requested station filter is a valid filter
+        
+        Input:
+            list_filters: List of station filters
+        
+        """
+        for fl in list_filters:
+            if (fl not in Station.station_filters):
+                LOGGER.error(
+                    f"{fl} is not a valid processing label. Command ignored."
+                    )
+                return False
+        
+        return True
+
     def valid_processing_labels(self):
         """ Returns a list of valid processing labels """
         for i,item in enumerate(TimeSeries.label_types):
             print(f"{i}: {item} - args: {TimeSeries.label_types[item]}")
+        
+        i = max(0,i)
+        for j,item in enumerate(Record.label_types):
+            print(f"{i+j+1}: {item} - args: {Record.label_types[item]}")
 
     # station filtering
     def add_station_filter(self, station_filter_name, station_filter_type,
@@ -351,7 +459,7 @@ class Project:
     def valid_station_filter_type(self):
         """ Returns a list of valid filters for selecting stations. """
         for i,item in enumerate(Station.station_filter_types):
-            print(f"{i}: {item}")
+            print(f"{i}: {item} - args: {Station.station_filter_types[item]}")
 
     def list_of_station_filters(self):
         """ Returns a list of available processing labels """
@@ -391,16 +499,27 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
+
         # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
+        if len(records[0]) > len(color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
 
         for record in records:
-            fig, message, f_name_save = plot_displacement_helper(record,
-             self.color_code,opt_params, list_inc, list_process, list_filters)
-                
+
+            try:
+                fig, message, f_name_save = plot_displacement_helper(record,
+                 color_code,opt_params, list_inc, list_process, list_filters)
+            
+            except TypeError as e:
+                continue
+
             if query_opt_params(opt_params, 'save_figure'):
                 
                 message = message + "\n----------------------------\n"
@@ -438,18 +557,38 @@ class Project:
             LOGGER.warning("At least one processing label is not valid.")
             return
 
+        if not self._is_station_filter_valid(list_filters):
+            LOGGER.warning("At least one station filter is not valid.")
+            return
+
+
         records = self._extract_records(list_inc, list_process, list_filters)
         
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
         # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
+        if len(records[0]) > len(color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
 
         for record in records:
-            fig, message, f_name_save = plot_velocity_helper(record,
-             self.color_code,opt_params, list_inc, list_process, list_filters)
-                
+
+            try:
+                fig, message, f_name_save = plot_velocity_helper(record,
+                color_code,opt_params, list_inc, list_process, list_filters)
+            
+            except TypeError as e:
+                LOGGER.debug(e)
+                continue
+            except ValueError as e:
+                LOGGER.debug(e)
+                continue
+
+
             if query_opt_params(opt_params, 'save_figure'):
                 
                 # temp_record = None
@@ -502,17 +641,26 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
         
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
         # Check number of input timeseries
-        if len(records[0]) > len(self.color_code):
+        if len(records[0]) > len(color_code):
             LOGGER.error(f"Number of timeseries are more than dedicated" 
             "colors.")
             return
 
         for record in records:
-            fig, message, f_name_save = plot_acceleration_helper(record,
-            self.color_code,opt_params,
-             list_inc, list_process, list_filters)
-                
+
+            try: 
+                fig, message, f_name_save = plot_acceleration_helper(record,
+                color_code,opt_params,
+                 list_inc, list_process, list_filters)
+            except TypeError as e:
+                continue
+            
             if query_opt_params(opt_params, 'save_figure'):
                 
                 message = message + "\n----------------------------\n"
@@ -548,8 +696,13 @@ class Project:
 
         records = self._extract_records(list_inc, list_process, list_filters)
 
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
         fig, message, f_name_save = plot_recordsection_helper(records,
-            self.color_code,opt_params,list_inc, list_process, list_filters)
+            color_code,opt_params,list_inc, list_process, list_filters)
 
         if query_opt_params(opt_params, 'save_figure'):
             
@@ -577,6 +730,11 @@ class Project:
                 
         records = self._extract_records(list_inc, list_process, list_filters)
 
+        if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
+            return
+
         m = Map(
             basemap=basemap_to_tiles(basemaps.Esri.WorldImagery, "2020-04-08"),
             center = (Station.pr_source_loc[0],Station.pr_source_loc[1]),
@@ -585,6 +743,8 @@ class Project:
         )
 
         for i in records:
+            if not i[0]:
+                continue
             lat = i[0].station.lat
             lon = i[0].station.lon
             marker = Marker(location=(lat, lon), draggable=False,
@@ -602,6 +762,77 @@ class Project:
         
         return m
 
+    def show_stations_on_map2(self,list_inc,list_process,list_filters,
+     opt_params):
+        """ Returns a map including the source and stations  
+
+        Inputs:
+            | list_inc: list of incidents (supports one incident)
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Optional parameters:
+            | save_figure: True, False
+            | llrtlatlon: lower_left then upper_right lat and lon
+
+        """
+
+        # Only supports one incident.        
+        tmp_inc_list = []
+        tmp_inc_list.append(list_inc[0])
+        
+        records = self._extract_records(list_inc, list_process, list_filters)
+                
+        if not records:
+            LOGGER.warning("No record has been collected.")
+            return
+                
+        # extract stations location from records.
+        lat,lon = [], []
+        
+        # first point is the source
+        lat.append(self.metadata["project_source_hypocenter"][0])
+        lon.append(self.metadata["project_source_hypocenter"][1])
+
+
+        for record in records:
+            if record[0]:
+                lat.append(record[0].station.lat)
+                lon.append(record[0].station.lon)
+
+        # find min max values.
+        min_lon, max_lon = min(lon), max(lon)
+        min_lat, max_lat = min(lat), max(lat)
+
+        if opt_params.get('llrtlatlon',None):
+            llcrnrlatlon = opt_params['llrtlatlon'][0:2]
+            urcrnrlatlon = opt_params['llrtlatlon'][2:4]
+        else:
+            llcrnrlatlon = [min_lat - 0.05, min_lon - 0.05]
+            urcrnrlatlon = [max_lat + 0.05, max_lon + 0.05]
+         
+        data = [lon, lat]
+        import numpy as np
+ 
+        # TODO: add epsg capability to the plots. 
+    
+        fig = plot_scatter_on_basemap(llcrnrlatlon, urcrnrlatlon, data)
+        
+        if query_opt_params(opt_params, 'save_figure'):
+            f_name_save = "f_stations_location_plot_" +\
+             datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+    
+            details = [f_name_save, list_inc, list_process, list_filters,
+             {}]
+            message = list2message(details)
+            
+            message = message + "\n----------------------------\n"
+            write_into_file(os.path.join(self.path_to_output_dir,
+            "output_item_description.txt"),message)
+            # save item.
+            plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+             format='pdf',transparent=False, dpi=300)  
 
     def which_records(self, list_inc,list_process,list_filters, opt_params):
         """ Print outs all records that pass the given filters 
@@ -620,20 +851,19 @@ class Project:
 
         if not self._is_processing_label_valid(list_process):
             return
-
         records = self._extract_records(list_inc, list_process, list_filters)
         
         if not records:
+            LOGGER.warning("There are no records to satisfy the provided"
+             " filters.")
             return
 
         for item in records:
-            print(item[0]) 
-
+            print(item[0])
     
     def list_of_incidents(self):
         """ Returns a list of incidents."""
         return list(self.incidents.keys())
-
 
     def compare_incidents(self,ls_inc, only_differences=False):
         """ 
@@ -690,8 +920,223 @@ class Project:
 
         for key, item in self.pr_db.db.items():
             print(key," : ", item)
+    
+    def summary(self):
+        """
+        prints out a summary of the project.
+        """
+        # project
+        print("Name:" , self.name)
+
+        # incidents
+        print("incidents: " , self.list_of_incidents())
+
+        # project vertical orientation
+        print("Vertical component positive orientation: " , self.ver_orientation_conv)
+
+    def stations_joint_table(self, list_inc,list_process,list_filters,
+                             opt_params):
+        """ Returns a joint table that shows stations' location and
+        corresponding station name at different incidents.
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Outputs: 
+            | stations_joint_table: as a pandas dataframe
+
+        """
+
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+        if not records:
+            LOGGER.warning("No record has been collected.")
+            return
+
+        record_data = []
+        for st_record in records:
+            lat_lon_registered = False
+            tmp_data, location_data = [], []
+            for i,inc_record in enumerate(st_record):
+                if (not lat_lon_registered and inc_record):
+                    location_data = [inc_record.station.lat, inc_record.station.lon, inc_record.station.depth]
+                    lat_lon_registered = True
+
+                if not inc_record:
+                    tmp_data.append(None)
+                    continue
+
+                tmp_data.append(inc_record.station.inc_st_name.get(list_inc[i],None))
+            
+            if not location_data:
+                # there is no record for this station. 
+                continue
+
+            location_data.extend(tmp_data)
+            record_data.append(location_data)
 
         
+        column_names = ['lat','lon','depth']
+        column_names.extend(list_inc) 
+        table_df = pd.DataFrame(record_data, columns=column_names)
+        return table_df       
+
+        
+
+
+    def plot_records_orientation(self, list_inc,list_process,list_filters,
+                             opt_params):
+        """ 
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Outputs: 
+            | 
+
+        """
+
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+        if not records:
+            LOGGER.warning("No record has been collected.")
+            return
+        
+        #st_record: all records in one station.
+        #inc_record: records of different incident at one station.
+
+        tmp_st_record = []
+        for st_record in records:
+            tmp_record = []
+            for i,inc_record in enumerate(st_record):
+                tmp = []                
+                if inc_record: 
+                   inc_name = list_inc[i]
+                   st_name = inc_record.station.inc_st_name.get(list_inc[i],None)
+                   st_location = [inc_record.station.lat,
+                    inc_record.station.lon, inc_record.station.depth]
+                   tmp = [st_location[0],st_location[1], st_location[2],
+                   inc_name, st_name, list_process[i],
+                   inc_record.hc_or1, inc_record.hc_or2, inc_record.ver_or]
+                   tmp_record.append(tmp)
+                else:
+                    tmp = [None, None, None, 
+                    None, None, list_process[i], None, None, None]
+                    tmp_record.append(tmp)
+            tmp_st_record.append(tmp_record)
+         
+
+        # n_inicident = len(st_orientation_list[0])
+        for st_item in tmp_st_record:
+            
+            if st_item[0] is None:
+                continue
+
+            fig = plot_records_orientation_helper(st_item)
+            
+            if query_opt_params(opt_params, 'save_figure'):
+                f_name_save = "f_records_orientation_plot_" +\
+                 datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+                
+                details = [f_name_save, list_inc, list_process, list_filters,
+                 {}]
+                message = list2message(details)
+                
+                message = message + "\n----------------------------\n"
+                write_into_file(os.path.join(self.path_to_output_dir,
+                "output_item_description.txt"),message)
+                # save item.
+                plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+                 format='pdf',transparent=False, dpi=300)  
+
+
+                    
+    def plot_peak_velocity_vs_distance(self, list_inc,list_process,list_filters,
+                             opt_params):
+        """ 
+
+        Inputs:
+            | list_inc: list of incidents
+            | list_process: list of processes, one list per incident
+            | list filters: list of filters defined for stations
+            | opt_params: optional parameters (dictionary)
+
+        Outputs: 
+            | 
+
+        """
+
+        if not self._is_incident_valid(list_inc):
+            return
+
+        if not self._is_processing_label_valid(list_process):
+            return
+
+        records = self._extract_records(list_inc, list_process, list_filters)
+        
+        if not records:
+            LOGGER.warning("No record has been collected.")
+            return
+
+                #st_record: all records in one station.
+        #inc_record: records of different incident at one station.
+
+        tmp_st_record = []
+        for st_record in records:
+            tmp_record = [None]
+            dist_set = False
+            for i,inc_record in enumerate(st_record):
+                if inc_record and not dist_set:
+                    tmp_record.pop(0)
+                    tmp_record.insert(0, inc_record.epicentral_distance)
+                    dist_set = True
+
+                if inc_record: 
+                   tmp_peak_vel = [inc_record.vel_h1.peak_vv,
+                    inc_record.vel_h2.peak_vv, inc_record.vel_ver.peak_vv]
+                   tmp_record.append(tmp_peak_vel)
+                
+                else:
+                    tmp_record.append([None, None, None]) 
+
+            tmp_st_record.append(tmp_record)
+
+        fig = plot_peak_velocity_vs_distance_helper(tmp_st_record, list_inc)
+        if query_opt_params(opt_params, 'save_figure'):
+            f_name_save = "f_peak_velocity_vs_distance_plot_" +\
+             datetime.now().strftime("%Y%m%d_%H%M%S_%f" + ".pdf")
+            
+            details = [f_name_save, list_inc, list_process, list_filters,
+             {}]
+            message = list2message(details)
+            
+            message = message + "\n----------------------------\n"
+            write_into_file(os.path.join(self.path_to_output_dir,
+            "output_item_description.txt"),message)
+            # save item.
+            plt.savefig(os.path.join(self.path_to_output_dir,f_name_save),
+             format='pdf',transparent=False, dpi=300)  
+
+
+
     
 
 

@@ -25,6 +25,12 @@ class SeismicSource:
         self._load_domain_surface_corners()
         self._load_source_params_hercules()
 
+    def __str__(self):
+        return f"Seismic Source: TBD ..."
+
+    def __repr__(self):
+        return f"SeismicSource({self.source_directory},{self.incident_type})"
+
     def _load_source_from_disk(self, incident_type):
 
         if incident_type == "hercules":

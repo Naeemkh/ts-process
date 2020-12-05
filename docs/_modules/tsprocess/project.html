@@ -190,6 +190,7 @@
 <span class="kn">from</span> <span class="nn">matplotlib.font_manager</span> <span class="kn">import</span> <span class="n">FontProperties</span>
 <span class="kn">from</span> <span class="nn">ipyleaflet</span> <span class="kn">import</span> <span class="n">Map</span><span class="p">,</span> <span class="n">Marker</span><span class="p">,</span> <span class="n">basemaps</span><span class="p">,</span> <span class="n">basemap_to_tiles</span><span class="p">,</span> <span class="n">AwesomeIcon</span><span class="p">,</span> <span class="n">Popup</span>
 
+
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 <span class="kn">from</span> <span class="nn">.record</span> <span class="kn">import</span> <span class="n">Record</span>
 <span class="kn">from</span> <span class="nn">.station</span> <span class="kn">import</span> <span class="n">Station</span>
@@ -198,9 +199,13 @@
 <span class="kn">from</span> <span class="nn">.timeseries</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
 <span class="kn">from</span> <span class="nn">.db_tracker</span> <span class="kn">import</span> <span class="n">DataBaseTracker</span>
 <span class="kn">from</span> <span class="nn">.ts_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">check_opt_param_minmax</span><span class="p">,</span> <span class="n">query_opt_params</span><span class="p">,</span> <span class="n">write_into_file</span><span class="p">,</span>
-                      <span class="n">list2message</span><span class="p">,</span> <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.ts_plot_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">plot_displacement_helper</span><span class="p">,</span> <span class="n">plot_velocity_helper</span><span class="p">,</span>
-                            <span class="n">plot_acceleration_helper</span><span class="p">,</span> <span class="n">plot_recordsection_helper</span><span class="p">)</span>
+                      <span class="n">list2message</span><span class="p">,</span> <span class="n">is_lat_valid</span><span class="p">,</span> <span class="n">is_lon_valid</span><span class="p">,</span> <span class="n">is_depth_valid</span><span class="p">,</span>
+                      <span class="n">is_incident_description_valid</span><span class="p">)</span>                      
+<span class="kn">from</span> <span class="nn">.ts_plot_utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">color_code</span><span class="p">,</span><span class="n">plot_displacement_helper</span><span class="p">,</span>
+                            <span class="n">plot_velocity_helper</span><span class="p">,</span> <span class="n">plot_acceleration_helper</span><span class="p">,</span>
+                            <span class="n">plot_recordsection_helper</span><span class="p">,</span> <span class="n">plot_scatter_on_basemap</span><span class="p">,</span>
+                            <span class="n">plot_records_orientation_helper</span><span class="p">,</span> 
+                            <span class="n">plot_peak_velocity_vs_distance_helper</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">:</span>
@@ -208,8 +213,10 @@
 <span class="sd">    p1 = Project(&#39;myproject&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">color_code</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;brown&#39;</span><span class="p">,</span>
-                   <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;blueviolet&#39;</span><span class="p">,</span> <span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="s1">&#39;pink&#39;</span><span class="p">]</span>
+    <span class="c1"># color_code = color_code</span>
+
+    <span class="n">valid_vertical_orientation</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]</span>
+    <span class="n">valid_incident_unit</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;cm&quot;</span><span class="p">]</span>
 
     <span class="n">_instance</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -224,6 +231,7 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_connect_to_database</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_make_output_dir</span><span class="p">()</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Project named </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
@@ -231,6 +239,15 @@
              <span class="s2">&quot;This command will be ignored.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
          
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Project: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Database: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Incidents: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Project(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
+
     <span class="c1"># database</span>
 <div class="viewcode-block" id="Project._connect_to_database"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._connect_to_database">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_connect_to_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -270,6 +287,67 @@
         <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create </span><span class="si">{</span><span class="n">path_to_output</span><span class="si">}</span><span class="s2"> folder.&quot;</span><span class="p">)</span></div>
   
+
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def switch_ver_orientation_convention(cls, ver_or):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     switches the vertical orientation convention to up or down. </span>
+
+    <span class="c1">#     Inputs:</span>
+
+    <span class="c1">#         ver_or: Vertical orientation (&quot;up&quot; or &quot;down&quot;)</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
+        
+    <span class="c1">#     if not isinstance(ver_or, str):</span>
+    <span class="c1">#         LOGGER.warning(&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
+
+    <span class="c1">#     if ver_or.lower() not in [&quot;up&quot;, &quot;down&quot;]:</span>
+    <span class="c1">#         LOGGER.warning(&#39;Vertical orientation should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
+
+    <span class="c1">#     if cls._instance.ver_orientation_conv:</span>
+    <span class="c1">#         if ver_or.lower() == cls._instance.ver_orientation_conv:</span>
+    <span class="c1">#             LOGGER.info(f&#39;Vertical orientation is already &quot;{ver_or}&quot;.&#39;)</span>
+    <span class="c1">#             return</span>
+
+    <span class="c1">#     cls._instance.ver_orientation_conv = ver_or</span>
+    <span class="c1">#     Record.ver_orientation_conv = ver_or</span>
+    <span class="c1">#     LOGGER.debug(f&#39;Vertical orientation is switched to {ver_or}.&#39;)</span>
+
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def switch_unit_convention(cls, unit):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     switches the unit convention to cm or m. </span>
+
+    <span class="c1">#     Inputs:</span>
+
+    <span class="c1">#         unit: Project unit convention (&quot;cm&quot; or &quot;m&quot;)</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
+        
+    <span class="c1">#     if not isinstance(unit, str):</span>
+    <span class="c1">#         LOGGER.warning(&#39;Project unit convention should be &quot;cm&quot; or &quot;m&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
+
+    <span class="c1">#     if unit.lower() not in [&quot;cm&quot;, &quot;m&quot;]:</span>
+    <span class="c1">#         LOGGER.warning(&#39;Project unit convention should be &quot;up&quot; or &quot;down&quot;.&#39;</span>
+    <span class="c1">#          &#39; Command is ignored.&#39;)</span>
+    <span class="c1">#         return</span>
+
+    <span class="c1">#     if cls._instance.unit_convention:</span>
+    <span class="c1">#         if unit.lower() == cls._instance.unit_convention:</span>
+    <span class="c1">#             LOGGER.info(f&#39;Unit is already &quot;{unit}&quot;.&#39;)</span>
+    <span class="c1">#             return</span>
+
+    <span class="c1">#     cls._instance.unit_convention = unit</span>
+    <span class="c1">#     Record.unit_convention = unit</span>
+    <span class="c1">#     LOGGER.debug(f&#39;Unit convention is switched to {unit}.&#39;)</span>
+
     <span class="c1"># Incidents</span>
 <div class="viewcode-block" id="Project.add_incident"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_incident">[docs]</a>    <span class="k">def</span> <span class="nf">add_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incident_folder</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Adds a new incident to the project.</span>
@@ -293,27 +371,12 @@
         <span class="c1"># read the description file of incident</span>
         <span class="n">inc_des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_incident_description</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">)</span>
         
-        <span class="c1">#TODO these checks do not follow EAFP</span>
-        <span class="k">if</span> <span class="s2">&quot;incident_name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident name is not provided in the&quot;</span>
-            <span class="s2">&quot; description.txt file.&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
+        <span class="c1"># These checks do not follow EAFP, however, it is better to catch any </span>
+        <span class="c1"># problem while the user has not started working on the data. </span>
 
-        <span class="k">if</span> <span class="s2">&quot;incident_type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inc_des</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;incident name is not provided in the&quot;</span>
-            <span class="s2">&quot; description.txt file.&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-
-        <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The incident type is not supported (valid &quot;</span>
-             <span class="sa">f</span><span class="s2">&quot;incidents: </span><span class="si">{</span><span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-
-        <span class="k">if</span> <span class="n">inc_des</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The provided incident name&quot;</span> 
-              <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">inc_des</span><span class="p">[</span><span class="s1">&#39;incident_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">) has been used before.</span><span class="se">\n</span><span class="s2">&quot;</span>
-              <span class="s2">&quot;The incident name should be a unique name. Current incidents: &quot;</span>
-             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_incident_description_valid</span><span class="p">(</span><span class="n">inc_des</span><span class="p">,</span> <span class="n">Incident</span><span class="o">.</span><span class="n">valid_incidents</span><span class="p">,</span>
+         <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">Project</span><span class="o">.</span><span class="n">valid_vertical_orientation</span><span class="p">,</span>
+         <span class="n">Project</span><span class="o">.</span><span class="n">valid_incident_unit</span><span class="p">):</span>
             <span class="k">return</span>
 
         <span class="c1"># load incident</span>
@@ -330,18 +393,21 @@
 
 <span class="sd">         &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hercules&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="ow">in</span>  <span class="p">[</span><span class="s2">&quot;hercules&quot;</span><span class="p">,</span> <span class="s2">&quot;cesmdv2&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="p">[</span><span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_name&quot;</span><span class="p">]]</span> <span class="o">=</span> \
             <span class="n">Incident</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">,</span> <span class="n">incident_description</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awp&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AWP incident loading methods have not been added yet.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;AWP incident loading methods have not been added&quot;</span>
+             <span class="s2">&quot; yet.&quot;</span><span class="p">)</span>
             <span class="k">return</span> 
 
         <span class="k">if</span> <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;rwg&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RWG incident loading methods have not been added yet.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;RWG incident loading methods have not been added&quot;</span>
+             <span class="s2">&quot; yet.&quot;</span><span class="p">)</span>
             <span class="k">return</span> </div>
+
 
 <div class="viewcode-block" id="Project._read_incident_description"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._read_incident_description">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_read_incident_description</span><span class="p">(</span><span class="n">incident_folder</span><span class="p">):</span>
@@ -349,7 +415,8 @@
 <span class="sd">        </span>
 <span class="sd">        Inputs:</span>
 
-<span class="sd">            incident_folder: path to incident folder.</span>
+<span class="sd">            | incident_folder: path to incident folder.</span>
+<span class="sd">            </span>
 <span class="sd">         &quot;&quot;&quot;</span>
         <span class="n">incident_description</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">incident_description</span><span class="p">[</span><span class="s2">&quot;incident_folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">incident_folder</span>
@@ -358,8 +425,17 @@
                 <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
                     <span class="k">break</span>
-                <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">))</span>
-                <span class="n">incident_description</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">))</span>
+                    <span class="n">incident_description</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">ve</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;description.txt does not follow the format.&quot;</span>
+                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ve</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="n">incident_description</span></div>
 
 <div class="viewcode-block" id="Project._extract_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._extract_records">[docs]</a>    <span class="k">def</span> <span class="nf">_extract_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">):</span>
@@ -373,7 +449,7 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_inc</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Number of incidents, and number of nested lists of&quot;</span>
-             <span class="s2">&quot;processing labels should be the same.&quot;</span><span class="p">)</span>
+             <span class="s2">&quot; processing labels should be the same.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
@@ -394,10 +470,17 @@
                 <span class="c1"># choose the equivalent station for that incident.</span>
                 <span class="n">incident_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="p">[</span><span class="n">incident_item</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span>
 
-                <span class="n">st_name_inc</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_item</span><span class="p">]</span>
-                <span class="n">list_process_cp</span> <span class="o">=</span> <span class="n">list_process</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">tmp_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">get_record</span><span class="p">(</span><span class="n">station</span><span class="p">,</span> <span class="n">incident_metadata</span><span class="p">,</span>
-                 <span class="n">list_process_cp</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">st_name_inc</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">st_name_inc</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="p">[</span><span class="n">incident_item</span><span class="p">]</span>
+                    <span class="n">list_process_cp</span> <span class="o">=</span> <span class="n">list_process</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="n">tmp_record</span> <span class="o">=</span> <span class="n">Record</span><span class="o">.</span><span class="n">get_record</span><span class="p">(</span><span class="n">station</span><span class="p">,</span> <span class="n">incident_metadata</span><span class="p">,</span>
+                     <span class="n">list_process_cp</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1"> does not have any record at&#39;</span> 
+                    <span class="sa">f</span><span class="s1">&#39; the location of station </span><span class="si">{</span><span class="n">st_name_inc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">tmp_record</span> <span class="o">=</span> <span class="kc">None</span>
+
                 <span class="n">st_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_record</span><span class="p">)</span>
 
             <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st_records</span><span class="p">)</span>
@@ -474,7 +557,8 @@
     <span class="c1"># processing labels</span>
 <div class="viewcode-block" id="Project.add_processing_label"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_processing_label">[docs]</a>    <span class="k">def</span> <span class="nf">add_processing_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span> <span class="n">hyper_parameters</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Creates a processing label &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s2">&quot;rotate&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">label_type</span> <span class="ow">in</span>
+         <span class="p">[</span><span class="s2">&quot;rotate&quot;</span><span class="p">,</span> <span class="s2">&quot;set_unit&quot;</span><span class="p">,</span> <span class="s2">&quot;set_vertical_or&quot;</span><span class="p">,</span> <span class="s2">&quot;align_record&quot;</span><span class="p">]):</span>
             <span class="n">Record</span><span class="o">.</span><span class="n">_add_processing_label</span><span class="p">(</span><span class="n">label_name</span><span class="p">,</span> <span class="n">label_type</span><span class="p">,</span>
             <span class="n">hyper_parameters</span><span class="p">)</span>
             <span class="k">return</span>            
@@ -485,10 +569,13 @@
         
 <div class="viewcode-block" id="Project.list_of_processing_labels"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_processing_labels">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_processing_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of available processing labels&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">item</span><span class="p">])</span></div>
+        <span class="k">if</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">item</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">Record</span><span class="o">.</span><span class="n">processing_labels</span><span class="p">[</span><span class="n">item</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Project._is_processing_label_valid"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project._is_processing_label_valid">[docs]</a>    <span class="k">def</span> <span class="nf">_is_processing_label_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">list_process</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Checks if the requested processing label is a valid lable</span>
@@ -512,7 +599,11 @@
 <div class="viewcode-block" id="Project.valid_processing_labels"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.valid_processing_labels">[docs]</a>    <span class="k">def</span> <span class="nf">valid_processing_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of valid processing labels &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">TimeSeries</span><span class="o">.</span><span class="n">label_types</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2"> - args: </span><span class="si">{</span><span class="n">TimeSeries</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2"> - args: </span><span class="si">{</span><span class="n">TimeSeries</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Record</span><span class="o">.</span><span class="n">label_types</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2"> - args: </span><span class="si">{</span><span class="n">Record</span><span class="o">.</span><span class="n">label_types</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     <span class="c1"># station filtering</span>
 <div class="viewcode-block" id="Project.add_station_filter"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.add_station_filter">[docs]</a>    <span class="k">def</span> <span class="nf">add_station_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station_filter_name</span><span class="p">,</span> <span class="n">station_filter_type</span><span class="p">,</span>
@@ -524,7 +615,7 @@
 <div class="viewcode-block" id="Project.valid_station_filter_type"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.valid_station_filter_type">[docs]</a>    <span class="k">def</span> <span class="nf">valid_station_filter_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of valid filters for selecting stations. &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Station</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2"> - args: </span><span class="si">{</span><span class="n">Station</span><span class="o">.</span><span class="n">station_filter_types</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Project.list_of_station_filters"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_station_filters">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_station_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of available processing labels &quot;&quot;&quot;</span>
@@ -564,16 +655,27 @@
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;There are no records to satisfy the provided&quot;</span>
+             <span class="s2">&quot; filters.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+
         <span class="c1"># Check number of input timeseries</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">color_code</span><span class="p">):</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
             <span class="s2">&quot;colors.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_displacement_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
-             <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
-                
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_displacement_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
+                 <span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+            
+            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">continue</span>
+
             <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
                 
                 <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -613,16 +715,27 @@
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;There are no records to satisfy the provided&quot;</span>
+             <span class="s2">&quot; filters.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="c1"># Check number of input timeseries</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">color_code</span><span class="p">):</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
             <span class="s2">&quot;colors.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_velocity_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
-             <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
-                
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_velocity_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
+                <span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+            
+            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+
             <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
                 
                 <span class="c1"># temp_record = None</span>
@@ -675,17 +788,26 @@
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;There are no records to satisfy the provided&quot;</span>
+             <span class="s2">&quot; filters.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="c1"># Check number of input timeseries</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">color_code</span><span class="p">):</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of timeseries are more than dedicated&quot;</span> 
             <span class="s2">&quot;colors.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_acceleration_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span>
-             <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
-                
+
+            <span class="k">try</span><span class="p">:</span> 
+                <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_acceleration_helper</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
+                <span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span>
+                 <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">continue</span>
+            
             <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
                 
                 <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -721,8 +843,13 @@
 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;There are no records to satisfy the provided&quot;</span>
+             <span class="s2">&quot; filters.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">fig</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">f_name_save</span> <span class="o">=</span> <span class="n">plot_recordsection_helper</span><span class="p">(</span><span class="n">records</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+            <span class="n">color_code</span><span class="p">,</span><span class="n">opt_params</span><span class="p">,</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
             
@@ -750,6 +877,11 @@
                 
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;There are no records to satisfy the provided&quot;</span>
+             <span class="s2">&quot; filters.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span>
             <span class="n">basemap</span><span class="o">=</span><span class="n">basemap_to_tiles</span><span class="p">(</span><span class="n">basemaps</span><span class="o">.</span><span class="n">Esri</span><span class="o">.</span><span class="n">WorldImagery</span><span class="p">,</span> <span class="s2">&quot;2020-04-08&quot;</span><span class="p">),</span>
             <span class="n">center</span> <span class="o">=</span> <span class="p">(</span><span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Station</span><span class="o">.</span><span class="n">pr_source_loc</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
@@ -775,6 +907,77 @@
         
         <span class="k">return</span> <span class="n">m</span></div>
 
+<div class="viewcode-block" id="Project.show_stations_on_map2"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.show_stations_on_map2">[docs]</a>    <span class="k">def</span> <span class="nf">show_stations_on_map2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+     <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a map including the source and stations  </span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents (supports one incident)</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Optional parameters:</span>
+<span class="sd">            | save_figure: True, False</span>
+<span class="sd">            | llrtlatlon: lower_left then upper_right lat and lon</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Only supports one incident.        </span>
+        <span class="n">tmp_inc_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tmp_inc_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_inc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+                
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No record has been collected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+                
+        <span class="c1"># extract stations location from records.</span>
+        <span class="n">lat</span><span class="p">,</span><span class="n">lon</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        
+        <span class="c1"># first point is the source</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;project_source_hypocenter&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;project_source_hypocenter&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">lat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
+                <span class="n">lon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
+
+        <span class="c1"># find min max values.</span>
+        <span class="n">min_lon</span><span class="p">,</span> <span class="n">max_lon</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+        <span class="n">min_lat</span><span class="p">,</span> <span class="n">max_lat</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">opt_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;llrtlatlon&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">llcrnrlatlon</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[</span><span class="s1">&#39;llrtlatlon&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">urcrnrlatlon</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[</span><span class="s1">&#39;llrtlatlon&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">llcrnrlatlon</span> <span class="o">=</span> <span class="p">[</span><span class="n">min_lat</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">min_lon</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">]</span>
+            <span class="n">urcrnrlatlon</span> <span class="o">=</span> <span class="p">[</span><span class="n">max_lat</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">max_lon</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">]</span>
+         
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">]</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+ 
+        <span class="c1"># TODO: add epsg capability to the plots. </span>
+    
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_scatter_on_basemap</span><span class="p">(</span><span class="n">llcrnrlatlon</span><span class="p">,</span> <span class="n">urcrnrlatlon</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
+            <span class="n">f_name_save</span> <span class="o">=</span> <span class="s2">&quot;f_stations_location_plot_&quot;</span> <span class="o">+</span>\
+             <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
+    
+            <span class="n">details</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_name_save</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">,</span>
+             <span class="p">{}]</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">list2message</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+            
+            <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+            <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
+            <span class="c1"># save item.</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  </div>
 
 <div class="viewcode-block" id="Project.which_records"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.which_records">[docs]</a>    <span class="k">def</span> <span class="nf">which_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span> <span class="n">opt_params</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Print outs all records that pass the given filters </span>
@@ -793,20 +996,19 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
             <span class="k">return</span>
-
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;There are no records to satisfy the provided&quot;</span>
+             <span class="s2">&quot; filters.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> </div>
-
+            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
     
 <div class="viewcode-block" id="Project.list_of_incidents"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.list_of_incidents">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_incidents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of incidents.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">incidents</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
-
 
 <div class="viewcode-block" id="Project.compare_incidents"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.compare_incidents">[docs]</a>    <span class="k">def</span> <span class="nf">compare_incidents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ls_inc</span><span class="p">,</span> <span class="n">only_differences</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
@@ -862,9 +1064,224 @@
     <span class="k">def</span> <span class="nf">database_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr_db</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s2">&quot; : &quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s2">&quot; : &quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="Project.summary"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        prints out a summary of the project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># project</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Name:&quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># incidents</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;incidents: &quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_incidents</span><span class="p">())</span>
+
+        <span class="c1"># project vertical orientation</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vertical component positive orientation: &quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ver_orientation_conv</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Project.stations_joint_table"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.stations_joint_table">[docs]</a>    <span class="k">def</span> <span class="nf">stations_joint_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+                             <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a joint table that shows stations&#39; location and</span>
+<span class="sd">        corresponding station name at different incidents.</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Outputs: </span>
+<span class="sd">            | stations_joint_table: as a pandas dataframe</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No record has been collected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">record_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">st_record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">lat_lon_registered</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">tmp_data</span><span class="p">,</span> <span class="n">location_data</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">inc_record</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st_record</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">lat_lon_registered</span> <span class="ow">and</span> <span class="n">inc_record</span><span class="p">):</span>
+                    <span class="n">location_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">depth</span><span class="p">]</span>
+                    <span class="n">lat_lon_registered</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">inc_record</span><span class="p">:</span>
+                    <span class="n">tmp_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="n">tmp_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="kc">None</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">location_data</span><span class="p">:</span>
+                <span class="c1"># there is no record for this station. </span>
+                <span class="k">continue</span>
+
+            <span class="n">location_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tmp_data</span><span class="p">)</span>
+            <span class="n">record_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">location_data</span><span class="p">)</span>
 
         
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>
+        <span class="n">column_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">list_inc</span><span class="p">)</span> 
+        <span class="n">table_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">record_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">table_df</span>       </div>
+
+        
+
+
+<div class="viewcode-block" id="Project.plot_records_orientation"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_records_orientation">[docs]</a>    <span class="k">def</span> <span class="nf">plot_records_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+                             <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Outputs: </span>
+<span class="sd">            | </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No record has been collected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1">#st_record: all records in one station.</span>
+        <span class="c1">#inc_record: records of different incident at one station.</span>
+
+        <span class="n">tmp_st_record</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">st_record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">tmp_record</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">inc_record</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st_record</span><span class="p">):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>                
+                <span class="k">if</span> <span class="n">inc_record</span><span class="p">:</span> 
+                   <span class="n">inc_name</span> <span class="o">=</span> <span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                   <span class="n">st_name</span> <span class="o">=</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">inc_st_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">list_inc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="kc">None</span><span class="p">)</span>
+                   <span class="n">st_location</span> <span class="o">=</span> <span class="p">[</span><span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+                    <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">depth</span><span class="p">]</span>
+                   <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">st_location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">st_location</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">st_location</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                   <span class="n">inc_name</span><span class="p">,</span> <span class="n">st_name</span><span class="p">,</span> <span class="n">list_process</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                   <span class="n">inc_record</span><span class="o">.</span><span class="n">hc_or1</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">hc_or2</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">ver_or</span><span class="p">]</span>
+                   <span class="n">tmp_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> 
+                    <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">list_process</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+                    <span class="n">tmp_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+            <span class="n">tmp_st_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_record</span><span class="p">)</span>
+         
+
+        <span class="c1"># n_inicident = len(st_orientation_list[0])</span>
+        <span class="k">for</span> <span class="n">st_item</span> <span class="ow">in</span> <span class="n">tmp_st_record</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">st_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_records_orientation_helper</span><span class="p">(</span><span class="n">st_item</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
+                <span class="n">f_name_save</span> <span class="o">=</span> <span class="s2">&quot;f_records_orientation_plot_&quot;</span> <span class="o">+</span>\
+                 <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
+                
+                <span class="n">details</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_name_save</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">,</span>
+                 <span class="p">{}]</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">list2message</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+                
+                <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+                <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
+                <span class="c1"># save item.</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+                 <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  </div>
+
+
+                    
+<div class="viewcode-block" id="Project.plot_peak_velocity_vs_distance"><a class="viewcode-back" href="../../modules.html#tsprocess.project.Project.plot_peak_velocity_vs_distance">[docs]</a>    <span class="k">def</span> <span class="nf">plot_peak_velocity_vs_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span><span class="n">list_process</span><span class="p">,</span><span class="n">list_filters</span><span class="p">,</span>
+                             <span class="n">opt_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">            | list_inc: list of incidents</span>
+<span class="sd">            | list_process: list of processes, one list per incident</span>
+<span class="sd">            | list filters: list of filters defined for stations</span>
+<span class="sd">            | opt_params: optional parameters (dictionary)</span>
+
+<span class="sd">        Outputs: </span>
+<span class="sd">            | </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_incident_valid</span><span class="p">(</span><span class="n">list_inc</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_processing_label_valid</span><span class="p">(</span><span class="n">list_process</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_records</span><span class="p">(</span><span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No record has been collected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+                <span class="c1">#st_record: all records in one station.</span>
+        <span class="c1">#inc_record: records of different incident at one station.</span>
+
+        <span class="n">tmp_st_record</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">st_record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">tmp_record</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+            <span class="n">dist_set</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">inc_record</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st_record</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">inc_record</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dist_set</span><span class="p">:</span>
+                    <span class="n">tmp_record</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">tmp_record</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">epicentral_distance</span><span class="p">)</span>
+                    <span class="n">dist_set</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">inc_record</span><span class="p">:</span> 
+                   <span class="n">tmp_peak_vel</span> <span class="o">=</span> <span class="p">[</span><span class="n">inc_record</span><span class="o">.</span><span class="n">vel_h1</span><span class="o">.</span><span class="n">peak_vv</span><span class="p">,</span>
+                    <span class="n">inc_record</span><span class="o">.</span><span class="n">vel_h2</span><span class="o">.</span><span class="n">peak_vv</span><span class="p">,</span> <span class="n">inc_record</span><span class="o">.</span><span class="n">vel_ver</span><span class="o">.</span><span class="n">peak_vv</span><span class="p">]</span>
+                   <span class="n">tmp_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_peak_vel</span><span class="p">)</span>
+                
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tmp_record</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> 
+
+            <span class="n">tmp_st_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_record</span><span class="p">)</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_peak_velocity_vs_distance_helper</span><span class="p">(</span><span class="n">tmp_st_record</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">query_opt_params</span><span class="p">(</span><span class="n">opt_params</span><span class="p">,</span> <span class="s1">&#39;save_figure&#39;</span><span class="p">):</span>
+            <span class="n">f_name_save</span> <span class="o">=</span> <span class="s2">&quot;f_peak_velocity_vs_distance_plot_&quot;</span> <span class="o">+</span>\
+             <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
+            
+            <span class="n">details</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_name_save</span><span class="p">,</span> <span class="n">list_inc</span><span class="p">,</span> <span class="n">list_process</span><span class="p">,</span> <span class="n">list_filters</span><span class="p">,</span>
+             <span class="p">{}]</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">list2message</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+            
+            <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">write_into_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span>
+            <span class="s2">&quot;output_item_description.txt&quot;</span><span class="p">),</span><span class="n">message</span><span class="p">)</span>
+            <span class="c1"># save item.</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_output_dir</span><span class="p">,</span><span class="n">f_name_save</span><span class="p">),</span>
+             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  </div></div>
+
+
+
     
 
 
